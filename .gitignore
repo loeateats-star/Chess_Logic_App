@@ -1,0 +1,13 @@
+# Stockfish engine
+stockfish.exe
+Stockfish.exe
+Stockfish.exe.exe
+
+# Database
+chess_data.db
+
+# PGN files
+games.pgn
+
+# Python virtual environment
+.venv/
