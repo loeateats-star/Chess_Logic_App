@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chess Blunder Trainer</title>
+
+  <!-- jQuery 3.7.1 via cdnjs -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+
+  <!-- Chess.js 0.10.3 via cdnjs -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
+
+  <!-- Chessboard.js 1.0.0 via unpkg (not available on cdnjs) -->
+  <link rel="stylesheet"
+        href="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.css" />
+  <script src="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.js"></script>
+
+  <style>
+    body {
+      font-family: sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem;
+      background: #1a1a2e;
+      color: #e0e0e0;
+    }
+
+    h1 { margin-bottom: 1.5rem; letter-spacing: 1px; }
+
+    #board { width: 400px; }
+
+    #train-btn {
+      margin-top: 1.5rem;
+      padding: 0.6rem 1.6rem;
+      font-size: 1rem;
+      cursor: pointer;
+      background: #e94560;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+    }
+
+    #train-btn:hover { background: #c73652; }
+
+    #status {
+      margin-top: 1rem;
+      min-height: 1.4rem;
+      font-size: 0.95rem;
+      color: #aaa;
+    }
+  </style>
+</head>
+<body>
+  <h1>Chess Blunder Trainer</h1>
+  <div id="board"></div>
+  <button id="train-btn">Train New Puzzle</button>
+  <p id="status">Click "Train New Puzzle" to begin.</p>
+
+  <script>
+    let board = null;
+    let game = null;
+    let currentFen = null;
+    let engineBestMove = null;
+
+    function setStatus(text, color) {
+      const el = document.getElementById('status');
+      el.textContent = text;
+      el.style.color = color || '#aaa';
+    }
+
+    function onDrop(source, target) {
+      const move = game.move({ from: source, to: target, promotion: 'q' });
+
+      if (move === null) return 'snapback';
+
+      const userMove = source + target;
+
+      if (userMove === engineBestMove.slice(0, 4)) {
+        setStatus('✓ Correct Solution!', '#4caf50');
+      } else {
+        setStatus('✗ Incorrect – snapping back.', '#e94560');
+        game.undo();
+        return 'snapback';
+      }
+    }
+
+    function loadPuzzle() {
+      setStatus('Loading puzzle…');
+
+      fetch('/get-puzzle')
+        .then(function(response) {
+          if (!response.ok) throw new Error('No puzzles available.');
+          return response.json();
+        })
+        .then(function(data) {
+          currentFen = data.fen;
+          engineBestMove = data.engine_best_move;
+
+          game = new Chess(currentFen);
+
+          if (board) board.destroy();
+
+          board = Chessboard('board', {
+            position:    currentFen,
+            draggable:   true,
+            pieceTheme:  '/static/img/chesspieces/wikipedia/{piece}.png',
+            onDragStart: function(source, piece) {
+              if (!game || game.game_over()) return false;
+            },
+            onDrop:      onDrop,
+            orientation: game.turn() === 'w' ? 'white' : 'black'
+          });
+
+          setStatus((game.turn() === 'w' ? 'White' : 'Black') + ' to move. Find the best move!');
+        })
+        .catch(function(err) {
+          setStatus('Error: ' + err.message, '#e94560');
+        });
+    }
+
+    document.getElementById('train-btn').addEventListener('click', loadPuzzle);
+  </script>
+</body>
+</html>
