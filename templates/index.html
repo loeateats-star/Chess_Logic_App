@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Algorithmic Chess</title>
+  <title>Chessalgo</title>
 
   <!-- Tailwind CSS CDN (cdn.tailwindcss.com is the correct play-CDN endpoint) -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -55,14 +55,15 @@
       <!-- Logo -->
       <a href="#" class="flex items-center gap-2 font-semibold text-white text-sm">
         <span class="flex items-center justify-center w-7 h-7 rounded-md bg-brand-green text-brand-bg font-bold text-base">♟</span>
-        Algorithmic Chess
+        Chessalgo
       </a>
 
       <!-- Center nav -->
-      <nav class="hidden md:flex items-center gap-6 text-sm text-brand-muted">
+      <nav class="hidden md:flex items-center gap-5 text-sm text-brand-muted">
         <a href="#mission"    class="hover:text-white transition-colors">Mission</a>
         <a href="/curriculum" class="hover:text-white transition-colors">Curriculum</a>
         <a href="/worksheets" class="hover:text-white transition-colors">Printable Sheets</a>
+        <a href="/basics"     class="text-brand-green hover:text-brand-gdark font-medium transition-colors">Chess Basics</a>
         <a href="#outcomes"   class="hover:text-white transition-colors">Outcomes</a>
         <a href="#foundation" class="hover:text-white transition-colors">Foundation</a>
       </nav>
@@ -208,56 +209,100 @@
       <div class="mb-10 max-w-lg">
         <p class="text-brand-green text-xs font-semibold tracking-widest uppercase mb-4">The Program</p>
         <h2 class="text-4xl font-bold text-white leading-tight mb-4">
-          A rigorous system,<br /> engineered for the classroom
+          A rigorous 4-level system,<br /> engineered for the classroom
         </h2>
         <p class="text-brand-muted text-base leading-relaxed">
-          We translate elite chess training into a measurable, repeatable framework any school can run.
+          From absolute beginner to master-level calculation — a structured progression with measurable milestones at every stage.
         </p>
       </div>
 
-      <!-- 2×2 feature grid in a card -->
-      <div class="rounded-2xl border border-brand-border overflow-hidden" style="background:#131419;">
-        <div class="grid md:grid-cols-2 divide-y divide-brand-border md:divide-x md:divide-y-0">
+      <!-- 4-level curriculum grid -->
+      <div class="grid md:grid-cols-2 gap-6">
 
-          <div class="p-8 md:border-b border-brand-border">
-            <div class="w-9 h-9 rounded-lg flex items-center justify-center mb-4 text-brand-green text-lg" style="background:#1a1f1a;">♛</div>
-            <h3 class="font-semibold text-white mb-2">Master-level curriculum</h3>
-            <p class="text-brand-muted text-sm leading-relaxed">
-              Lesson plans designed with grandmasters and learning scientists, sequenced from first move to advanced tactics.
-            </p>
-          </div>
-
-          <div class="p-8 md:border-b border-brand-border">
-            <div class="w-9 h-9 rounded-lg flex items-center justify-center mb-4 text-brand-green text-lg" style="background:#1a1f1a;">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        <!-- Level 0 -->
+        <div onclick="if(!event.target.closest('a'))window.location.href='/basics'"
+             class="rounded-2xl border border-brand-border p-6 flex flex-col gap-4 hover:border-brand-green/40 transition-colors cursor-pointer" style="background:#131419;">
+          <div class="flex items-center gap-3">
+            <span class="flex items-center justify-center w-9 h-9 rounded-lg text-brand-green font-bold text-sm flex-shrink-0"
+                  style="background:#1a1f1a;">0</span>
+            <div>
+              <p class="text-brand-green text-xs font-semibold tracking-widest uppercase">Level 0 · The Foundation</p>
+              <p class="text-white font-semibold text-sm">Chess Basics</p>
             </div>
-            <h3 class="font-semibold text-white mb-2">Data-focused training</h3>
-            <p class="text-brand-muted text-sm leading-relaxed">
-              Every exercise feeds an analytics layer that surfaces each student's reasoning patterns and growth trajectory.
-            </p>
           </div>
-
-          <div class="p-8">
-            <div class="w-9 h-9 rounded-lg flex items-center justify-center mb-4 text-brand-green text-lg" style="background:#1a1f1a;">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
-            </div>
-            <h3 class="font-semibold text-white mb-2">Educator-ready materials</h3>
-            <p class="text-brand-muted text-sm leading-relaxed">
-              Print and digital resources built for non-specialist teachers, requiring zero prior chess experience.
-            </p>
+          <p class="text-brand-muted text-sm leading-relaxed flex-1">
+            Learn how every piece moves with interactive drag-and-drop exercises before touching a single tactical puzzle.
+          </p>
+          <div class="flex flex-wrap gap-4 pt-2 border-t border-brand-border text-xs">
+            <a href="/basics"     class="text-brand-green hover:text-brand-gdark transition-colors font-medium">▶ Interactive Board</a>
+            <a href="/curriculum" class="text-brand-muted hover:text-white transition-colors">📹 Video Lecture</a>
+            <a href="/worksheets" class="text-brand-muted hover:text-white transition-colors">📄 Worksheet</a>
           </div>
-
-          <div class="p-8">
-            <div class="w-9 h-9 rounded-lg flex items-center justify-center mb-4 text-brand-green text-lg" style="background:#1a1f1a;">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-            </div>
-            <h3 class="font-semibold text-white mb-2">Equity-first deployment</h3>
-            <p class="text-brand-muted text-sm leading-relaxed">
-              Purpose-built for Title I schools and provided at no cost, removing barriers to cognitive enrichment.
-            </p>
-          </div>
-
         </div>
+
+        <!-- Level 1 -->
+        <div onclick="if(!event.target.closest('a'))window.location.href='/trainer?level=1'"
+             class="rounded-2xl border border-brand-border p-6 flex flex-col gap-4 hover:border-brand-green/40 transition-colors cursor-pointer" style="background:#131419;">
+          <div class="flex items-center gap-3">
+            <span class="flex items-center justify-center w-9 h-9 rounded-lg text-brand-green font-bold text-sm flex-shrink-0"
+                  style="background:#1a1f1a;">1</span>
+            <div>
+              <p class="text-brand-green text-xs font-semibold tracking-widest uppercase">Level 1 · Beginner Tactics</p>
+              <p class="text-white font-semibold text-sm">1-Star Matrices ⭐</p>
+            </div>
+          </div>
+          <p class="text-brand-muted text-sm leading-relaxed flex-1">
+            Solve 1–2 ply tactical puzzles on absolute pins, skewers, and double attacks. Served automatically at Streak 0–4.
+          </p>
+          <div class="flex flex-wrap gap-4 pt-2 border-t border-brand-border text-xs">
+            <a href="/trainer?level=1" class="text-brand-green hover:text-brand-gdark transition-colors font-medium">▶ Puzzle Trainer</a>
+            <a href="/curriculum"      class="text-brand-muted hover:text-white transition-colors">📹 Video Lecture</a>
+            <a href="/worksheets"      class="text-brand-muted hover:text-white transition-colors">📄 Worksheet</a>
+          </div>
+        </div>
+
+        <!-- Level 2 -->
+        <div onclick="if(!event.target.closest('a'))window.location.href='/trainer?level=2'"
+             class="rounded-2xl border border-brand-border p-6 flex flex-col gap-4 hover:border-brand-green/40 transition-colors cursor-pointer" style="background:#131419;">
+          <div class="flex items-center gap-3">
+            <span class="flex items-center justify-center w-9 h-9 rounded-lg text-brand-green font-bold text-sm flex-shrink-0"
+                  style="background:#1a1f1a;">2</span>
+            <div>
+              <p class="text-brand-green text-xs font-semibold tracking-widest uppercase">Level 2 · Intermediate Strategy</p>
+              <p class="text-white font-semibold text-sm">2-Star Matrices ⭐⭐</p>
+            </div>
+          </div>
+          <p class="text-brand-muted text-sm leading-relaxed flex-1">
+            Tackle 3–4 ply combinations — piece overloads, decoy sacrifices, and positional play. Unlocked at Streak 5.
+          </p>
+          <div class="flex flex-wrap gap-4 pt-2 border-t border-brand-border text-xs">
+            <a href="/trainer?level=2" class="text-brand-green hover:text-brand-gdark transition-colors font-medium">▶ Puzzle Trainer</a>
+            <a href="/curriculum"      class="text-brand-muted hover:text-white transition-colors">📹 Video Lecture</a>
+            <a href="/worksheets"      class="text-brand-muted hover:text-white transition-colors">📄 Worksheet</a>
+          </div>
+        </div>
+
+        <!-- Level 3 -->
+        <div onclick="if(!event.target.closest('a'))window.location.href='/trainer?level=3'"
+             class="rounded-2xl border border-brand-border p-6 flex flex-col gap-4 hover:border-brand-green/40 transition-colors cursor-pointer" style="background:#131419;">
+          <div class="flex items-center gap-3">
+            <span class="flex items-center justify-center w-9 h-9 rounded-lg text-brand-green font-bold text-sm flex-shrink-0"
+                  style="background:#1a1f1a;">3</span>
+            <div>
+              <p class="text-brand-green text-xs font-semibold tracking-widest uppercase">Level 3 · Advanced Calculation</p>
+              <p class="text-white font-semibold text-sm">3-Star Master ⭐⭐⭐</p>
+            </div>
+          </div>
+          <p class="text-brand-muted text-sm leading-relaxed flex-1">
+            Master 5+ ply deep calculations, horizon effects, and endgame logic at the master level. Unlocked at Streak 10.
+          </p>
+          <div class="flex flex-wrap gap-4 pt-2 border-t border-brand-border text-xs">
+            <a href="/trainer?level=3" class="text-brand-green hover:text-brand-gdark transition-colors font-medium">▶ Puzzle Trainer</a>
+            <a href="/curriculum"      class="text-brand-muted hover:text-white transition-colors">📹 Video Lecture</a>
+            <a href="/worksheets"      class="text-brand-muted hover:text-white transition-colors">📄 Worksheet</a>
+          </div>
+        </div>
+
       </div>
     </div>
   </section>
@@ -397,10 +442,10 @@
         <div class="col-span-2 md:col-span-2 space-y-3">
           <a href="#" class="flex items-center gap-2 font-semibold text-white text-sm">
             <span class="flex items-center justify-center w-7 h-7 rounded-md bg-brand-green text-brand-bg font-bold text-base">♟</span>
-            Algorithmic Chess
+            Chessalgo
           </a>
           <p class="text-brand-muted text-sm leading-relaxed max-w-xs">
-            The Algorithmic Chess Foundation is a 501(c)(3) nonprofit closing the cognitive equity gap in Title I schools.
+            The Chessalgo Foundation is a 501(c)(3) nonprofit closing the cognitive equity gap in Title I schools.
           </p>
         </div>
 
@@ -441,7 +486,7 @@
 
       <!-- Bottom row -->
       <div class="border-t border-brand-border pt-6 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-brand-muted">
-        <span>© 2026 The Algorithmic Chess Foundation. All rights reserved.</span>
+        <span>© 2026 The Chessalgo Foundation. All rights reserved.</span>
         <div class="flex gap-5">
           <a href="#" class="hover:text-white transition-colors">Privacy</a>
           <a href="#" class="hover:text-white transition-colors">Terms</a>

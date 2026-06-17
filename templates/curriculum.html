@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Curriculum — Algorithmic Chess</title>
+  <title>Curriculum — Chessalgo</title>
 
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
@@ -31,26 +31,24 @@
 </head>
 <body class="text-white antialiased" style="font-family: Inter, system-ui, sans-serif;">
 
-  <!-- ─── SiteHeader (identical to main page) ───────────────────────────── -->
+  <!-- ─── SiteHeader ────────────────────────────────────────────────────── -->
   <header class="sticky top-0 z-50 border-b border-brand-border" style="background:#0b0c10;">
     <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
 
-      <!-- Logo -->
       <a href="/" class="flex items-center gap-2 font-semibold text-white text-sm">
         <span class="flex items-center justify-center w-7 h-7 rounded-md bg-brand-green text-brand-bg font-bold text-base">♟</span>
-        Algorithmic Chess
+        Chessalgo
       </a>
 
-      <!-- Center nav — anchor links back to main page sections -->
-      <nav class="hidden md:flex items-center gap-6 text-sm text-brand-muted">
+      <nav class="hidden md:flex items-center gap-5 text-sm text-brand-muted">
         <a href="/#mission"    class="hover:text-white transition-colors">Mission</a>
-        <a href="/curriculum"  class="text-white">Curriculum</a>
+        <a href="/curriculum"  class="text-white font-semibold">Curriculum</a>
         <a href="/worksheets"  class="hover:text-white transition-colors">Printable Sheets</a>
+        <a href="/basics"      class="text-brand-green hover:text-brand-gdark font-medium transition-colors">Chess Basics</a>
         <a href="/#outcomes"   class="hover:text-white transition-colors">Outcomes</a>
         <a href="/#foundation" class="hover:text-white transition-colors">Foundation</a>
       </nav>
 
-      <!-- Right actions -->
       <div class="flex items-center gap-4 text-sm">
         <a href="/#train" class="text-brand-muted hover:text-white transition-colors">Sign in</a>
         <a href="/#train"
@@ -75,17 +73,15 @@
         Back to Dashboard
       </a>
 
-      <!-- Section label -->
       <p class="text-brand-green text-xs font-semibold tracking-widest uppercase">Video Vault</p>
 
-      <!-- Heading -->
       <h1 class="text-4xl md:text-5xl font-extrabold text-white leading-tight">
         Master-Level Curriculum<br class="hidden md:block" /> Video Vault
       </h1>
 
       <p class="text-brand-muted text-lg max-w-2xl leading-relaxed">
-        Three advanced lecture modules engineered with grandmasters and learning scientists.
-        Work through each track at your own pace, then drill positions on the training board.
+        Four level-calibrated lecture modules engineered with grandmasters and learning scientists.
+        Work through each level at your own pace, then drill positions on the training board.
       </p>
 
       <!-- Meta pills -->
@@ -94,13 +90,13 @@
           <svg class="w-3.5 h-3.5 text-brand-green" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/>
           </svg>
-          3 lectures
+          4 level lectures
         </span>
         <span class="inline-flex items-center gap-1.5 border border-brand-border rounded-md px-3 py-1.5 text-xs text-brand-muted" style="background:#131419;">
           <svg class="w-3.5 h-3.5 text-brand-green" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
           </svg>
-          Advanced track
+          Levels 0–3
         </span>
         <span class="inline-flex items-center gap-1.5 border border-brand-border rounded-md px-3 py-1.5 text-xs text-brand-muted" style="background:#131419;">
           <span class="text-brand-green">•</span>
@@ -111,52 +107,83 @@
     </div>
   </section>
 
-  <!-- ─── 3-Column Video Grid ───────────────────────────────────────────── -->
+  <!-- ─── 4-Level Video Grid ────────────────────────────────────────────── -->
   <section class="py-24 px-6" style="background:#0b0c10;">
-    <div class="max-w-6xl mx-auto grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div class="max-w-6xl mx-auto grid md:grid-cols-2 gap-6">
 
-      <!-- ── Lecture 1 ──────────────────────────────────────────────────── -->
+      <!-- ── Level 0 ──────────────────────────────────────────────────── -->
       <article class="flex flex-col rounded-2xl border border-brand-border overflow-hidden hover:border-brand-green/40 transition-colors"
                style="background:#131419;">
 
-        <!-- Icon badge row -->
         <div class="flex items-center gap-3 px-6 pt-6 pb-4 border-b border-brand-border">
           <div class="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 text-brand-green text-lg font-bold"
-               style="background:#1a1f1a;">1</div>
+               style="background:#1a1f1a;">0</div>
           <div>
-            <p class="text-brand-green text-xs font-semibold tracking-widest uppercase">Lecture 1</p>
-            <p class="text-brand-muted text-xs">Calculation &amp; Decision Logic</p>
+            <p class="text-brand-green text-xs font-semibold tracking-widest uppercase">Level 0 · The Foundation</p>
+            <p class="text-brand-muted text-xs">Rules &amp; Basic Checkmate Patterns</p>
           </div>
         </div>
 
-        <!-- Video player -->
         <div class="px-6 py-5">
           <video controls
                  class="w-full rounded-xl border border-brand-border shadow-lg"
-                 style="background:#0b0c10; aspect-ratio:16/9; object-fit:cover;"
-                 poster="https://unsplash.com">
-            <source src="/static/videos/module1.mp4" type="video/mp4">
+                 style="background:#0b0c10; aspect-ratio:16/9; object-fit:cover;">
+            <source src="/static/videos/level0_basics.mp4" type="video/mp4">
             Your browser does not support HTML5 video.
           </video>
         </div>
 
-        <!-- Card body -->
         <div class="flex flex-col flex-1 px-6 pb-6 gap-3">
           <h2 class="font-bold text-white text-base leading-snug">
-            Calculation Matrices: Decision-Tree Logic under Pressure
+            Level 0 Video: How the Pieces Move and Basic Checkmate Patterns
           </h2>
           <p class="text-brand-muted text-sm leading-relaxed flex-1">
-            Learn how grandmasters construct branching calculation trees in time-critical positions,
-            pruning low-probability lines while maintaining evaluation accuracy.
+            The foundational lecture covering board orientation, how every piece moves, and the three most common checkmate patterns every beginner must know before drilling puzzles.
           </p>
           <div class="flex items-center justify-between pt-3 border-t border-brand-border text-xs text-brand-muted">
-            <span>Advanced · Module 1</span>
-            <span class="text-brand-green font-medium">module1.mp4</span>
+            <span>Foundation · Level 0</span>
+            <a href="/basics" class="text-brand-green font-medium hover:text-brand-gdark transition-colors">▶ Interactive Board →</a>
           </div>
         </div>
       </article>
 
-      <!-- ── Lecture 2 ──────────────────────────────────────────────────── -->
+      <!-- ── Level 1 ──────────────────────────────────────────────────── -->
+      <article class="flex flex-col rounded-2xl border border-brand-border overflow-hidden hover:border-brand-green/40 transition-colors"
+               style="background:#131419;">
+
+        <div class="flex items-center gap-3 px-6 pt-6 pb-4 border-b border-brand-border">
+          <div class="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 text-brand-green text-lg font-bold"
+               style="background:#1a1f1a;">1</div>
+          <div>
+            <p class="text-brand-green text-xs font-semibold tracking-widest uppercase">Level 1 · Beginner Tactics</p>
+            <p class="text-brand-muted text-xs">1-Star Matrices · Streak 0–4</p>
+          </div>
+        </div>
+
+        <div class="px-6 py-5">
+          <video controls
+                 class="w-full rounded-xl border border-brand-border shadow-lg"
+                 style="background:#0b0c10; aspect-ratio:16/9; object-fit:cover;">
+            <source src="/static/videos/level1_tactics.mp4" type="video/mp4">
+            Your browser does not support HTML5 video.
+          </video>
+        </div>
+
+        <div class="flex flex-col flex-1 px-6 pb-6 gap-3">
+          <h2 class="font-bold text-white text-base leading-snug">
+            Level 1 Video: Tactical Motifs — Absolute Pins, Skewers &amp; Double Attacks
+          </h2>
+          <p class="text-brand-muted text-sm leading-relaxed flex-1">
+            A systematic breakdown of the three core tactical motifs underlying the majority of beginner-level combinations. Includes annotated master-game examples and positional drill sequences.
+          </p>
+          <div class="flex items-center justify-between pt-3 border-t border-brand-border text-xs text-brand-muted">
+            <span>Beginner Tactics · Level 1</span>
+            <span class="text-brand-green font-medium">⭐ 1-Star</span>
+          </div>
+        </div>
+      </article>
+
+      <!-- ── Level 2 ──────────────────────────────────────────────────── -->
       <article class="flex flex-col rounded-2xl border border-brand-border overflow-hidden hover:border-brand-green/40 transition-colors"
                style="background:#131419;">
 
@@ -164,37 +191,35 @@
           <div class="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 text-brand-green text-lg font-bold"
                style="background:#1a1f1a;">2</div>
           <div>
-            <p class="text-brand-green text-xs font-semibold tracking-widest uppercase">Lecture 2</p>
-            <p class="text-brand-muted text-xs">Pattern Matching &amp; Tactics</p>
+            <p class="text-brand-green text-xs font-semibold tracking-widest uppercase">Level 2 · Intermediate Strategy</p>
+            <p class="text-brand-muted text-xs">2-Star Matrices · Streak 5–9</p>
           </div>
         </div>
 
         <div class="px-6 py-5">
           <video controls
                  class="w-full rounded-xl border border-brand-border shadow-lg"
-                 style="background:#0b0c10; aspect-ratio:16/9; object-fit:cover;"
-                 poster="https://unsplash.com">
-            <source src="/static/videos/module2.mp4" type="video/mp4">
+                 style="background:#0b0c10; aspect-ratio:16/9; object-fit:cover;">
+            <source src="/static/videos/level2_strategy.mp4" type="video/mp4">
             Your browser does not support HTML5 video.
           </video>
         </div>
 
         <div class="flex flex-col flex-1 px-6 pb-6 gap-3">
           <h2 class="font-bold text-white text-base leading-snug">
-            Algorithmic Pattern Matching: Absolute Pins &amp; Tactical Overloads
+            Level 2 Video: Positional Play, Piece Overloads &amp; Decoy Sacrifices
           </h2>
           <p class="text-brand-muted text-sm leading-relaxed flex-1">
-            A systematic framework for recognising absolute pins and overloaded defenders — the two
-            structural motifs that unlock the majority of tactical sequences at master level.
+            Advanced techniques covering piece overloads, decoy sacrifices, and positional play principles — the concepts that separate intermediate players from beginners in 3–4 ply combinations.
           </p>
           <div class="flex items-center justify-between pt-3 border-t border-brand-border text-xs text-brand-muted">
-            <span>Advanced · Module 2</span>
-            <span class="text-brand-green font-medium">module2.mp4</span>
+            <span>Intermediate Strategy · Level 2</span>
+            <span class="text-brand-green font-medium">⭐⭐ 2-Star</span>
           </div>
         </div>
       </article>
 
-      <!-- ── Lecture 3 ──────────────────────────────────────────────────── -->
+      <!-- ── Level 3 ──────────────────────────────────────────────────── -->
       <article class="flex flex-col rounded-2xl border border-brand-border overflow-hidden hover:border-brand-green/40 transition-colors"
                style="background:#131419;">
 
@@ -202,32 +227,30 @@
           <div class="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 text-brand-green text-lg font-bold"
                style="background:#1a1f1a;">3</div>
           <div>
-            <p class="text-brand-green text-xs font-semibold tracking-widest uppercase">Lecture 3</p>
-            <p class="text-brand-muted text-xs">Evaluation &amp; Horizon Control</p>
+            <p class="text-brand-green text-xs font-semibold tracking-widest uppercase">Level 3 · Advanced Calculation</p>
+            <p class="text-brand-muted text-xs">3-Star Master · Streak 10+</p>
           </div>
         </div>
 
         <div class="px-6 py-5">
           <video controls
                  class="w-full rounded-xl border border-brand-border shadow-lg"
-                 style="background:#0b0c10; aspect-ratio:16/9; object-fit:cover;"
-                 poster="https://unsplash.com">
-            <source src="/static/videos/module3.mp4" type="video/mp4">
+                 style="background:#0b0c10; aspect-ratio:16/9; object-fit:cover;">
+            <source src="/static/videos/level3_advanced.mp4" type="video/mp4">
             Your browser does not support HTML5 video.
           </video>
         </div>
 
         <div class="flex flex-col flex-1 px-6 pb-6 gap-3">
           <h2 class="font-bold text-white text-base leading-snug">
-            Horizon Mitigation: Quantifying Evaluation Volatility
+            Level 3 Video: Horizon Calculation Matrices &amp; Deep Endgame Logic
           </h2>
           <p class="text-brand-muted text-sm leading-relaxed flex-1">
-            Explore how engines and top players manage the horizon effect — preventing short-sighted
-            evaluations by quantifying position volatility and extending search depth at critical junctures.
+            Master-level calculation training covering the horizon effect, 5+ ply deep endgame logic, and the algorithmic approach to position evaluation that distinguishes grandmaster-level play.
           </p>
           <div class="flex items-center justify-between pt-3 border-t border-brand-border text-xs text-brand-muted">
-            <span>Advanced · Module 3</span>
-            <span class="text-brand-green font-medium">module3.mp4</span>
+            <span>Advanced Calculation · Level 3</span>
+            <span class="text-brand-green font-medium">⭐⭐⭐ Master</span>
           </div>
         </div>
       </article>
@@ -235,7 +258,7 @@
     </div>
   </section>
 
-  <!-- ─── DashboardCta (matches main page) ─────────────────────────────── -->
+  <!-- ─── Dashboard CTA ─────────────────────────────────────────────────── -->
   <section class="py-24 px-6 border-t border-brand-border" style="background:#0b0c10;">
     <div class="max-w-4xl mx-auto">
       <div class="rounded-2xl border border-brand-border p-16 text-center space-y-6" style="background:#131419;">
@@ -253,7 +276,7 @@
     </div>
   </section>
 
-  <!-- ─── SiteFooter (identical to main page) ───────────────────────────── -->
+  <!-- ─── SiteFooter ────────────────────────────────────────────────────── -->
   <footer class="border-t border-brand-border pt-16 pb-8 px-6" style="background:#0b0c10;">
     <div class="max-w-6xl mx-auto">
 
@@ -261,20 +284,20 @@
         <div class="col-span-2 space-y-3">
           <a href="/" class="flex items-center gap-2 font-semibold text-white text-sm">
             <span class="flex items-center justify-center w-7 h-7 rounded-md bg-brand-green text-brand-bg font-bold text-base">♟</span>
-            Algorithmic Chess
+            Chessalgo
           </a>
           <p class="text-brand-muted text-sm leading-relaxed max-w-xs">
-            The Algorithmic Chess Foundation is a 501(c)(3) nonprofit closing the cognitive equity gap in Title I schools.
+            The Chessalgo Foundation is a 501(c)(3) nonprofit closing the cognitive equity gap in Title I schools.
           </p>
         </div>
 
         <div class="space-y-3">
           <h4 class="text-white text-sm font-semibold">Program</h4>
           <ul class="space-y-2 text-sm text-brand-muted">
-            <li><a href="/curriculum"  class="hover:text-white transition-colors">Curriculum</a></li>
+            <li><a href="/basics"      class="hover:text-white transition-colors">Chess Basics</a></li>
+            <li><a href="/curriculum"  class="text-white">Curriculum</a></li>
+            <li><a href="/worksheets"  class="hover:text-white transition-colors">Printable Sheets</a></li>
             <li><a href="/#outcomes"   class="hover:text-white transition-colors">Outcomes</a></li>
-            <li><a href="/#train"      class="hover:text-white transition-colors">For educators</a></li>
-            <li><a href="/#mission"    class="hover:text-white transition-colors">Research</a></li>
           </ul>
         </div>
 
@@ -291,16 +314,16 @@
         <div class="space-y-3">
           <h4 class="text-white text-sm font-semibold">Resources</h4>
           <ul class="space-y-2 text-sm text-brand-muted">
-            <li><a href="/#train" class="hover:text-white transition-colors">Training dashboard</a></li>
-            <li><a href="#"       class="hover:text-white transition-colors">Documentation</a></li>
-            <li><a href="#"       class="hover:text-white transition-colors">Support</a></li>
-            <li><a href="#"       class="hover:text-white transition-colors">Contact</a></li>
+            <li><a href="/#train"     class="hover:text-white transition-colors">Training dashboard</a></li>
+            <li><a href="/worksheets" class="hover:text-white transition-colors">Worksheets</a></li>
+            <li><a href="#"           class="hover:text-white transition-colors">Support</a></li>
+            <li><a href="#"           class="hover:text-white transition-colors">Contact</a></li>
           </ul>
         </div>
       </div>
 
       <div class="border-t border-brand-border pt-6 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-brand-muted">
-        <span>© 2026 The Algorithmic Chess Foundation. All rights reserved.</span>
+        <span>© 2026 The Chessalgo Foundation. All rights reserved.</span>
         <div class="flex gap-5">
           <a href="#" class="hover:text-white transition-colors">Privacy</a>
           <a href="#" class="hover:text-white transition-colors">Terms</a>
