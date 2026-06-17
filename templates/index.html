@@ -59,16 +59,46 @@
       </a>
 
       <!-- Center nav -->
-      <nav class="hidden md:flex items-center gap-8 text-sm text-brand-muted">
+      <nav class="hidden md:flex items-center gap-6 text-sm text-brand-muted">
         <a href="#mission"    class="hover:text-white transition-colors">Mission</a>
-        <a href="#curriculum" class="hover:text-white transition-colors">Curriculum</a>
+        <a href="/curriculum" class="hover:text-white transition-colors">Curriculum</a>
+        <a href="/worksheets" class="hover:text-white transition-colors">Printable Sheets</a>
         <a href="#outcomes"   class="hover:text-white transition-colors">Outcomes</a>
         <a href="#foundation" class="hover:text-white transition-colors">Foundation</a>
       </nav>
 
       <!-- Right actions -->
       <div class="flex items-center gap-4 text-sm">
-        <a href="#train" class="text-brand-muted hover:text-white transition-colors">Sign in</a>
+
+        <!-- Logged-out state (default) -->
+        <div id="auth-logged-out" class="flex items-center gap-3">
+          <button id="btn-login"
+                  class="text-brand-muted hover:text-white transition-colors cursor-pointer">
+            Student Login
+          </button>
+          <button id="btn-register"
+                  class="border border-brand-border hover:border-brand-green text-brand-muted hover:text-white px-3 py-1.5 rounded-md transition-colors cursor-pointer"
+                  style="background:#131419;">
+            Register
+          </button>
+        </div>
+
+        <!-- Logged-in state (hidden until authenticated) -->
+        <div id="auth-logged-in" class="hidden items-center gap-3">
+          <span id="nav-welcome" class="text-brand-muted text-xs"></span>
+          <button id="btn-telemetry"
+                  onclick="toggleTelemetry()"
+                  class="border border-brand-border hover:border-brand-green text-brand-green text-xs font-semibold px-3 py-1.5 rounded-md transition-colors cursor-pointer"
+                  style="background:#131419;">
+            View Telemetry
+          </button>
+          <span class="text-brand-border text-xs">|</span>
+          <button id="btn-logout"
+                  class="text-brand-muted hover:text-white transition-colors cursor-pointer">
+            Logout
+          </button>
+        </div>
+
         <a href="#train"
            class="bg-brand-green hover:bg-brand-gdark text-brand-bg font-semibold px-4 py-2 rounded-md transition-colors">
           Launch Dashboard
@@ -421,6 +451,93 @@
     </div>
   </footer>
 
+  <!-- ─── Auth Modal ──────────────────────────────────────────────────── -->
+  <div id="auth-modal" class="fixed inset-0 z-[100] flex items-center justify-center hidden">
+    <!-- Backdrop -->
+    <div id="modal-backdrop" class="absolute inset-0" style="background:rgba(0,0,0,0.8);" onclick="closeModal()"></div>
+
+    <!-- Box -->
+    <div class="relative z-10 w-full max-w-sm mx-4 rounded-2xl border border-brand-border p-8 space-y-6"
+         style="background:#131419;">
+
+      <!-- Close -->
+      <button onclick="closeModal()"
+              class="absolute top-4 right-4 text-brand-muted hover:text-white transition-colors text-lg leading-none cursor-pointer">
+        ✕
+      </button>
+
+      <!-- Tabs -->
+      <div class="flex gap-6 border-b border-brand-border pb-4">
+        <button id="tab-login"
+                onclick="switchTab('login')"
+                class="text-white font-semibold text-sm pb-1 border-b-2 border-brand-green cursor-pointer transition-colors">
+          Login
+        </button>
+        <button id="tab-register"
+                onclick="switchTab('register')"
+                class="text-brand-muted hover:text-white font-semibold text-sm pb-1 border-b-2 border-transparent cursor-pointer transition-colors">
+          Register
+        </button>
+      </div>
+
+      <!-- Fields -->
+      <div class="space-y-4">
+        <input id="modal-username" type="text" placeholder="Username" autocomplete="username"
+               class="w-full px-4 py-3 rounded-lg border border-brand-border text-white text-sm outline-none focus:border-brand-green transition-colors"
+               style="background:#0b0c10;" />
+        <input id="modal-password" type="password" placeholder="Password" autocomplete="current-password"
+               class="w-full px-4 py-3 rounded-lg border border-brand-border text-white text-sm outline-none focus:border-brand-green transition-colors"
+               style="background:#0b0c10;" />
+        <p id="modal-error" class="text-xs hidden" style="color:#ef4444;"></p>
+        <button id="modal-submit"
+                onclick="submitModal()"
+                class="w-full bg-brand-green hover:bg-brand-gdark text-brand-bg font-semibold py-3 rounded-lg transition-colors text-sm cursor-pointer">
+          Login
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Telemetry Dropdown Panel ────────────────────────────────────── -->
+  <div id="telemetry-panel" class="fixed z-40 hidden" style="top:4.25rem; right:1.5rem;">
+    <div class="rounded-2xl border border-brand-border shadow-2xl p-5 w-72"
+         style="background:#131419;">
+
+      <!-- Panel header -->
+      <div class="flex items-center justify-between mb-4">
+        <div class="flex items-center gap-2">
+          <svg class="w-3.5 h-3.5 text-brand-green" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+          </svg>
+          <p class="text-brand-green text-xs font-semibold tracking-widest uppercase">My Analytics</p>
+        </div>
+        <button onclick="closeTelemetry()"
+                class="text-brand-muted hover:text-white text-sm leading-none cursor-pointer transition-colors">✕</button>
+      </div>
+
+      <!-- Metric rows -->
+      <div class="space-y-2">
+        <div class="flex items-center justify-between rounded-lg border border-brand-border px-4 py-3"
+             style="background:#0b0c10;">
+          <span class="text-brand-muted text-xs">Total Puzzles Played</span>
+          <span id="stat-total" class="text-white text-sm font-bold">—</span>
+        </div>
+        <div class="flex items-center justify-between rounded-lg border border-brand-border px-4 py-3"
+             style="background:#0b0c10;">
+          <span class="text-brand-muted text-xs">Tactical Accuracy</span>
+          <span id="stat-accuracy" class="text-brand-green text-sm font-bold">—</span>
+        </div>
+        <div class="flex items-center justify-between rounded-lg border border-brand-border px-4 py-3"
+             style="background:#0b0c10;">
+          <span class="text-brand-muted text-xs">Avg Solving Velocity</span>
+          <span id="stat-velocity" class="text-white text-sm font-bold">—</span>
+        </div>
+      </div>
+
+      <p id="stat-loading" class="text-brand-muted text-xs text-center mt-3 hidden">Refreshing…</p>
+    </div>
+  </div>
+
   <!-- ─── Chess Engine ────────────────────────────────────────────────── -->
   <script>
     let board                 = null;
@@ -431,7 +548,12 @@
     let waitingForComputer    = false;
     let puzzlesSolvedInStreak = 0;
     let isReplaying           = false;
-    let replayTimeout         = null;   // handle so loadPuzzle can cancel mid-replay
+    let replayTimeout         = null;
+    let currentPuzzleId       = null;   // set by /get-puzzle, sent to /log-attempt
+    let puzzleStartTime       = null;   // performance.now() snapshot when puzzle loads
+    let currentUser           = null;   // { username } when logged in, else null
+    let activeModalTab        = 'login';
+    let telemetryOpen         = false;
 
     function updateStreakDisplay() {
       const level = puzzlesSolvedInStreak < 5 ? 1 : puzzlesSolvedInStreak < 10 ? 2 : 3;
@@ -462,6 +584,7 @@
         if (currentMoveIndex >= solutionMoves.length) {
           puzzlesSolvedInStreak++;
           updateStreakDisplay();
+          logAttempt(true);
           setStatus('✓ Puzzle Completed Successfully!', '#00dc82');
         } else {
           const whose = game.turn() === 'w' ? 'White' : 'Black';
@@ -491,6 +614,7 @@
         if (currentMoveIndex >= solutionMoves.length) {
           puzzlesSolvedInStreak++;
           updateStreakDisplay();
+          logAttempt(true);
           setStatus('✓ Puzzle Completed Successfully!', '#00dc82');
           return;
         }
@@ -506,6 +630,7 @@
         game.undo();
         puzzlesSolvedInStreak = 0;
         updateStreakDisplay();
+        logAttempt(false);
         setStatus('✗ Incorrect – try again.', '#ef4444');
         return 'snapback';
       }
@@ -526,9 +651,11 @@
         })
         .then(function(data) {
           currentFen         = data.fen;
+          currentPuzzleId    = data.puzzle_id;
           solutionMoves      = data.engine_best_move.split(' ').filter(Boolean);
           currentMoveIndex   = 0;
           waitingForComputer = false;
+          puzzleStartTime    = performance.now();
 
           // Difficulty: 1 move → ⭐, 2-5 moves → ⭐⭐, 6+ moves → ⭐⭐⭐
           const len   = solutionMoves.length;
@@ -561,6 +688,208 @@
           setStatus('Error: ' + err.message, '#ef4444');
         });
     }
+
+    // ── Telemetry ───────────────────────────────────────────────────────────
+    function logAttempt(isCorrect) {
+      if (!currentPuzzleId || !currentUser) return;
+      const timeMs = puzzleStartTime ? Math.round(performance.now() - puzzleStartTime) : null;
+      fetch('/log-attempt', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({
+          puzzle_id:     currentPuzzleId,
+          time_spent_ms: timeMs,
+          is_correct:    isCorrect
+        })
+      })
+      .then(function() { fetchAnalytics(); })   // real-time stats refresh after every attempt
+      .catch(function() {});
+    }
+
+    // ── Auth modal ──────────────────────────────────────────────────────────
+    function openModal(tab) {
+      activeModalTab = tab || 'login';
+      switchTab(activeModalTab);
+      document.getElementById('modal-username').value = '';
+      document.getElementById('modal-password').value = '';
+      const err = document.getElementById('modal-error');
+      err.classList.add('hidden');
+      err.style.color = '#ef4444';
+      document.getElementById('auth-modal').classList.remove('hidden');
+      setTimeout(function() { document.getElementById('modal-username').focus(); }, 50);
+    }
+
+    function closeModal() {
+      document.getElementById('auth-modal').classList.add('hidden');
+    }
+
+    function switchTab(tab) {
+      activeModalTab = tab;
+      const loginTab    = document.getElementById('tab-login');
+      const registerTab = document.getElementById('tab-register');
+      const submitBtn   = document.getElementById('modal-submit');
+      if (tab === 'login') {
+        loginTab.classList.add('text-white', 'border-brand-green');
+        loginTab.classList.remove('text-brand-muted', 'border-transparent');
+        registerTab.classList.remove('text-white', 'border-brand-green');
+        registerTab.classList.add('text-brand-muted', 'border-transparent');
+        submitBtn.textContent = 'Login';
+      } else {
+        registerTab.classList.add('text-white', 'border-brand-green');
+        registerTab.classList.remove('text-brand-muted', 'border-transparent');
+        loginTab.classList.remove('text-white', 'border-brand-green');
+        loginTab.classList.add('text-brand-muted', 'border-transparent');
+        submitBtn.textContent = 'Create Account';
+      }
+    }
+
+    function updateNavAuth() {
+      const loggedOut = document.getElementById('auth-logged-out');
+      const loggedIn  = document.getElementById('auth-logged-in');
+      if (currentUser) {
+        loggedOut.classList.add('hidden');
+        loggedIn.classList.remove('hidden');
+        loggedIn.classList.add('flex');
+        document.getElementById('nav-welcome').textContent = 'Welcome, ' + currentUser.username + '!';
+      } else {
+        loggedOut.classList.remove('hidden');
+        loggedIn.classList.add('hidden');
+        loggedIn.classList.remove('flex');
+      }
+    }
+
+    function submitModal() {
+      const username  = document.getElementById('modal-username').value.trim();
+      const password  = document.getElementById('modal-password').value;
+      const errorEl   = document.getElementById('modal-error');
+      const submitBtn = document.getElementById('modal-submit');
+
+      if (!username || !password) {
+        errorEl.style.color  = '#ef4444';
+        errorEl.textContent  = 'Please fill in both fields.';
+        errorEl.classList.remove('hidden');
+        return;
+      }
+
+      errorEl.classList.add('hidden');
+      submitBtn.textContent = 'Please wait…';
+
+      const endpoint = activeModalTab === 'login' ? '/login' : '/register';
+
+      fetch(endpoint, {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ username: username, password: password })
+      })
+      .then(function(r) {
+        return r.json().then(function(d) { return { ok: r.ok, data: d }; });
+      })
+      .then(function(res) {
+        if (!res.ok) {
+          errorEl.style.color = '#ef4444';
+          errorEl.textContent = res.data.error || 'Something went wrong.';
+          errorEl.classList.remove('hidden');
+          submitBtn.textContent = activeModalTab === 'login' ? 'Login' : 'Create Account';
+          return;
+        }
+        if (activeModalTab === 'register') {
+          // Auto-switch to login after successful registration
+          switchTab('login');
+          errorEl.style.color = '#00dc82';
+          errorEl.textContent = 'Account created! Please log in.';
+          errorEl.classList.remove('hidden');
+          document.getElementById('modal-username').value = username;
+          document.getElementById('modal-password').value = '';
+          document.getElementById('modal-password').focus();
+          return;
+        }
+        // Successful login
+        currentUser = { username: username };
+        if (typeof res.data.streak === 'number') {
+          puzzlesSolvedInStreak = res.data.streak;
+          updateStreakDisplay();
+        }
+        closeModal();
+        updateNavAuth();
+        fetchAnalytics();
+        loadPuzzle();
+      })
+      .catch(function() {
+        errorEl.style.color = '#ef4444';
+        errorEl.textContent = 'Network error — please try again.';
+        errorEl.classList.remove('hidden');
+        submitBtn.textContent = activeModalTab === 'login' ? 'Login' : 'Create Account';
+      });
+    }
+
+    // ── Analytics panel ─────────────────────────────────────────────────────
+    function fetchAnalytics() {
+      if (!currentUser) return;
+      const loading = document.getElementById('stat-loading');
+      loading.classList.remove('hidden');
+      fetch('/get-analytics')
+        .then(function(r) { return r.json(); })
+        .then(function(d) {
+          loading.classList.add('hidden');
+          document.getElementById('stat-total').textContent = d.total_attempts;
+          const pct = d.total_attempts > 0 ? Math.round(d.accuracy) + '%' : '0%';
+          document.getElementById('stat-accuracy').textContent = pct;
+          const secs = d.avg_time_ms > 0 ? (d.avg_time_ms / 1000).toFixed(1) + 's' : '—';
+          document.getElementById('stat-velocity').textContent = secs;
+        })
+        .catch(function() { loading.classList.add('hidden'); });
+    }
+
+    function toggleTelemetry() {
+      telemetryOpen ? closeTelemetry() : openTelemetry();
+    }
+
+    function openTelemetry() {
+      document.getElementById('telemetry-panel').classList.remove('hidden');
+      telemetryOpen = true;
+      fetchAnalytics();
+    }
+
+    function closeTelemetry() {
+      document.getElementById('telemetry-panel').classList.add('hidden');
+      telemetryOpen = false;
+    }
+
+    function handleLogout() {
+      fetch('/logout').then(function() {
+        currentUser = null;
+        closeTelemetry();
+        updateNavAuth();
+        setStatus('Logged out. Click "Train New Puzzle" to continue as guest.');
+      });
+    }
+
+    // Nav button wiring
+    document.getElementById('btn-login').addEventListener('click', function() { openModal('login'); });
+    document.getElementById('btn-register').addEventListener('click', function() { openModal('register'); });
+    document.getElementById('btn-logout').addEventListener('click', handleLogout);
+
+    // Submit on Enter key inside modal inputs
+    ['modal-username', 'modal-password'].forEach(function(id) {
+      document.getElementById(id).addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') submitModal();
+      });
+    });
+
+    // Close modal on Escape; close telemetry panel too
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') { closeModal(); closeTelemetry(); }
+    });
+
+    // Close telemetry panel when clicking outside it
+    document.addEventListener('click', function(e) {
+      if (!telemetryOpen) return;
+      const panel = document.getElementById('telemetry-panel');
+      const btn   = document.getElementById('btn-telemetry');
+      if (!panel.contains(e.target) && (!btn || !btn.contains(e.target))) {
+        closeTelemetry();
+      }
+    });
 
     document.getElementById('train-btn').addEventListener('click', loadPuzzle);
 
