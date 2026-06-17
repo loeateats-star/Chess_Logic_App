@@ -39,6 +39,11 @@
     /* Chessboard.js sizes itself from this width — do not remove */
     #board { width: 400px; }
     .board-b72b1 { border: 2px solid #00dc82 !important; border-radius: 6px; }
+    /* Dark squares — premium mint green */
+    .black-3c85d { background-color: #66b38c !important; }
+    /* Keep coordinate labels legible against the new green tone */
+    .black-3c85d.notation-322f9 { color: #1a3d2b !important; }
+    .white-1e1d7.notation-322f9 { color: #66b38c !important; }
   </style>
 </head>
 <body class="text-white antialiased" style="font-family: Inter, system-ui, sans-serif;">
@@ -99,7 +104,7 @@
            class="bg-brand-green hover:bg-brand-gdark text-brand-bg font-semibold px-6 py-3 rounded-md transition-colors text-sm inline-flex items-center gap-2">
           Launch Training Dashboard &rarr;
         </a>
-        <a href="#outcomes"
+        <a href="/curriculum"
            class="border border-brand-border text-white hover:border-brand-green px-6 py-3 rounded-md transition-colors text-sm inline-flex items-center gap-2"
            style="background:#131419;">
           <span class="text-brand-green">&#9654;</span> Watch the curriculum
@@ -135,10 +140,28 @@
           if you're wrong the piece snaps back and you try again.
         </p>
 
+        <!-- Difficulty rating — updated by JS on each puzzle load -->
+        <div id="difficulty" class="flex items-center gap-2 text-sm text-brand-muted">
+          <span>Difficulty:</span>
+          <span id="difficulty-stars" class="tracking-wide text-base"></span>
+        </div>
+
+        <!-- Level streak counter -->
+        <div class="flex items-center gap-2 text-sm text-brand-muted">
+          <span>Current Level Streak:</span>
+          <span id="streak-count" class="text-white font-semibold">0</span>
+          <span id="streak-level" class="text-base">⭐</span>
+        </div>
+
         <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4">
           <button id="train-btn"
             class="bg-brand-green hover:bg-brand-gdark text-brand-bg font-semibold px-6 py-3 rounded-md transition-colors text-sm cursor-pointer">
             Train New Puzzle
+          </button>
+          <button id="show-btn"
+            class="border border-slate-600 hover:border-brand-green text-slate-300 hover:text-white font-semibold px-6 py-3 rounded-md transition-colors text-sm cursor-pointer"
+            style="background:#131419;">
+            Show Solution
           </button>
           <p id="status" class="text-sm" style="color:#9ca3af;">
             Click "Train New Puzzle" to begin.
@@ -398,12 +421,23 @@
     </div>
   </footer>
 
-  <!-- ─── Chess Engine (intact) ────────────────────────────────────────── -->
+  <!-- ─── Chess Engine ────────────────────────────────────────────────── -->
   <script>
-    let board = null;
-    let game  = null;
-    let currentFen    = null;
-    let engineBestMove = null;
+    let board                 = null;
+    let game                  = null;
+    let currentFen            = null;
+    let solutionMoves         = [];
+    let currentMoveIndex      = 0;
+    let waitingForComputer    = false;
+    let puzzlesSolvedInStreak = 0;
+    let isReplaying           = false;
+    let replayTimeout         = null;   // handle so loadPuzzle can cancel mid-replay
+
+    function updateStreakDisplay() {
+      const level = puzzlesSolvedInStreak < 5 ? 1 : puzzlesSolvedInStreak < 10 ? 2 : 3;
+      document.getElementById('streak-count').textContent = puzzlesSolvedInStreak;
+      document.getElementById('streak-level').textContent = '⭐'.repeat(level);
+    }
 
     function setStatus(text, color) {
       const el = document.getElementById('status');
@@ -411,33 +445,95 @@
       el.style.color = color || '#9ca3af';
     }
 
+    // Auto-plays the computer's response move after a short delay.
+    function playComputerMove() {
+      waitingForComputer = true;
+      setTimeout(function() {
+        const uci   = solutionMoves[currentMoveIndex];
+        const from  = uci.slice(0, 2);
+        const to    = uci.slice(2, 4);
+        const promo = uci.length > 4 ? uci[4] : 'q';
+
+        game.move({ from: from, to: to, promotion: promo });
+        board.position(game.fen());
+        currentMoveIndex++;
+        waitingForComputer = false;
+
+        if (currentMoveIndex >= solutionMoves.length) {
+          puzzlesSolvedInStreak++;
+          updateStreakDisplay();
+          setStatus('✓ Puzzle Completed Successfully!', '#00dc82');
+        } else {
+          const whose = game.turn() === 'w' ? 'White' : 'Black';
+          const left  = Math.ceil((solutionMoves.length - currentMoveIndex) / 2);
+          setStatus(whose + ' to move — ' + left + ' move' + (left > 1 ? 's' : '') + ' left.', '#9ca3af');
+        }
+      }, 450);
+    }
+
     function onDrop(source, target) {
       const move = game.move({ from: source, to: target, promotion: 'q' });
 
+      // Block user input while solution replay is running
+      if (isReplaying) return 'snapback';
+
+      // Illegal move — snap back without touching engine or board state
       if (move === null) return 'snapback';
 
       const userMove = source + target;
 
-      if (userMove === engineBestMove.slice(0, 4)) {
-        setStatus('✓ Correct Solution!', '#00dc82');
+      if (userMove === solutionMoves[currentMoveIndex].slice(0, 4)) {
+        // Correct — sync board NOW (handles castling rook sliding into place)
+        board.position(game.fen());
+        currentMoveIndex++;
+
+        // All moves played — puzzle done
+        if (currentMoveIndex >= solutionMoves.length) {
+          puzzlesSolvedInStreak++;
+          updateStreakDisplay();
+          setStatus('✓ Puzzle Completed Successfully!', '#00dc82');
+          return;
+        }
+
+        // Trigger opponent's reply
+        setStatus('✓ Correct! Computer is responding…', '#00dc82');
+        playComputerMove();
+
       } else {
-        setStatus('✗ Incorrect – snapping back.', '#ef4444');
+        // Incorrect — undo engine first, then snap piece back visually.
+        // board.position() is deliberately NOT called here so Chessboard.js
+        // can cleanly return the piece to its origin square via 'snapback'.
         game.undo();
+        puzzlesSolvedInStreak = 0;
+        updateStreakDisplay();
+        setStatus('✗ Incorrect – try again.', '#ef4444');
         return 'snapback';
       }
     }
 
     function loadPuzzle() {
-      setStatus('Loading puzzle…');
+      // Cancel any in-progress replay cleanly before fetching a new puzzle
+      clearTimeout(replayTimeout);
+      isReplaying = false;
 
-      fetch('/get-puzzle')
+      setStatus('Loading puzzle…');
+      document.getElementById('difficulty-stars').textContent = '';
+
+      fetch('/get-puzzle?streak=' + puzzlesSolvedInStreak)
         .then(function(response) {
           if (!response.ok) throw new Error('No puzzles available.');
           return response.json();
         })
         .then(function(data) {
-          currentFen     = data.fen;
-          engineBestMove = data.engine_best_move;
+          currentFen         = data.fen;
+          solutionMoves      = data.engine_best_move.split(' ').filter(Boolean);
+          currentMoveIndex   = 0;
+          waitingForComputer = false;
+
+          // Difficulty: 1 move → ⭐, 2-5 moves → ⭐⭐, 6+ moves → ⭐⭐⭐
+          const len   = solutionMoves.length;
+          const stars = len <= 2 ? '⭐' : len <= 4 ? '⭐⭐' : '⭐⭐⭐';
+          document.getElementById('difficulty-stars').textContent = stars;
 
           game = new Chess(currentFen);
 
@@ -448,13 +544,18 @@
             draggable:   true,
             pieceTheme:  '/static/img/chesspieces/wikipedia/{piece}.png',
             onDragStart: function(source, piece) {
+              // Block dragging while computer is thinking or puzzle is complete
               if (!game || game.game_over()) return false;
+              if (waitingForComputer)               return false;
+              if (currentMoveIndex >= solutionMoves.length) return false;
             },
             onDrop:      onDrop,
             orientation: game.turn() === 'w' ? 'white' : 'black'
           });
 
-          setStatus((game.turn() === 'w' ? 'White' : 'Black') + ' to move. Find the best move!');
+          const whose = game.turn() === 'w' ? 'White' : 'Black';
+          const total = Math.ceil(solutionMoves.length / 2);
+          setStatus(whose + ' to move — solve ' + total + '-move puzzle.');
         })
         .catch(function(err) {
           setStatus('Error: ' + err.message, '#ef4444');
@@ -462,6 +563,36 @@
     }
 
     document.getElementById('train-btn').addEventListener('click', loadPuzzle);
+
+    document.getElementById('show-btn').addEventListener('click', function() {
+      if (!currentFen || solutionMoves.length === 0) return;
+
+      // Cancel any already-running replay and reset to puzzle start
+      clearTimeout(replayTimeout);
+      isReplaying = true;
+      game = new Chess(currentFen);
+      board.position(currentFen, false);
+      setStatus('Playing solution…');
+
+      function playNextMove(index) {
+        if (index >= solutionMoves.length) {
+          isReplaying = false;
+          setStatus("Solution played out. Click 'Train New Puzzle' to continue!");
+          return;
+        }
+        replayTimeout = setTimeout(function() {
+          const uci   = solutionMoves[index];
+          const from  = uci.slice(0, 2);
+          const to    = uci.slice(2, 4);
+          const promo = uci.length > 4 ? uci[4] : 'q';
+          game.move({ from: from, to: to, promotion: promo });
+          board.position(game.fen());
+          playNextMove(index + 1);
+        }, 800);
+      }
+
+      playNextMove(0);
+    });
   </script>
 
 </body>
