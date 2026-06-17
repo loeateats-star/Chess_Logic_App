@@ -1,73 +1,414 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="scroll-smooth">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Chess Blunder Trainer</title>
+  <title>Algorithmic Chess</title>
 
-  <!-- jQuery 3.7.1 via cdnjs -->
+  <!-- Tailwind CSS CDN (cdn.tailwindcss.com is the correct play-CDN endpoint) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              bg:     '#0b0c10',
+              card:   '#131419',
+              border: '#1e2028',
+              green:  '#00dc82',
+              gdark:  '#00aa63',
+              muted:  '#9ca3af',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- jQuery 3.7.1 -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-
-  <!-- Chess.js 0.10.3 via cdnjs -->
+  <!-- Chess.js 0.10.3 -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
-
-  <!-- Chessboard.js 1.0.0 via unpkg (not available on cdnjs) -->
-  <link rel="stylesheet"
-        href="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.css" />
+  <!-- Chessboard.js 1.0.0 -->
+  <link rel="stylesheet" href="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.css" />
   <script src="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.js"></script>
 
   <style>
-    body {
-      font-family: sans-serif;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 2rem;
-      background: #1a1a2e;
-      color: #e0e0e0;
-    }
-
-    h1 { margin-bottom: 1.5rem; letter-spacing: 1px; }
-
+    body  { background-color: #0b0c10; }
+    /* Chessboard.js sizes itself from this width — do not remove */
     #board { width: 400px; }
-
-    #train-btn {
-      margin-top: 1.5rem;
-      padding: 0.6rem 1.6rem;
-      font-size: 1rem;
-      cursor: pointer;
-      background: #e94560;
-      color: #fff;
-      border: none;
-      border-radius: 6px;
-    }
-
-    #train-btn:hover { background: #c73652; }
-
-    #status {
-      margin-top: 1rem;
-      min-height: 1.4rem;
-      font-size: 0.95rem;
-      color: #aaa;
-    }
+    .board-b72b1 { border: 2px solid #00dc82 !important; border-radius: 6px; }
   </style>
 </head>
-<body>
-  <h1>Chess Blunder Trainer</h1>
-  <div id="board"></div>
-  <button id="train-btn">Train New Puzzle</button>
-  <p id="status">Click "Train New Puzzle" to begin.</p>
+<body class="text-white antialiased" style="font-family: Inter, system-ui, sans-serif;">
 
+  <!-- ─── SiteHeader ────────────────────────────────────────────────────── -->
+  <header class="sticky top-0 z-50 border-b border-brand-border" style="background:#0b0c10;">
+    <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+
+      <!-- Logo -->
+      <a href="#" class="flex items-center gap-2 font-semibold text-white text-sm">
+        <span class="flex items-center justify-center w-7 h-7 rounded-md bg-brand-green text-brand-bg font-bold text-base">♟</span>
+        Algorithmic Chess
+      </a>
+
+      <!-- Center nav -->
+      <nav class="hidden md:flex items-center gap-8 text-sm text-brand-muted">
+        <a href="#mission"    class="hover:text-white transition-colors">Mission</a>
+        <a href="#curriculum" class="hover:text-white transition-colors">Curriculum</a>
+        <a href="#outcomes"   class="hover:text-white transition-colors">Outcomes</a>
+        <a href="#foundation" class="hover:text-white transition-colors">Foundation</a>
+      </nav>
+
+      <!-- Right actions -->
+      <div class="flex items-center gap-4 text-sm">
+        <a href="#train" class="text-brand-muted hover:text-white transition-colors">Sign in</a>
+        <a href="#train"
+           class="bg-brand-green hover:bg-brand-gdark text-brand-bg font-semibold px-4 py-2 rounded-md transition-colors">
+          Launch Dashboard
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- ─── Hero ─────────────────────────────────────────────────────────── -->
+  <section class="pt-24 pb-32 px-6 text-center" style="background:#0b0c10;">
+    <div class="max-w-3xl mx-auto space-y-6">
+
+      <!-- Pill badge -->
+      <p class="text-brand-muted text-sm tracking-wide">
+        <span class="text-brand-green mr-1">•</span>
+        501(c)(3) nonprofit &nbsp;·&nbsp; Now serving 142 Title I schools
+      </p>
+
+      <!-- Heading -->
+      <h1 class="text-5xl md:text-6xl font-extrabold leading-tight text-white">
+        Reducing the cognitive equity<br class="hidden md:block" /> gap, one move at a time
+      </h1>
+
+      <!-- Sub-copy -->
+      <p class="text-brand-muted text-lg max-w-xl mx-auto leading-relaxed">
+        Reducing the cognitive equity gap in Title I schools through master-level chess
+        curriculum and data-focused training materials.
+      </p>
+
+      <!-- CTAs -->
+      <div class="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
+        <a href="#train"
+           class="bg-brand-green hover:bg-brand-gdark text-brand-bg font-semibold px-6 py-3 rounded-md transition-colors text-sm inline-flex items-center gap-2">
+          Launch Training Dashboard &rarr;
+        </a>
+        <a href="#outcomes"
+           class="border border-brand-border text-white hover:border-brand-green px-6 py-3 rounded-md transition-colors text-sm inline-flex items-center gap-2"
+           style="background:#131419;">
+          <span class="text-brand-green">&#9654;</span> Watch the curriculum
+        </a>
+      </div>
+
+      <!-- Trust line -->
+      <p class="text-brand-muted text-xs pt-2">Trusted by district partners across 38 states</p>
+    </div>
+  </section>
+
+  <!-- ─── Interactive Training Board ───────────────────────────────────── -->
+  <section id="train" class="py-20 px-6 border-t border-brand-border" style="background:#0b0c10;">
+    <div class="max-w-6xl mx-auto flex flex-col lg:flex-row items-center gap-16">
+
+      <!-- Board -->
+      <div class="flex-shrink-0">
+        <div class="rounded-lg overflow-hidden shadow-2xl shadow-brand-green/10">
+          <div id="board"></div>
+        </div>
+      </div>
+
+      <!-- Controls -->
+      <div class="flex-1 space-y-6">
+        <span class="text-brand-green text-xs font-semibold tracking-widest uppercase">
+          Live Puzzle Training
+        </span>
+        <h2 class="text-3xl font-bold text-white leading-snug">
+          Train on your actual blunders,<br /> not generic puzzles
+        </h2>
+        <p class="text-brand-muted text-base leading-relaxed max-w-md">
+          Every position is extracted from real games. Find the engine's best move —
+          if you're wrong the piece snaps back and you try again.
+        </p>
+
+        <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+          <button id="train-btn"
+            class="bg-brand-green hover:bg-brand-gdark text-brand-bg font-semibold px-6 py-3 rounded-md transition-colors text-sm cursor-pointer">
+            Train New Puzzle
+          </button>
+          <p id="status" class="text-sm" style="color:#9ca3af;">
+            Click "Train New Puzzle" to begin.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── Program Section ───────────────────────────────────────────────── -->
+  <section id="mission" class="py-24 px-6 border-t border-brand-border" style="background:#0b0c10;">
+    <div class="max-w-6xl mx-auto">
+
+      <div class="mb-10 max-w-lg">
+        <p class="text-brand-green text-xs font-semibold tracking-widest uppercase mb-4">The Program</p>
+        <h2 class="text-4xl font-bold text-white leading-tight mb-4">
+          A rigorous system,<br /> engineered for the classroom
+        </h2>
+        <p class="text-brand-muted text-base leading-relaxed">
+          We translate elite chess training into a measurable, repeatable framework any school can run.
+        </p>
+      </div>
+
+      <!-- 2×2 feature grid in a card -->
+      <div class="rounded-2xl border border-brand-border overflow-hidden" style="background:#131419;">
+        <div class="grid md:grid-cols-2 divide-y divide-brand-border md:divide-x md:divide-y-0">
+
+          <div class="p-8 md:border-b border-brand-border">
+            <div class="w-9 h-9 rounded-lg flex items-center justify-center mb-4 text-brand-green text-lg" style="background:#1a1f1a;">♛</div>
+            <h3 class="font-semibold text-white mb-2">Master-level curriculum</h3>
+            <p class="text-brand-muted text-sm leading-relaxed">
+              Lesson plans designed with grandmasters and learning scientists, sequenced from first move to advanced tactics.
+            </p>
+          </div>
+
+          <div class="p-8 md:border-b border-brand-border">
+            <div class="w-9 h-9 rounded-lg flex items-center justify-center mb-4 text-brand-green text-lg" style="background:#1a1f1a;">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+            </div>
+            <h3 class="font-semibold text-white mb-2">Data-focused training</h3>
+            <p class="text-brand-muted text-sm leading-relaxed">
+              Every exercise feeds an analytics layer that surfaces each student's reasoning patterns and growth trajectory.
+            </p>
+          </div>
+
+          <div class="p-8">
+            <div class="w-9 h-9 rounded-lg flex items-center justify-center mb-4 text-brand-green text-lg" style="background:#1a1f1a;">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+            </div>
+            <h3 class="font-semibold text-white mb-2">Educator-ready materials</h3>
+            <p class="text-brand-muted text-sm leading-relaxed">
+              Print and digital resources built for non-specialist teachers, requiring zero prior chess experience.
+            </p>
+          </div>
+
+          <div class="p-8">
+            <div class="w-9 h-9 rounded-lg flex items-center justify-center mb-4 text-brand-green text-lg" style="background:#1a1f1a;">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            </div>
+            <h3 class="font-semibold text-white mb-2">Equity-first deployment</h3>
+            <p class="text-brand-muted text-sm leading-relaxed">
+              Purpose-built for Title I schools and provided at no cost, removing barriers to cognitive enrichment.
+            </p>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── Outcomes / Stats ──────────────────────────────────────────────── -->
+  <section id="outcomes" class="py-24 px-6 border-t border-brand-border" style="background:#0b0c10;">
+    <div class="max-w-6xl mx-auto">
+
+      <div class="text-center mb-14 space-y-4">
+        <p class="text-brand-green text-xs font-semibold tracking-widest uppercase flex items-center justify-center gap-2">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          Measured Outcomes
+        </p>
+        <h2 class="text-4xl font-bold text-white">Student cognitive growth, quantified</h2>
+        <p class="text-brand-muted text-base max-w-2xl mx-auto leading-relaxed">
+          Every cohort is tracked against district baselines so educators can see exactly how chess
+          training compounds reasoning skills over time.
+        </p>
+      </div>
+
+      <!-- 3 stat cards -->
+      <div class="grid md:grid-cols-3 gap-6">
+
+        <!-- Card 1 -->
+        <div class="rounded-2xl border border-brand-border p-6 flex flex-col gap-4" style="background:#131419;">
+          <div class="flex items-center justify-between text-xs text-brand-muted">
+            <div class="w-8 h-8 rounded-lg flex items-center justify-center text-brand-green" style="background:#1a1f1a;">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            </div>
+            <span>vs. district baseline</span>
+          </div>
+          <div>
+            <div class="text-4xl font-extrabold text-white">+34%</div>
+            <div class="text-brand-muted text-sm mt-1">Cognitive growth index</div>
+          </div>
+          <!-- Mini bar chart -->
+          <div class="flex items-end gap-1 h-10">
+            <div class="flex-1 rounded-sm" style="background:#1e2028; height:30%;"></div>
+            <div class="flex-1 rounded-sm" style="background:#1e2028; height:40%;"></div>
+            <div class="flex-1 rounded-sm" style="background:#1e2028; height:35%;"></div>
+            <div class="flex-1 rounded-sm" style="background:#1e2028; height:50%;"></div>
+            <div class="flex-1 rounded-sm" style="background:#1e2028; height:45%;"></div>
+            <div class="flex-1 rounded-sm" style="background:#1e2028; height:60%;"></div>
+            <div class="flex-1 rounded-sm" style="background:#1e2028; height:55%;"></div>
+            <div class="flex-1 rounded-sm" style="background:#00dc82; height:100%;"></div>
+          </div>
+          <p class="text-brand-muted text-xs leading-relaxed">
+            Working-memory &amp; pattern-recognition gains across one school year.
+          </p>
+        </div>
+
+        <!-- Card 2 -->
+        <div class="rounded-2xl border border-brand-border p-6 flex flex-col gap-4" style="background:#131419;">
+          <div class="flex items-center justify-between text-xs text-brand-muted">
+            <div class="w-8 h-8 rounded-lg flex items-center justify-center text-brand-green" style="background:#1a1f1a;">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+            </div>
+            <span>+18.2 pts YoY</span>
+          </div>
+          <div>
+            <div class="text-4xl font-extrabold text-white">92.4%</div>
+            <div class="text-brand-muted text-sm mt-1">Problem-solving accuracy</div>
+          </div>
+          <div class="flex items-end gap-1 h-10">
+            <div class="flex-1 rounded-sm" style="background:#1e2028; height:40%;"></div>
+            <div class="flex-1 rounded-sm" style="background:#1e2028; height:55%;"></div>
+            <div class="flex-1 rounded-sm" style="background:#1e2028; height:50%;"></div>
+            <div class="flex-1 rounded-sm" style="background:#1e2028; height:65%;"></div>
+            <div class="flex-1 rounded-sm" style="background:#1e2028; height:60%;"></div>
+            <div class="flex-1 rounded-sm" style="background:#1e2028; height:75%;"></div>
+            <div class="flex-1 rounded-sm" style="background:#1e2028; height:70%;"></div>
+            <div class="flex-1 rounded-sm" style="background:#00dc82; height:100%;"></div>
+          </div>
+          <p class="text-brand-muted text-xs leading-relaxed">
+            Measured on standardized spatial-reasoning assessments.
+          </p>
+        </div>
+
+        <!-- Card 3 -->
+        <div class="rounded-2xl border border-brand-border p-6 flex flex-col gap-4" style="background:#131419;">
+          <div class="flex items-center justify-between text-xs text-brand-muted">
+            <div class="w-8 h-8 rounded-lg flex items-center justify-center text-brand-green" style="background:#1a1f1a;">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            </div>
+            <span>across 142 schools</span>
+          </div>
+          <div>
+            <div class="text-4xl font-extrabold text-white">27,840</div>
+            <div class="text-brand-muted text-sm mt-1">Students reached</div>
+          </div>
+          <div class="flex items-end gap-1 h-10">
+            <div class="flex-1 rounded-sm" style="background:#1e2028; height:25%;"></div>
+            <div class="flex-1 rounded-sm" style="background:#1e2028; height:35%;"></div>
+            <div class="flex-1 rounded-sm" style="background:#1e2028; height:45%;"></div>
+            <div class="flex-1 rounded-sm" style="background:#1e2028; height:40%;"></div>
+            <div class="flex-1 rounded-sm" style="background:#1e2028; height:55%;"></div>
+            <div class="flex-1 rounded-sm" style="background:#1e2028; height:50%;"></div>
+            <div class="flex-1 rounded-sm" style="background:#1e2028; height:65%;"></div>
+            <div class="flex-1 rounded-sm" style="background:#00dc82; height:100%;"></div>
+          </div>
+          <p class="text-brand-muted text-xs leading-relaxed">
+            Active learners on the master-level chess curriculum.
+          </p>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── DashboardCta ──────────────────────────────────────────────────── -->
+  <section id="foundation" class="py-24 px-6 border-t border-brand-border" style="background:#0b0c10;">
+    <div class="max-w-4xl mx-auto">
+      <div class="rounded-2xl border border-brand-border p-16 text-center space-y-6" style="background:#131419;">
+        <h2 class="text-4xl font-bold text-white leading-tight">
+          Bring data-driven chess<br /> training to your students
+        </h2>
+        <p class="text-brand-muted text-base max-w-md mx-auto leading-relaxed">
+          Track cognitive growth, assign lessons, and measure outcomes from a single
+          dashboard built for educators.
+        </p>
+        <a href="#train"
+           class="inline-block bg-brand-green hover:bg-brand-gdark text-brand-bg font-semibold px-6 py-3 rounded-md transition-colors text-sm">
+          Launch Training Dashboard &rarr;
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── SiteFooter ────────────────────────────────────────────────────── -->
+  <footer class="border-t border-brand-border pt-16 pb-8 px-6" style="background:#0b0c10;">
+    <div class="max-w-6xl mx-auto">
+
+      <!-- Top row: brand + columns -->
+      <div class="grid grid-cols-2 md:grid-cols-5 gap-10 mb-14">
+
+        <!-- Brand blurb -->
+        <div class="col-span-2 md:col-span-2 space-y-3">
+          <a href="#" class="flex items-center gap-2 font-semibold text-white text-sm">
+            <span class="flex items-center justify-center w-7 h-7 rounded-md bg-brand-green text-brand-bg font-bold text-base">♟</span>
+            Algorithmic Chess
+          </a>
+          <p class="text-brand-muted text-sm leading-relaxed max-w-xs">
+            The Algorithmic Chess Foundation is a 501(c)(3) nonprofit closing the cognitive equity gap in Title I schools.
+          </p>
+        </div>
+
+        <!-- Column: Program -->
+        <div class="space-y-3">
+          <h4 class="text-white text-sm font-semibold">Program</h4>
+          <ul class="space-y-2 text-sm text-brand-muted">
+            <li><a href="#curriculum" class="hover:text-white transition-colors">Curriculum</a></li>
+            <li><a href="#outcomes"   class="hover:text-white transition-colors">Outcomes</a></li>
+            <li><a href="#train"      class="hover:text-white transition-colors">For educators</a></li>
+            <li><a href="#mission"    class="hover:text-white transition-colors">Research</a></li>
+          </ul>
+        </div>
+
+        <!-- Column: Foundation -->
+        <div class="space-y-3">
+          <h4 class="text-white text-sm font-semibold">Foundation</h4>
+          <ul class="space-y-2 text-sm text-brand-muted">
+            <li><a href="#" class="hover:text-white transition-colors">Our mission</a></li>
+            <li><a href="#" class="hover:text-white transition-colors">Partners</a></li>
+            <li><a href="#" class="hover:text-white transition-colors">Donate</a></li>
+            <li><a href="#" class="hover:text-white transition-colors">Careers</a></li>
+          </ul>
+        </div>
+
+        <!-- Column: Resources -->
+        <div class="space-y-3">
+          <h4 class="text-white text-sm font-semibold">Resources</h4>
+          <ul class="space-y-2 text-sm text-brand-muted">
+            <li><a href="#train" class="hover:text-white transition-colors">Training dashboard</a></li>
+            <li><a href="#"      class="hover:text-white transition-colors">Documentation</a></li>
+            <li><a href="#"      class="hover:text-white transition-colors">Support</a></li>
+            <li><a href="#"      class="hover:text-white transition-colors">Contact</a></li>
+          </ul>
+        </div>
+
+      </div>
+
+      <!-- Bottom row -->
+      <div class="border-t border-brand-border pt-6 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-brand-muted">
+        <span>© 2026 The Algorithmic Chess Foundation. All rights reserved.</span>
+        <div class="flex gap-5">
+          <a href="#" class="hover:text-white transition-colors">Privacy</a>
+          <a href="#" class="hover:text-white transition-colors">Terms</a>
+        </div>
+      </div>
+
+    </div>
+  </footer>
+
+  <!-- ─── Chess Engine (intact) ────────────────────────────────────────── -->
   <script>
     let board = null;
-    let game = null;
-    let currentFen = null;
+    let game  = null;
+    let currentFen    = null;
     let engineBestMove = null;
 
     function setStatus(text, color) {
       const el = document.getElementById('status');
       el.textContent = text;
-      el.style.color = color || '#aaa';
+      el.style.color = color || '#9ca3af';
     }
 
     function onDrop(source, target) {
@@ -78,9 +419,9 @@
       const userMove = source + target;
 
       if (userMove === engineBestMove.slice(0, 4)) {
-        setStatus('✓ Correct Solution!', '#4caf50');
+        setStatus('✓ Correct Solution!', '#00dc82');
       } else {
-        setStatus('✗ Incorrect – snapping back.', '#e94560');
+        setStatus('✗ Incorrect – snapping back.', '#ef4444');
         game.undo();
         return 'snapback';
       }
@@ -95,7 +436,7 @@
           return response.json();
         })
         .then(function(data) {
-          currentFen = data.fen;
+          currentFen     = data.fen;
           engineBestMove = data.engine_best_move;
 
           game = new Chess(currentFen);
@@ -116,11 +457,12 @@
           setStatus((game.turn() === 'w' ? 'White' : 'Black') + ' to move. Find the best move!');
         })
         .catch(function(err) {
-          setStatus('Error: ' + err.message, '#e94560');
+          setStatus('Error: ' + err.message, '#ef4444');
         });
     }
 
     document.getElementById('train-btn').addEventListener('click', loadPuzzle);
   </script>
+
 </body>
 </html>
