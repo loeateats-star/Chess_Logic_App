@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Chessalgo</title>
+  <title>AlgoGambit</title>
 
   <!-- Tailwind CSS CDN (cdn.tailwindcss.com is the correct play-CDN endpoint) -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -55,7 +55,7 @@
       <!-- Logo -->
       <a href="#" class="flex items-center gap-2 font-semibold text-white text-sm">
         <span class="flex items-center justify-center w-7 h-7 rounded-md bg-brand-green text-brand-bg font-bold text-base">♟</span>
-        Chessalgo
+        AlgoGambit
       </a>
 
       <!-- Center nav -->
@@ -65,7 +65,7 @@
         <a href="/worksheets" class="hover:text-white transition-colors">Printable Sheets</a>
         <a href="/basics"     class="text-brand-green hover:text-brand-gdark font-medium transition-colors">Chess Basics</a>
         <a href="#outcomes"   class="hover:text-white transition-colors">Outcomes</a>
-        <a href="#foundation" class="hover:text-white transition-colors">Foundation</a>
+        <a href="/stampede"   class="font-semibold transition-colors" style="color:#c084fc;">Stampede ⚡</a>
       </nav>
 
       <!-- Right actions -->
@@ -164,10 +164,10 @@
           Live Puzzle Training
         </span>
         <h2 class="text-3xl font-bold text-white leading-snug">
-          Train on your actual blunders,<br /> not generic puzzles
+          Train on curated puzzles,<br /> built to sharpen your tactics
         </h2>
         <p class="text-brand-muted text-base leading-relaxed max-w-md">
-          Every position is extracted from real games. Find the engine's best move —
+          Every position is drawn from our database of 4,000+ puzzles. Find the engine's best move —
           if you're wrong the piece snaps back and you try again.
         </p>
 
@@ -442,10 +442,10 @@
         <div class="col-span-2 md:col-span-2 space-y-3">
           <a href="#" class="flex items-center gap-2 font-semibold text-white text-sm">
             <span class="flex items-center justify-center w-7 h-7 rounded-md bg-brand-green text-brand-bg font-bold text-base">♟</span>
-            Chessalgo
+            AlgoGambit
           </a>
           <p class="text-brand-muted text-sm leading-relaxed max-w-xs">
-            The Chessalgo Foundation is a 501(c)(3) nonprofit closing the cognitive equity gap in Title I schools.
+            The AlgoGambit Foundation is a 501(c)(3) nonprofit closing the cognitive equity gap in Title I schools.
           </p>
         </div>
 
@@ -486,7 +486,7 @@
 
       <!-- Bottom row -->
       <div class="border-t border-brand-border pt-6 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-brand-muted">
-        <span>© 2026 The Chessalgo Foundation. All rights reserved.</span>
+        <span>© 2026 The AlgoGambit Foundation. All rights reserved.</span>
         <div class="flex gap-5">
           <a href="#" class="hover:text-white transition-colors">Privacy</a>
           <a href="#" class="hover:text-white transition-colors">Terms</a>
@@ -583,6 +583,143 @@
     </div>
   </div>
 
+  <!-- ─── Daily Training Complete Overlay ─────────────────────────────── -->
+  <div id="daily-limit-banner" class="fixed inset-0 z-[200] flex items-center justify-center hidden">
+    <div class="absolute inset-0" style="background:rgba(0,0,0,0.88);"></div>
+    <div class="relative z-10 w-full max-w-md mx-4 rounded-2xl border p-10 text-center space-y-5"
+         style="background:#131419; border-color:rgba(0,220,130,0.35);">
+      <div class="w-16 h-16 rounded-full flex items-center justify-center mx-auto"
+           style="background:rgba(0,220,130,0.08); border:1px solid rgba(0,220,130,0.25);">
+        <span class="text-3xl">♟</span>
+      </div>
+      <div class="space-y-2">
+        <h2 class="text-xl font-bold text-white leading-snug">
+          Daily AlgoGambit Training Block Complete!
+        </h2>
+        <p class="text-brand-muted text-sm leading-relaxed">
+          You've hit your daily goal. Consistency is the key to mastery —
+          your brain is growing even when you're not at the board.
+        </p>
+        <p class="text-brand-green text-sm font-semibold pt-1">See you tomorrow.</p>
+      </div>
+      <button onclick="document.getElementById('daily-limit-banner').classList.add('hidden')"
+              class="border border-brand-border hover:border-brand-green text-brand-muted hover:text-white px-6 py-2.5 rounded-lg text-sm transition-colors cursor-pointer"
+              style="background:#0b0c10;">
+        Dismiss
+      </button>
+    </div>
+  </div>
+
+  <!-- ─── Onboarding Diagnostic Wizard ────────────────────────────────── -->
+  <div id="wizard-modal" class="fixed inset-0 z-[150] flex items-center justify-center hidden">
+    <div class="absolute inset-0" style="background:rgba(0,0,0,0.88);"></div>
+
+    <div class="relative z-10 w-full max-w-lg mx-4 rounded-2xl border border-brand-border p-8 space-y-7"
+         style="background:#131419;">
+
+      <!-- Progress dots + skip -->
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <div class="wiz-dot w-2.5 h-2.5 rounded-full transition-colors" style="background:#00dc82;"></div>
+          <div class="wiz-dot w-2.5 h-2.5 rounded-full transition-colors" style="background:#1e2028;"></div>
+          <div class="wiz-dot w-2.5 h-2.5 rounded-full transition-colors" style="background:#1e2028;"></div>
+        </div>
+        <button onclick="skipWizard()"
+                class="text-brand-muted hover:text-white text-xs transition-colors cursor-pointer">
+          Skip for now →
+        </button>
+      </div>
+
+      <!-- Step 1: Background -->
+      <div id="wiz-step-1" class="space-y-5">
+        <div class="space-y-1">
+          <p class="text-brand-green text-xs font-semibold tracking-widest uppercase">Step 1 of 3</p>
+          <h3 class="text-2xl font-bold text-white">What is your chess background?</h3>
+          <p class="text-brand-muted text-sm">We'll tailor your training path to match your experience.</p>
+        </div>
+        <div class="grid gap-3">
+          <button class="wiz-card text-left rounded-xl border border-brand-border p-4 transition-colors cursor-pointer hover:border-brand-green/60"
+                  style="background:#0b0c10;"
+                  onclick="wizSelectBackground('Absolute Beginner', '/basics', this)">
+            <div class="text-white font-semibold text-sm mb-1">♟ Absolute Beginner</div>
+            <div class="text-brand-muted text-xs">I don't know how the pieces move yet</div>
+          </button>
+          <button class="wiz-card text-left rounded-xl border border-brand-border p-4 transition-colors cursor-pointer hover:border-brand-green/60"
+                  style="background:#0b0c10;"
+                  onclick="wizSelectBackground('Casual', '/trainer?level=1', this)">
+            <div class="text-white font-semibold text-sm mb-1">⭐ Casual</div>
+            <div class="text-brand-muted text-xs">I know the rules and play occasionally</div>
+          </button>
+          <button class="wiz-card text-left rounded-xl border border-brand-border p-4 transition-colors cursor-pointer hover:border-brand-green/60"
+                  style="background:#0b0c10;"
+                  onclick="wizSelectBackground('Club/Competitive', '/trainer?level=2', this)">
+            <div class="text-white font-semibold text-sm mb-1">⭐⭐ Club / Competitive</div>
+            <div class="text-brand-muted text-xs">I play in tournaments or study seriously</div>
+          </button>
+        </div>
+      </div>
+
+      <!-- Step 2: Daily time -->
+      <div id="wiz-step-2" class="space-y-5 hidden">
+        <div class="space-y-1">
+          <p class="text-brand-green text-xs font-semibold tracking-widest uppercase">Step 2 of 3</p>
+          <h3 class="text-2xl font-bold text-white">How much time can you train daily?</h3>
+          <p class="text-brand-muted text-sm">We'll enforce a training block limit to keep you consistent.</p>
+        </div>
+        <div class="grid grid-cols-3 gap-3">
+          <button class="wiz-card rounded-xl border border-brand-border p-5 text-center transition-colors cursor-pointer hover:border-brand-green/60"
+                  style="background:#0b0c10;"
+                  onclick="wizSelectTime(15, this)">
+            <div class="text-3xl font-extrabold text-white mb-1">15</div>
+            <div class="text-brand-muted text-xs">minutes</div>
+          </button>
+          <button class="wiz-card rounded-xl border border-brand-border p-5 text-center transition-colors cursor-pointer hover:border-brand-green/60"
+                  style="background:#0b0c10;"
+                  onclick="wizSelectTime(30, this)">
+            <div class="text-3xl font-extrabold text-white mb-1">30</div>
+            <div class="text-brand-muted text-xs">minutes</div>
+          </button>
+          <button class="wiz-card rounded-xl border border-brand-border p-5 text-center transition-colors cursor-pointer hover:border-brand-green/60"
+                  style="background:#0b0c10;"
+                  onclick="wizSelectTime(60, this)">
+            <div class="text-3xl font-extrabold text-white mb-1">60</div>
+            <div class="text-brand-muted text-xs">minutes</div>
+          </button>
+        </div>
+      </div>
+
+      <!-- Step 3: Core target -->
+      <div id="wiz-step-3" class="space-y-5 hidden">
+        <div class="space-y-1">
+          <p class="text-brand-green text-xs font-semibold tracking-widest uppercase">Step 3 of 3</p>
+          <h3 class="text-2xl font-bold text-white">What is your core target?</h3>
+          <p class="text-brand-muted text-sm">Choose the skill you most want to develop right now.</p>
+        </div>
+        <div class="grid gap-3">
+          <button class="wiz-card text-left rounded-xl border border-brand-border p-4 transition-colors cursor-pointer hover:border-brand-green/60"
+                  style="background:#0b0c10;"
+                  onclick="wizSelectGoal('Learn Rules', this)">
+            <div class="text-white font-semibold text-sm mb-1">📖 Learn the Rules</div>
+            <div class="text-brand-muted text-xs">Master piece movement and basic principles</div>
+          </button>
+          <button class="wiz-card text-left rounded-xl border border-brand-border p-4 transition-colors cursor-pointer hover:border-brand-green/60"
+                  style="background:#0b0c10;"
+                  onclick="wizSelectGoal('Master Tactics', this)">
+            <div class="text-white font-semibold text-sm mb-1">⚡ Master Tactics</div>
+            <div class="text-brand-muted text-xs">Win material with pins, forks, and combinations</div>
+          </button>
+          <button class="wiz-card text-left rounded-xl border border-brand-border p-4 transition-colors cursor-pointer hover:border-brand-green/60"
+                  style="background:#0b0c10;"
+                  onclick="wizSelectGoal('Deep Calculation', this)">
+            <div class="text-white font-semibold text-sm mb-1">🔭 Deep Calculation</div>
+            <div class="text-brand-muted text-xs">Calculate 5+ move sequences like a master</div>
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
   <!-- ─── Chess Engine ────────────────────────────────────────────────── -->
   <script>
     let board                 = null;
@@ -599,6 +736,8 @@
     let currentUser           = null;   // { username } when logged in, else null
     let activeModalTab        = 'login';
     let telemetryOpen         = false;
+    let dailyBudgetMs         = 0;      // user's daily time limit in ms (0 = no limit)
+    let sessionTrainingMs     = 0;      // accumulated active puzzle time this session
 
     function updateStreakDisplay() {
       const level = puzzlesSolvedInStreak < 5 ? 1 : puzzlesSolvedInStreak < 10 ? 2 : 3;
@@ -734,10 +873,20 @@
         });
     }
 
+    // ── Daily budget enforcement ─────────────────────────────────────────────
+    function checkDailyLimit(elapsedMs) {
+      if (!dailyBudgetMs) return;
+      sessionTrainingMs += elapsedMs;
+      if (sessionTrainingMs >= dailyBudgetMs) {
+        document.getElementById('daily-limit-banner').classList.remove('hidden');
+      }
+    }
+
     // ── Telemetry ───────────────────────────────────────────────────────────
     function logAttempt(isCorrect) {
       if (!currentPuzzleId || !currentUser) return;
       const timeMs = puzzleStartTime ? Math.round(performance.now() - puzzleStartTime) : null;
+      if (timeMs) checkDailyLimit(timeMs);
       fetch('/log-attempt', {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -854,10 +1003,17 @@
           puzzlesSolvedInStreak = res.data.streak;
           updateStreakDisplay();
         }
+        if (typeof res.data.daily_time_budget === 'number' && res.data.daily_time_budget > 0) {
+          dailyBudgetMs = res.data.daily_time_budget * 60 * 1000;
+        }
         closeModal();
         updateNavAuth();
         fetchAnalytics();
-        loadPuzzle();
+        if (res.data.diagnostic_done === 0) {
+          openWizard();
+        } else {
+          loadPuzzle();
+        }
       })
       .catch(function() {
         errorEl.style.color = '#ef4444';
@@ -907,6 +1063,80 @@
         updateNavAuth();
         setStatus('Logged out. Click "Train New Puzzle" to continue as guest.');
       });
+    }
+
+    // ── Onboarding Wizard ───────────────────────────────────────────────────
+    var wizData     = { experience_level: '', daily_time_budget: 30, training_goal: '' };
+    var wizRedirect = '/';
+
+    function openWizard() {
+      wizData     = { experience_level: '', daily_time_budget: 30, training_goal: '' };
+      wizRedirect = '/';
+      showWizStep(1);
+      document.getElementById('wizard-modal').classList.remove('hidden');
+    }
+
+    function closeWizard() {
+      document.getElementById('wizard-modal').classList.add('hidden');
+    }
+
+    function showWizStep(n) {
+      [1, 2, 3].forEach(function(i) {
+        document.getElementById('wiz-step-' + i).classList.add('hidden');
+      });
+      document.getElementById('wiz-step-' + n).classList.remove('hidden');
+      document.querySelectorAll('.wiz-dot').forEach(function(d, idx) {
+        d.style.background = idx < n ? '#00dc82' : '#1e2028';
+      });
+    }
+
+    function wizSelectBackground(val, redirect, el) {
+      wizData.experience_level = val;
+      wizRedirect              = redirect;
+      document.querySelectorAll('#wiz-step-1 .wiz-card').forEach(function(c) {
+        c.style.borderColor = '#1e2028';
+      });
+      el.style.borderColor = '#00dc82';
+      setTimeout(function() { showWizStep(2); }, 320);
+    }
+
+    function wizSelectTime(val, el) {
+      wizData.daily_time_budget = val;
+      document.querySelectorAll('#wiz-step-2 .wiz-card').forEach(function(c) {
+        c.style.borderColor = '#1e2028';
+      });
+      el.style.borderColor = '#00dc82';
+      setTimeout(function() { showWizStep(3); }, 320);
+    }
+
+    function wizSelectGoal(val, el) {
+      wizData.training_goal = val;
+      document.querySelectorAll('#wiz-step-3 .wiz-card').forEach(function(c) {
+        c.style.borderColor = '#1e2028';
+      });
+      el.style.borderColor = '#00dc82';
+      setTimeout(submitWizard, 400);
+    }
+
+    function submitWizard() {
+      fetch('/save-diagnostic', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify(wizData)
+      })
+      .then(function() {
+        if (wizData.daily_time_budget > 0) {
+          dailyBudgetMs = wizData.daily_time_budget * 60 * 1000;
+        }
+        closeWizard();
+        window.location.href = wizRedirect;
+      })
+      .catch(function() { closeWizard(); window.location.href = wizRedirect; });
+    }
+
+    function skipWizard() {
+      closeWizard();
+      loadPuzzle();
     }
 
     // Nav button wiring

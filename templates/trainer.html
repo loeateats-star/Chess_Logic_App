@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Level {{ level }} Puzzle Trainer — Chessalgo</title>
+  <title>Level {{ level }} Puzzle Trainer — AlgoGambit</title>
 
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
@@ -47,6 +47,8 @@
       animation: checkPop 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
     }
   </style>
+  <!-- Runtime board theme — swapped by JS when entering/exiting practice mode -->
+  <style id="board-theme"></style>
 </head>
 <body class="text-white antialiased" style="font-family: Inter, system-ui, sans-serif;">
 
@@ -56,7 +58,7 @@
 
       <a href="/" class="flex items-center gap-2 font-semibold text-white text-sm">
         <span class="flex items-center justify-center w-7 h-7 rounded-md bg-brand-green text-brand-bg font-bold text-base">♟</span>
-        Chessalgo
+        AlgoGambit
       </a>
 
       <nav class="hidden md:flex items-center gap-5 text-sm text-brand-muted">
@@ -65,7 +67,7 @@
         <a href="/worksheets"  class="hover:text-white transition-colors">Printable Sheets</a>
         <a href="/basics"      class="text-brand-green hover:text-brand-gdark font-medium transition-colors">Chess Basics</a>
         <a href="/#outcomes"   class="hover:text-white transition-colors">Outcomes</a>
-        <a href="/#foundation" class="hover:text-white transition-colors">Foundation</a>
+        <a href="/stampede"    class="font-semibold transition-colors" style="color:#c084fc;">Stampede ⚡</a>
       </nav>
 
       <div class="flex items-center gap-4 text-sm">
@@ -157,6 +159,19 @@
           </div>
         </div>
 
+        <!-- Daily time budget (shown only when user has a budget set) -->
+        <div id="budget-card" class="rounded-xl border border-brand-border p-4 space-y-2 hidden" style="background:#131419;">
+          <p class="text-brand-muted text-xs">Daily time budget</p>
+          <div class="flex items-center justify-between">
+            <span id="budget-used"  class="text-white text-sm font-bold">0m</span>
+            <span id="budget-total" class="text-brand-muted text-xs"></span>
+          </div>
+          <div class="w-full h-1.5 rounded-full" style="background:#1e2028;">
+            <div id="budget-bar" class="h-1.5 rounded-full transition-all duration-500"
+                 style="background:#00dc82; width:0%;"></div>
+          </div>
+        </div>
+
         <!-- Switch level -->
         <div class="rounded-xl border border-brand-border p-4 space-y-2" style="background:#131419;">
           <p class="text-brand-muted text-xs mb-3">Switch level</p>
@@ -187,6 +202,13 @@
 
         <div class="rounded-lg overflow-hidden shadow-2xl shadow-brand-green/10">
           <div id="board"></div>
+        </div>
+
+        <!-- Practice mode banner — shown when reviewing a history entry -->
+        <div id="practice-banner"
+             class="hidden w-full max-w-sm text-center py-2 px-4 rounded-lg text-xs font-semibold"
+             style="background:rgba(155,142,200,0.12); border:1px solid rgba(155,142,200,0.35); color:#c4b5fd;">
+          ♻ Practice Mode — reviewing a previous puzzle. Attempts won't count toward your score.
         </div>
 
         <p id="status"
@@ -281,10 +303,10 @@
         <div class="col-span-2 space-y-3">
           <a href="/" class="flex items-center gap-2 font-semibold text-white text-sm">
             <span class="flex items-center justify-center w-7 h-7 rounded-md bg-brand-green text-brand-bg font-bold text-base">♟</span>
-            Chessalgo
+            AlgoGambit
           </a>
           <p class="text-brand-muted text-sm leading-relaxed max-w-xs">
-            The Chessalgo Foundation is a 501(c)(3) nonprofit closing the cognitive equity gap in Title I schools.
+            The AlgoGambit Foundation is a 501(c)(3) nonprofit closing the cognitive equity gap in Title I schools.
           </p>
         </div>
         <div class="space-y-3">
@@ -313,7 +335,7 @@
         </div>
       </div>
       <div class="border-t border-brand-border pt-6 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-brand-muted">
-        <span>© 2026 The Chessalgo Foundation. All rights reserved.</span>
+        <span>© 2026 The AlgoGambit Foundation. All rights reserved.</span>
         <div class="flex gap-5">
           <a href="#" class="hover:text-white transition-colors">Privacy</a>
           <a href="#" class="hover:text-white transition-colors">Terms</a>
@@ -321,6 +343,37 @@
       </div>
     </div>
   </footer>
+
+  <!-- ─── Budget Complete Overlay ─────────────────────────────────────── -->
+  <div id="budget-overlay" class="fixed inset-0 z-[200] flex items-center justify-center hidden">
+    <div class="absolute inset-0" style="background:rgba(11,12,16,0.96);"></div>
+    <div class="relative z-10 text-center space-y-6 px-6 max-w-sm mx-auto">
+      <div class="w-20 h-20 rounded-full mx-auto flex items-center justify-center text-5xl"
+           style="background:#131419; border:2px solid #00dc82;">
+        🏆
+      </div>
+      <div class="space-y-3">
+        <h2 class="text-3xl font-extrabold text-white leading-tight">
+          Daily AlgoGambit Training Block Complete!
+        </h2>
+        <p class="text-brand-muted text-base leading-relaxed">
+          You've hit your training allocation for today.<br />
+          Rest up and let your brain consolidate your gains.
+        </p>
+        <p class="text-brand-green font-bold text-lg">See you tomorrow. ♟</p>
+      </div>
+      <div class="flex flex-col items-center gap-3 pt-2">
+        <a href="/"
+           class="w-full max-w-xs bg-brand-green hover:bg-brand-gdark text-brand-bg font-semibold py-3 rounded-md transition-colors text-sm text-center">
+          Return to Dashboard
+        </a>
+        <button onclick="dismissBudgetOverlay()"
+                class="text-brand-muted hover:text-white text-sm transition-colors cursor-pointer">
+          Keep Training Anyway
+        </button>
+      </div>
+    </div>
+  </div>
 
   <!-- ─── Auth Modal ────────────────────────────────────────────────────── -->
   <div id="auth-modal" class="fixed inset-0 z-[100] flex items-center justify-center hidden">
@@ -380,6 +433,11 @@
     var sessionCount       = 0;       // total checks this session
     var streak             = 0;
     var wrongAttempts      = 0;       // wrong moves on the current puzzle (max 3)
+    var dailyBudgetMs      = 0;       // user's daily time allocation in ms (0 = no limit)
+    var totalTimeMs        = 0;       // accumulated active puzzle time this session
+    var budgetCheckpoint   = null;    // performance.now() snapshot when puzzle started
+    var budgetNotified     = false;   // true once the budget overlay has been shown
+    var practiceMode       = false;   // true when reviewing a history entry (no scoring)
 
     // ── Page init ──────────────────────────────────────────────────────────
     document.addEventListener('DOMContentLoaded', function() {
@@ -416,10 +474,14 @@
               streak = d.streak;
               updateStreakDisplay();
             }
+            if (typeof d.daily_time_budget === 'number' && d.daily_time_budget > 0) {
+              dailyBudgetMs = d.daily_time_budget * 60000;
+              document.getElementById('budget-card').classList.remove('hidden');
+              updateBudgetBar();
+            }
             updateNavAuth();
             fetchAnalytics();
           }
-          // If not logged in, stats-signin is already visible by default
         })
         .catch(function() {});
     }
@@ -454,9 +516,15 @@
     // ── Puzzle history entry ───────────────────────────────────────────────
     // result: 'green' (solved 1st/2nd try), 'yellow' (solved 3rd try), 'red' (failed)
     function addHistoryEntry(result) {
-      if (puzzleChecked) return;
+      if (puzzleChecked || practiceMode) return;
       puzzleChecked = true;
       sessionCount++;
+
+      // Capture snapshot so the click handler can replay this exact puzzle
+      var savedFen   = currentFen;
+      var savedMoves = solutionMoves.slice();
+      var savedId    = currentPuzzleId;
+      var savedNum   = sessionCount;
 
       var empty = document.getElementById('history-empty');
       if (empty) empty.style.display = 'none';
@@ -473,16 +541,78 @@
       var container = document.getElementById('history-checks');
       var el        = document.createElement('div');
       el.className  = 'check-pop';
-      el.title      = 'Puzzle #' + sessionCount + ' — ' + label;
+      el.title      = 'Puzzle #' + savedNum + ' — ' + label + ' · Click to review in Practice Mode';
       el.style.cssText = [
         'width:34px', 'height:34px', 'border-radius:50%',
         'background:' + bg, 'color:' + fg,
         'display:flex', 'align-items:center', 'justify-content:center',
-        'font-weight:bold', 'font-size:15px', 'flex-shrink:0'
+        'font-weight:bold', 'font-size:15px', 'flex-shrink:0',
+        'cursor:pointer', 'transition:opacity 0.15s'
       ].join(';');
       el.textContent = sym;
+      el.addEventListener('mouseenter', function() { el.style.opacity = '0.75'; });
+      el.addEventListener('mouseleave', function() { el.style.opacity = '1'; });
+      el.addEventListener('click', function() { reviewPuzzle(savedFen, savedMoves, savedId); });
       container.insertBefore(el, container.firstChild);
       document.getElementById('puzzle-count').textContent = sessionCount;
+    }
+
+    // ── Board theme (normal = mint green, practice = light purple) ────────
+    function setBoardTheme(mode) {
+      var el = document.getElementById('board-theme');
+      if (mode === 'practice') {
+        el.textContent = [
+          '.black-3c85d{background-color:#9b8ec8!important;}',
+          '.black-3c85d.notation-322f9{color:#2d1a5a!important;}',
+          '.white-1e1d7.notation-322f9{color:#9b8ec8!important;}'
+        ].join('');
+      } else {
+        el.textContent = '';
+      }
+    }
+
+    // ── Practice mode: replay a history puzzle without scoring ─────────────
+    function reviewPuzzle(fen, moves, puzzleId) {
+      clearTimeout(replayTimeout);
+      isReplaying        = false;
+      practiceMode       = true;
+      currentFen         = fen;
+      solutionMoves      = moves.slice();
+      currentPuzzleId    = puzzleId;
+      currentMoveIndex   = 0;
+      waitingForComputer = false;
+      wrongAttempts      = 0;
+      puzzleStartTime    = performance.now();
+      budgetCheckpoint   = performance.now();
+
+      document.getElementById('practice-banner').classList.remove('hidden');
+      setBoardTheme('practice');
+
+      var len   = solutionMoves.length;
+      var stars = len <= 2 ? '⭐' : len <= 4 ? '⭐⭐' : '⭐⭐⭐';
+      var lbl   = len <= 2 ? 'Beginner' : len <= 4 ? 'Intermediate' : 'Advanced';
+      document.getElementById('difficulty-stars').textContent = stars;
+      document.getElementById('difficulty-label').textContent = lbl;
+
+      game = new Chess(currentFen);
+
+      if (board) board.destroy();
+      board = Chessboard('board', {
+        position:    currentFen,
+        draggable:   true,
+        pieceTheme:  '/static/img/chesspieces/wikipedia/{piece}.png',
+        onDragStart: function(source, piece) {
+          if (!game || game.game_over())                return false;
+          if (waitingForComputer)                       return false;
+          if (currentMoveIndex >= solutionMoves.length) return false;
+        },
+        onDrop:      onDrop,
+        orientation: game.turn() === 'w' ? 'white' : 'black'
+      });
+
+      var whose = game.turn() === 'w' ? 'White' : 'Black';
+      var total = Math.ceil(solutionMoves.length / 2);
+      setStatus(whose + ' to move — practice this ' + total + '-move puzzle.');
     }
 
     // ── Status ─────────────────────────────────────────────────────────────
@@ -495,7 +625,10 @@
     // ── Load puzzle ────────────────────────────────────────────────────────
     function loadPuzzle() {
       clearTimeout(replayTimeout);
-      isReplaying = false;
+      isReplaying  = false;
+      practiceMode = false;
+      document.getElementById('practice-banner').classList.add('hidden');
+      setBoardTheme('normal');
 
       // If an unsolved puzzle was active, count it as abandoned (red)
       if (currentPuzzleId && !puzzleChecked) {
@@ -520,6 +653,7 @@
           currentMoveIndex = 0;
           waitingForComputer = false;
           puzzleStartTime  = performance.now();
+          budgetCheckpoint = performance.now();
 
           var len    = solutionMoves.length;
           var stars  = len <= 2 ? '⭐' : len <= 4 ? '⭐⭐' : '⭐⭐⭐';
@@ -566,11 +700,15 @@
         currentMoveIndex++;
 
         if (currentMoveIndex >= solutionMoves.length) {
-          streak++;
-          updateStreakDisplay();
-          addHistoryEntry(wrongAttempts < 2 ? 'green' : 'yellow');
-          logAttempt(true);
-          setStatus('✓ Puzzle solved! Well done.', '#00dc82');
+          if (!practiceMode) {
+            streak++;
+            updateStreakDisplay();
+            addHistoryEntry(wrongAttempts < 2 ? 'green' : 'yellow');
+            logAttempt(true);
+            setStatus('✓ Puzzle solved! Well done.', '#00dc82');
+          } else {
+            setStatus('✓ Solved in practice! Click "New Puzzle" for a fresh one.', '#c4b5fd');
+          }
           return;
         }
 
@@ -580,14 +718,20 @@
       } else {
         game.undo();
         wrongAttempts++;
-        streak = 0;
-        updateStreakDisplay();
-        logAttempt(false);
+        if (!practiceMode) {
+          streak = 0;
+          updateStreakDisplay();
+          logAttempt(false);
+        }
 
         if (wrongAttempts >= 3) {
-          addHistoryEntry('red');
-          setStatus('✗ No more attempts — loading next puzzle…', '#ef4444');
-          setTimeout(loadPuzzle, 1800);
+          if (!practiceMode) {
+            addHistoryEntry('red');
+            setStatus('✗ No more attempts — loading next puzzle…', '#ef4444');
+            setTimeout(loadPuzzle, 1800);
+          } else {
+            setStatus('✗ All attempts used. Click "New Puzzle" for a fresh puzzle.', '#ef4444');
+          }
           return 'snapback';
         }
 
@@ -612,11 +756,15 @@
         waitingForComputer = false;
 
         if (currentMoveIndex >= solutionMoves.length) {
-          streak++;
-          updateStreakDisplay();
-          addHistoryEntry(wrongAttempts < 2 ? 'green' : 'yellow');
-          logAttempt(true);
-          setStatus('✓ Puzzle solved! Well done.', '#00dc82');
+          if (!practiceMode) {
+            streak++;
+            updateStreakDisplay();
+            addHistoryEntry(wrongAttempts < 2 ? 'green' : 'yellow');
+            logAttempt(true);
+            setStatus('✓ Puzzle solved! Well done.', '#00dc82');
+          } else {
+            setStatus('✓ Solved in practice! Click "New Puzzle" for a fresh one.', '#c4b5fd');
+          }
         } else {
           var whose = game.turn() === 'w' ? 'White' : 'Black';
           var left  = Math.ceil((solutionMoves.length - currentMoveIndex) / 2);
@@ -627,8 +775,17 @@
 
     // ── Telemetry ──────────────────────────────────────────────────────────
     function logAttempt(isCorrect) {
-      if (!currentPuzzleId || !currentUser) return;
+      if (!currentPuzzleId || !currentUser || practiceMode) return;
       var timeMs = puzzleStartTime ? Math.round(performance.now() - puzzleStartTime) : null;
+
+      // Accumulate active puzzle time toward the daily budget
+      if (budgetCheckpoint !== null) {
+        totalTimeMs     += performance.now() - budgetCheckpoint;
+        budgetCheckpoint = performance.now();
+        updateBudgetBar();
+        checkTimeBudget();
+      }
+
       fetch('/log-attempt', {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -741,6 +898,11 @@
           streak = res.data.streak;
           updateStreakDisplay();
         }
+        if (typeof res.data.daily_time_budget === 'number' && res.data.daily_time_budget > 0) {
+          dailyBudgetMs = res.data.daily_time_budget * 60000;
+          document.getElementById('budget-card').classList.remove('hidden');
+          updateBudgetBar();
+        }
         closeModal();
         updateNavAuth();
       })
@@ -750,6 +912,31 @@
         errorEl.classList.remove('hidden');
         submitBtn.textContent = activeModalTab === 'login' ? 'Login' : 'Create Account';
       });
+    }
+
+    // ── Time budget ────────────────────────────────────────────────────────
+    function updateBudgetBar() {
+      if (!dailyBudgetMs) return;
+      var usedMin  = Math.floor(totalTimeMs / 60000);
+      var totalMin = Math.floor(dailyBudgetMs / 60000);
+      var pct      = Math.min(100, Math.round((totalTimeMs / dailyBudgetMs) * 100));
+      document.getElementById('budget-used').textContent  = usedMin + 'm';
+      document.getElementById('budget-total').textContent = 'of ' + totalMin + 'm';
+      var bar = document.getElementById('budget-bar');
+      bar.style.width      = pct + '%';
+      bar.style.background = pct >= 100 ? '#ef4444' : pct >= 75 ? '#f59e0b' : '#00dc82';
+    }
+
+    function checkTimeBudget() {
+      if (!dailyBudgetMs || budgetNotified) return;
+      if (totalTimeMs >= dailyBudgetMs) {
+        budgetNotified = true;
+        document.getElementById('budget-overlay').classList.remove('hidden');
+      }
+    }
+
+    function dismissBudgetOverlay() {
+      document.getElementById('budget-overlay').classList.add('hidden');
     }
 
     // ── Button wiring ──────────────────────────────────────────────────────

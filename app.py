@@ -54,6 +54,18 @@ def init_db():
             );
         ''')
         conn.commit()
+        # Backwards-compatible schema migrations
+        for stmt in [
+            'ALTER TABLE users ADD COLUMN experience_level  TEXT',
+            'ALTER TABLE users ADD COLUMN daily_time_budget INTEGER DEFAULT 30',
+            'ALTER TABLE users ADD COLUMN training_goal     TEXT',
+            'ALTER TABLE users ADD COLUMN diagnostic_done   INTEGER DEFAULT 0',
+        ]:
+            try:
+                conn.execute(stmt)
+            except Exception:
+                pass
+        conn.commit()
     finally:
         conn.close()
 
@@ -156,6 +168,16 @@ def basics():
     return render_template('basics.html')
 
 
+@app.route('/special-rules')
+def special_rules():
+    return render_template('special_rules.html')
+
+
+@app.route('/stampede')
+def stampede():
+    return render_template('stampede.html')
+
+
 @app.route('/trainer')
 def trainer():
     level = request.args.get('level', 1, type=int)
@@ -171,14 +193,21 @@ def me():
     conn = get_db()
     try:
         row = conn.execute(
-            'SELECT username, current_streak FROM users WHERE id = ?', (user_id,)
+            'SELECT username, current_streak, diagnostic_done, daily_time_budget '
+            'FROM users WHERE id = ?', (user_id,)
         ).fetchone()
     finally:
         conn.close()
     if row is None:
         session.clear()
         return jsonify({'logged_in': False})
-    return jsonify({'logged_in': True, 'username': row['username'], 'streak': row['current_streak']})
+    return jsonify({
+        'logged_in':         True,
+        'username':          row['username'],
+        'streak':            row['current_streak'],
+        'diagnostic_done':   row['diagnostic_done']  if row['diagnostic_done']  is not None else 0,
+        'daily_time_budget': row['daily_time_budget'] if row['daily_time_budget'] is not None else 30,
+    })
 
 
 # ── Auth routes ───────────────────────────────────────────────────────────────
@@ -215,7 +244,8 @@ def login():
     conn = get_db()
     try:
         row = conn.execute(
-            'SELECT id, password_hash, current_streak FROM users WHERE username = ?',
+            'SELECT id, password_hash, current_streak, diagnostic_done, daily_time_budget '
+            'FROM users WHERE username = ?',
             (username,)
         ).fetchone()
     finally:
@@ -227,8 +257,10 @@ def login():
     session['user_id']  = row['id']
     session['username'] = username
     return jsonify({
-        'message': f'Welcome back, {username}!',
-        'streak':  row['current_streak']
+        'message':           f'Welcome back, {username}!',
+        'streak':            row['current_streak'],
+        'diagnostic_done':   row['diagnostic_done']  if row['diagnostic_done']  is not None else 0,
+        'daily_time_budget': row['daily_time_budget'] if row['daily_time_budget'] is not None else 30,
     })
 
 
@@ -236,6 +268,34 @@ def login():
 def logout():
     session.clear()
     return jsonify({'message': 'Logged out.'})
+
+
+@app.route('/save-diagnostic', methods=['POST'])
+def save_diagnostic():
+    user_id = session.get('user_id')
+    if user_id is None:
+        return jsonify({'error': 'Not authenticated.'}), 401
+
+    data              = request.get_json(force=True) or {}
+    experience_level  = (data.get('experience_level') or '').strip()
+    daily_time_budget = int(data.get('daily_time_budget') or 30)
+    training_goal     = (data.get('training_goal') or '').strip()
+
+    conn = get_db()
+    try:
+        conn.execute(
+            '''UPDATE users
+               SET experience_level  = ?,
+                   daily_time_budget = ?,
+                   training_goal     = ?,
+                   diagnostic_done   = 1
+               WHERE id = ?''',
+            (experience_level, daily_time_budget, training_goal, user_id)
+        )
+        conn.commit()
+        return jsonify({'message': 'Diagnostic saved.', 'daily_time_budget': daily_time_budget})
+    finally:
+        conn.close()
 
 
 @app.route('/get-analytics')
@@ -350,6 +410,23 @@ def get_puzzle():
     user_id = session.get('user_id')
 
     level_param = request.args.get('level', type=int)   # explicit level override
+
+    # ── Stampede / fully-random mode: bypass all tier/SRS logic ──────────────
+    if request.args.get('random', type=int) == 1:
+        conn = get_db()
+        try:
+            row = conn.execute(
+                'SELECT id, fen, engine_best_move FROM personal_blunders ORDER BY RANDOM() LIMIT 1'
+            ).fetchone()
+            if row is None:
+                return jsonify({'error': 'No puzzles found.'}), 404
+            return jsonify({
+                'puzzle_id':        row['id'],
+                'fen':              row['fen'],
+                'engine_best_move': row['engine_best_move'],
+            })
+        finally:
+            conn.close()
 
     # ── Anonymous: tier-based random delivery ─────────────────────────────────
     if user_id is None:
