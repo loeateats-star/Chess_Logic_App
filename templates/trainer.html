@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Level {{ level }} Puzzle Trainer — AlgoGambit</title>
+  <title>Level {{ level }} Puzzle Trainer — Synapchess</title>
 
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
@@ -12,12 +12,13 @@
         extend: {
           colors: {
             brand: {
-              bg:     '#0b0c10',
-              card:   '#131419',
-              border: '#1e2028',
+              bg:     '#ffffff',
+              card:   '#f6faf8',
+              border: '#e7ebe9',
               green:  '#00dc82',
               gdark:  '#00aa63',
-              muted:  '#9ca3af',
+              muted:  '#64748b',
+              ink:    '#0b0c10',
             }
           }
         }
@@ -29,9 +30,10 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
   <link rel="stylesheet" href="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.css" />
   <script src="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
 
   <style>
-    body { background-color: #0b0c10; }
+    body { background-color: #ffffff; }
     #board { width: 400px; }
     .board-b72b1 { border: 2px solid #00dc82 !important; border-radius: 6px; }
     .black-3c85d { background-color: #66b38c !important; }
@@ -50,30 +52,27 @@
   <!-- Runtime board theme — swapped by JS when entering/exiting practice mode -->
   <style id="board-theme"></style>
 </head>
-<body class="text-white antialiased" style="font-family: Inter, system-ui, sans-serif;">
+<body class="text-brand-ink antialiased" style="font-family: Inter, system-ui, sans-serif;">
 
   <!-- ─── SiteHeader ────────────────────────────────────────────────────── -->
-  <header class="sticky top-0 z-50 border-b border-brand-border" style="background:#0b0c10;">
+  <header class="sticky top-0 z-50 border-b border-brand-border" style="background:rgba(255,255,255,0.92); backdrop-filter:blur(8px);">
     <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
 
-      <a href="/" class="flex items-center gap-2 font-semibold text-white text-sm">
-        <span class="flex items-center justify-center w-7 h-7 rounded-md bg-brand-green text-brand-bg font-bold text-base">♟</span>
-        AlgoGambit
+      <a href="/" class="flex items-center gap-2 font-semibold text-brand-ink text-sm">
+        <span class="flex items-center justify-center w-7 h-7 rounded-md bg-brand-green text-brand-ink font-bold text-base">♟</span>
+        Synapchess
       </a>
 
-      <nav class="hidden md:flex items-center gap-5 text-sm text-brand-muted">
-        <a href="/#mission"    class="hover:text-white transition-colors">Mission</a>
-        <a href="/curriculum"  class="hover:text-white transition-colors">Curriculum</a>
-        <a href="/worksheets"  class="hover:text-white transition-colors">Printable Sheets</a>
-        <a href="/basics"      class="text-brand-green hover:text-brand-gdark font-medium transition-colors">Chess Basics</a>
-        <a href="/#outcomes"   class="hover:text-white transition-colors">Outcomes</a>
-        <a href="/stampede"    class="font-semibold transition-colors" style="color:#c084fc;">Stampede ⚡</a>
+      <nav class="hidden md:flex items-center gap-8 text-sm font-medium">
+        <a href="/learn"  class="text-brand-ink">Learn</a>
+        <a href="/join"   class="text-brand-muted hover:text-brand-ink transition-colors">Join</a>
+        <a href="/donate" class="text-brand-muted hover:text-brand-ink transition-colors">Donate</a>
       </nav>
 
       <div class="flex items-center gap-4 text-sm">
         <div id="auth-logged-out" class="flex items-center gap-3">
           <button id="btn-login"
-                  class="text-brand-muted hover:text-white transition-colors cursor-pointer text-sm">
+                  class="text-brand-muted hover:text-brand-ink transition-colors cursor-pointer text-sm">
             Student Login
           </button>
         </div>
@@ -81,12 +80,12 @@
           <span id="nav-welcome" class="text-brand-muted text-xs"></span>
           <span class="text-brand-border text-xs">|</span>
           <button id="btn-logout"
-                  class="text-brand-muted hover:text-white transition-colors cursor-pointer text-xs">
+                  class="text-brand-muted hover:text-brand-ink transition-colors cursor-pointer text-xs">
             Logout
           </button>
         </div>
         <a href="/"
-           class="bg-brand-green hover:bg-brand-gdark text-brand-bg font-semibold px-4 py-2 rounded-md transition-colors text-sm">
+           class="bg-brand-green hover:bg-brand-gdark text-brand-ink font-semibold px-4 py-2 rounded-md transition-colors text-sm">
           Dashboard
         </a>
       </div>
@@ -94,10 +93,10 @@
   </header>
 
   <!-- ─── Page Header ───────────────────────────────────────────────────── -->
-  <section class="py-10 px-6 border-b border-brand-border" style="background:#0b0c10;">
+  <section class="py-10 px-6 border-b border-brand-border" style="background:#ffffff;">
     <div class="max-w-6xl mx-auto space-y-3">
       <a href="/"
-         class="inline-flex items-center gap-2 text-brand-muted hover:text-white transition-colors text-sm group">
+         class="inline-flex items-center gap-2 text-brand-muted hover:text-brand-ink transition-colors text-sm group">
         <svg class="w-4 h-4 transition-transform group-hover:-translate-x-1"
              fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
@@ -106,43 +105,43 @@
       </a>
       <div class="flex items-center gap-3 flex-wrap">
         <span id="header-label"
-              class="text-brand-green text-xs font-semibold tracking-widest uppercase"></span>
+              class="text-brand-gdark text-xs font-semibold tracking-widest uppercase"></span>
         <span id="header-stars" class="text-base"></span>
       </div>
-      <h1 id="header-title" class="text-3xl md:text-4xl font-extrabold text-white leading-tight"></h1>
+      <h1 id="header-title" class="text-3xl md:text-4xl font-extrabold text-brand-ink leading-tight"></h1>
       <p  id="header-desc"  class="text-brand-muted text-sm max-w-xl leading-relaxed"></p>
     </div>
   </section>
 
   <!-- ─── Trainer Layout ────────────────────────────────────────────────── -->
-  <section class="py-10 px-6" style="background:#0b0c10;">
+  <section class="py-10 px-6" style="background:#ffffff;">
     <div class="max-w-6xl mx-auto flex gap-7 items-start">
 
       <!-- ── Left: Level info ──────────────────────────────────────────── -->
       <aside class="w-52 flex-shrink-0 space-y-4">
 
         <!-- Level card -->
-        <div class="rounded-xl border border-brand-border p-4 space-y-3" style="background:#131419;">
+        <div class="rounded-xl border border-brand-border p-4 space-y-3" style="background:#f6faf8;">
           <div class="flex items-center gap-2">
             <div id="left-badge"
-                 class="w-8 h-8 rounded-lg flex items-center justify-center text-brand-green font-bold text-sm flex-shrink-0"
-                 style="background:#1a1f1a;"></div>
+                 class="w-8 h-8 rounded-lg flex items-center justify-center text-brand-gdark font-bold text-sm flex-shrink-0"
+                 style="background:#e6f9f0;"></div>
             <p id="left-label"
-               class="text-brand-green text-xs font-semibold tracking-widest uppercase leading-tight"></p>
+               class="text-brand-gdark text-xs font-semibold tracking-widest uppercase leading-tight"></p>
           </div>
           <p id="left-desc" class="text-brand-muted text-xs leading-relaxed"></p>
           <div class="border-t border-brand-border pt-3 space-y-1">
             <p class="text-brand-muted text-xs">Puzzle range</p>
-            <p id="left-range" class="text-white text-xs font-semibold"></p>
+            <p id="left-range" class="text-brand-ink text-xs font-semibold"></p>
           </div>
           <div class="border-t border-brand-border pt-3 space-y-1">
             <p class="text-brand-muted text-xs">Streak window</p>
-            <p id="left-unlock" class="text-white text-xs font-semibold"></p>
+            <p id="left-unlock" class="text-brand-ink text-xs font-semibold"></p>
           </div>
         </div>
 
         <!-- Difficulty -->
-        <div class="rounded-xl border border-brand-border p-4 space-y-1" style="background:#131419;">
+        <div class="rounded-xl border border-brand-border p-4 space-y-1" style="background:#f6faf8;">
           <p class="text-brand-muted text-xs">This puzzle</p>
           <div class="flex items-center gap-2 min-h-5">
             <span id="difficulty-stars" class="text-base"></span>
@@ -151,46 +150,43 @@
         </div>
 
         <!-- Session streak -->
-        <div class="rounded-xl border border-brand-border p-4 space-y-1" style="background:#131419;">
+        <div class="rounded-xl border border-brand-border p-4 space-y-1" style="background:#f6faf8;">
           <p class="text-brand-muted text-xs">Session streak</p>
           <div class="flex items-center gap-2">
-            <span id="streak-count" class="text-white text-2xl font-extrabold">0</span>
+            <span id="streak-count" class="text-brand-ink text-2xl font-extrabold">0</span>
             <span id="streak-stars" class="text-base">⭐</span>
           </div>
         </div>
 
         <!-- Daily time budget (shown only when user has a budget set) -->
-        <div id="budget-card" class="rounded-xl border border-brand-border p-4 space-y-2 hidden" style="background:#131419;">
+        <div id="budget-card" class="rounded-xl border border-brand-border p-4 space-y-2 hidden" style="background:#f6faf8;">
           <p class="text-brand-muted text-xs">Daily time budget</p>
           <div class="flex items-center justify-between">
-            <span id="budget-used"  class="text-white text-sm font-bold">0m</span>
+            <span id="budget-used"  class="text-brand-ink text-sm font-bold">0m</span>
             <span id="budget-total" class="text-brand-muted text-xs"></span>
           </div>
-          <div class="w-full h-1.5 rounded-full" style="background:#1e2028;">
+          <div class="w-full h-1.5 rounded-full" style="background:#e7ebe9;">
             <div id="budget-bar" class="h-1.5 rounded-full transition-all duration-500"
                  style="background:#00dc82; width:0%;"></div>
           </div>
         </div>
 
         <!-- Switch level -->
-        <div class="rounded-xl border border-brand-border p-4 space-y-2" style="background:#131419;">
+        <div class="rounded-xl border border-brand-border p-4 space-y-2" style="background:#f6faf8;">
           <p class="text-brand-muted text-xs mb-3">Switch level</p>
           <a href="/trainer?level=1"
              data-level="1"
-             class="level-link flex items-center justify-between px-3 py-2 rounded-lg border border-brand-border hover:border-brand-green text-brand-muted hover:text-white transition-colors text-xs"
-             style="background:#0b0c10;">
+             class="level-link flex items-center justify-between px-3 py-2 rounded-lg border border-brand-border hover:border-brand-green text-brand-muted hover:text-brand-ink transition-colors text-xs bg-white">
             <span>Level 1</span><span>⭐</span>
           </a>
           <a href="/trainer?level=2"
              data-level="2"
-             class="level-link flex items-center justify-between px-3 py-2 rounded-lg border border-brand-border hover:border-brand-green text-brand-muted hover:text-white transition-colors text-xs"
-             style="background:#0b0c10;">
+             class="level-link flex items-center justify-between px-3 py-2 rounded-lg border border-brand-border hover:border-brand-green text-brand-muted hover:text-brand-ink transition-colors text-xs bg-white">
             <span>Level 2</span><span>⭐⭐</span>
           </a>
           <a href="/trainer?level=3"
              data-level="3"
-             class="level-link flex items-center justify-between px-3 py-2 rounded-lg border border-brand-border hover:border-brand-green text-brand-muted hover:text-white transition-colors text-xs"
-             style="background:#0b0c10;">
+             class="level-link flex items-center justify-between px-3 py-2 rounded-lg border border-brand-border hover:border-brand-green text-brand-muted hover:text-brand-ink transition-colors text-xs bg-white">
             <span>Level 3</span><span>⭐⭐⭐</span>
           </a>
         </div>
@@ -207,7 +203,7 @@
         <!-- Practice mode banner — shown when reviewing a history entry -->
         <div id="practice-banner"
              class="hidden w-full max-w-sm text-center py-2 px-4 rounded-lg text-xs font-semibold"
-             style="background:rgba(155,142,200,0.12); border:1px solid rgba(155,142,200,0.35); color:#c4b5fd;">
+             style="background:rgba(139,92,246,0.08); border:1px solid rgba(139,92,246,0.3); color:#7c3aed;">
           ♻ Practice Mode — reviewing a previous puzzle. Attempts won't count toward your score.
         </div>
 
@@ -218,12 +214,11 @@
 
         <div class="flex items-center gap-3">
           <button id="train-btn"
-                  class="bg-brand-green hover:bg-brand-gdark text-brand-bg font-semibold px-5 py-2.5 rounded-md transition-colors text-sm cursor-pointer">
+                  class="bg-brand-green hover:bg-brand-gdark text-brand-ink font-semibold px-5 py-2.5 rounded-md transition-colors text-sm cursor-pointer">
             New Puzzle
           </button>
           <button id="show-btn"
-                  class="border border-brand-border hover:border-brand-green text-brand-muted hover:text-white font-semibold px-5 py-2.5 rounded-md transition-colors text-sm cursor-pointer"
-                  style="background:#131419;">
+                  class="border border-brand-border hover:border-brand-green text-brand-muted hover:text-brand-ink font-semibold px-5 py-2.5 rounded-md transition-colors text-sm cursor-pointer bg-white">
             Show Solution
           </button>
         </div>
@@ -234,13 +229,13 @@
       <aside class="w-52 flex-shrink-0 space-y-4">
 
         <!-- Live stats -->
-        <div class="rounded-xl border border-brand-border p-4 space-y-3" style="background:#131419;">
+        <div class="rounded-xl border border-brand-border p-4 space-y-3" style="background:#f6faf8;">
           <div class="flex items-center gap-2">
             <svg class="w-3.5 h-3.5 text-brand-green flex-shrink-0"
                  fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
               <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
             </svg>
-            <p class="text-brand-green text-xs font-semibold tracking-widest uppercase">Live Stats</p>
+            <p class="text-brand-gdark text-xs font-semibold tracking-widest uppercase">Live Stats</p>
           </div>
 
           <!-- Not signed in -->
@@ -249,38 +244,35 @@
               Sign in to track accuracy &amp; progress.
             </p>
             <button onclick="openModal('login')"
-                    class="text-brand-green text-xs font-medium hover:text-brand-gdark transition-colors cursor-pointer">
+                    class="text-brand-gdark text-xs font-medium hover:text-brand-green transition-colors cursor-pointer">
               Sign in →
             </button>
           </div>
 
           <!-- Signed in -->
           <div id="stats-content" class="space-y-2 hidden">
-            <div class="flex items-center justify-between rounded-lg px-3 py-2 border border-brand-border"
-                 style="background:#0b0c10;">
+            <div class="flex items-center justify-between rounded-lg px-3 py-2 border border-brand-border bg-white">
               <span class="text-brand-muted text-xs">Total</span>
-              <span id="stat-total" class="text-white text-xs font-bold">—</span>
+              <span id="stat-total" class="text-brand-ink text-xs font-bold">—</span>
             </div>
-            <div class="flex items-center justify-between rounded-lg px-3 py-2 border border-brand-border"
-                 style="background:#0b0c10;">
+            <div class="flex items-center justify-between rounded-lg px-3 py-2 border border-brand-border bg-white">
               <span class="text-brand-muted text-xs">Accuracy</span>
-              <span id="stat-accuracy" class="text-brand-green text-xs font-bold">—</span>
+              <span id="stat-accuracy" class="text-brand-gdark text-xs font-bold">—</span>
             </div>
-            <div class="flex items-center justify-between rounded-lg px-3 py-2 border border-brand-border"
-                 style="background:#0b0c10;">
+            <div class="flex items-center justify-between rounded-lg px-3 py-2 border border-brand-border bg-white">
               <span class="text-brand-muted text-xs">Avg Time</span>
-              <span id="stat-velocity" class="text-white text-xs font-bold">—</span>
+              <span id="stat-velocity" class="text-brand-ink text-xs font-bold">—</span>
             </div>
           </div>
         </div>
 
         <!-- Puzzle history -->
-        <div class="rounded-xl border border-brand-border p-4 space-y-3" style="background:#131419;">
+        <div class="rounded-xl border border-brand-border p-4 space-y-3" style="background:#f6faf8;">
           <div class="flex items-center justify-between">
-            <p class="text-brand-green text-xs font-semibold tracking-widest uppercase">History</p>
+            <p class="text-brand-gdark text-xs font-semibold tracking-widest uppercase">History</p>
             <span id="puzzle-count"
-                  class="text-white text-xs font-bold px-1.5 py-0.5 rounded"
-                  style="background:#1e2028;">0</span>
+                  class="text-brand-ink text-xs font-bold px-1.5 py-0.5 rounded"
+                  style="background:#e7ebe9;">0</span>
           </div>
 
           <p id="history-empty"
@@ -296,49 +288,44 @@
     </div>
   </section>
 
-  <!-- ─── Footer ────────────────────────────────────────────────────────── -->
-  <footer class="border-t border-brand-border pt-12 pb-8 px-6 mt-4" style="background:#0b0c10;">
+  <!-- ─── SiteFooter ────────────────────────────────────────────────────── -->
+  <footer class="border-t border-brand-border pt-16 pb-8 px-6" style="background:#ffffff;">
     <div class="max-w-6xl mx-auto">
-      <div class="grid grid-cols-2 md:grid-cols-5 gap-10 mb-12">
+
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-10 mb-14">
         <div class="col-span-2 space-y-3">
-          <a href="/" class="flex items-center gap-2 font-semibold text-white text-sm">
-            <span class="flex items-center justify-center w-7 h-7 rounded-md bg-brand-green text-brand-bg font-bold text-base">♟</span>
-            AlgoGambit
+          <a href="/" class="flex items-center gap-2 font-semibold text-brand-ink text-sm">
+            <span class="flex items-center justify-center w-7 h-7 rounded-md bg-brand-green text-brand-ink font-bold text-base">♟</span>
+            Synapchess
           </a>
           <p class="text-brand-muted text-sm leading-relaxed max-w-xs">
-            The AlgoGambit Foundation is a 501(c)(3) nonprofit closing the cognitive equity gap in Title I schools.
+            Synapchess is fiscally sponsored by HCB Foundation, closing the cognitive equity gap in Title I schools.
           </p>
         </div>
+
         <div class="space-y-3">
-          <h4 class="text-white text-sm font-semibold">Program</h4>
+          <h4 class="text-brand-ink text-sm font-semibold">Site</h4>
           <ul class="space-y-2 text-sm text-brand-muted">
-            <li><a href="/basics"     class="hover:text-white transition-colors">Chess Basics</a></li>
-            <li><a href="/curriculum" class="hover:text-white transition-colors">Curriculum</a></li>
-            <li><a href="/worksheets" class="hover:text-white transition-colors">Printable Sheets</a></li>
+            <li><a href="/learn"  class="hover:text-brand-ink transition-colors">Learn</a></li>
+            <li><a href="/join"   class="hover:text-brand-ink transition-colors">Join</a></li>
+            <li><a href="/donate" class="hover:text-brand-ink transition-colors">Donate</a></li>
           </ul>
         </div>
+
         <div class="space-y-3">
-          <h4 class="text-white text-sm font-semibold">Trainer Levels</h4>
+          <h4 class="text-brand-ink text-sm font-semibold">Resources</h4>
           <ul class="space-y-2 text-sm text-brand-muted">
-            <li><a href="/trainer?level=1" class="hover:text-white transition-colors">Level 1 — Beginner ⭐</a></li>
-            <li><a href="/trainer?level=2" class="hover:text-white transition-colors">Level 2 — Intermediate ⭐⭐</a></li>
-            <li><a href="/trainer?level=3" class="hover:text-white transition-colors">Level 3 — Advanced ⭐⭐⭐</a></li>
-          </ul>
-        </div>
-        <div class="space-y-3">
-          <h4 class="text-white text-sm font-semibold">Foundation</h4>
-          <ul class="space-y-2 text-sm text-brand-muted">
-            <li><a href="#" class="hover:text-white transition-colors">Our mission</a></li>
-            <li><a href="#" class="hover:text-white transition-colors">Partners</a></li>
-            <li><a href="#" class="hover:text-white transition-colors">Contact</a></li>
+            <li><a href="/trainer"  class="hover:text-brand-ink transition-colors">Puzzle Trainer</a></li>
+            <li><a href="/analysis" class="hover:text-brand-ink transition-colors">Game Analysis</a></li>
           </ul>
         </div>
       </div>
+
       <div class="border-t border-brand-border pt-6 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-brand-muted">
-        <span>© 2026 The AlgoGambit Foundation. All rights reserved.</span>
+        <span>© 2026 Synapchess. All rights reserved.</span>
         <div class="flex gap-5">
-          <a href="#" class="hover:text-white transition-colors">Privacy</a>
-          <a href="#" class="hover:text-white transition-colors">Terms</a>
+          <a href="#" class="hover:text-brand-ink transition-colors">Privacy</a>
+          <a href="#" class="hover:text-brand-ink transition-colors">Terms</a>
         </div>
       </div>
     </div>
@@ -346,29 +333,29 @@
 
   <!-- ─── Budget Complete Overlay ─────────────────────────────────────── -->
   <div id="budget-overlay" class="fixed inset-0 z-[200] flex items-center justify-center hidden">
-    <div class="absolute inset-0" style="background:rgba(11,12,16,0.96);"></div>
+    <div class="absolute inset-0" style="background:rgba(255,255,255,0.96);"></div>
     <div class="relative z-10 text-center space-y-6 px-6 max-w-sm mx-auto">
       <div class="w-20 h-20 rounded-full mx-auto flex items-center justify-center text-5xl"
-           style="background:#131419; border:2px solid #00dc82;">
+           style="background:#f6faf8; border:2px solid #00dc82;">
         🏆
       </div>
       <div class="space-y-3">
-        <h2 class="text-3xl font-extrabold text-white leading-tight">
-          Daily AlgoGambit Training Block Complete!
+        <h2 class="text-3xl font-extrabold text-brand-ink leading-tight">
+          Daily Synapchess Training Block Complete!
         </h2>
         <p class="text-brand-muted text-base leading-relaxed">
           You've hit your training allocation for today.<br />
           Rest up and let your brain consolidate your gains.
         </p>
-        <p class="text-brand-green font-bold text-lg">See you tomorrow. ♟</p>
+        <p class="text-brand-gdark font-bold text-lg">See you tomorrow. ♟</p>
       </div>
       <div class="flex flex-col items-center gap-3 pt-2">
         <a href="/"
-           class="w-full max-w-xs bg-brand-green hover:bg-brand-gdark text-brand-bg font-semibold py-3 rounded-md transition-colors text-sm text-center">
+           class="w-full max-w-xs bg-brand-green hover:bg-brand-gdark text-brand-ink font-semibold py-3 rounded-md transition-colors text-sm text-center">
           Return to Dashboard
         </a>
         <button onclick="dismissBudgetOverlay()"
-                class="text-brand-muted hover:text-white text-sm transition-colors cursor-pointer">
+                class="text-brand-muted hover:text-brand-ink text-sm transition-colors cursor-pointer">
           Keep Training Anyway
         </button>
       </div>
@@ -377,27 +364,27 @@
 
   <!-- ─── Auth Modal ────────────────────────────────────────────────────── -->
   <div id="auth-modal" class="fixed inset-0 z-[100] flex items-center justify-center hidden">
-    <div class="absolute inset-0" style="background:rgba(0,0,0,0.8);" onclick="closeModal()"></div>
+    <div class="absolute inset-0" style="background:rgba(15,23,20,0.5);" onclick="closeModal()"></div>
     <div class="relative z-10 w-full max-w-sm mx-4 rounded-2xl border border-brand-border p-8 space-y-6"
-         style="background:#131419;">
+         style="background:#ffffff;">
       <button onclick="closeModal()"
-              class="absolute top-4 right-4 text-brand-muted hover:text-white transition-colors text-lg leading-none cursor-pointer">✕</button>
+              class="absolute top-4 right-4 text-brand-muted hover:text-brand-ink transition-colors text-lg leading-none cursor-pointer">✕</button>
       <div class="flex gap-6 border-b border-brand-border pb-4">
         <button id="tab-login" onclick="switchTab('login')"
-                class="text-white font-semibold text-sm pb-1 border-b-2 border-brand-green cursor-pointer">Login</button>
+                class="text-brand-ink font-semibold text-sm pb-1 border-b-2 border-brand-green cursor-pointer">Login</button>
         <button id="tab-register" onclick="switchTab('register')"
-                class="text-brand-muted hover:text-white font-semibold text-sm pb-1 border-b-2 border-transparent cursor-pointer">Register</button>
+                class="text-brand-muted hover:text-brand-ink font-semibold text-sm pb-1 border-b-2 border-transparent cursor-pointer">Register</button>
       </div>
       <div class="space-y-4">
         <input id="modal-username" type="text" placeholder="Username" autocomplete="username"
-               class="w-full px-4 py-3 rounded-lg border border-brand-border text-white text-sm outline-none focus:border-brand-green transition-colors"
-               style="background:#0b0c10;" />
+               class="w-full px-4 py-3 rounded-lg border border-brand-border text-brand-ink text-sm outline-none focus:border-brand-green transition-colors"
+               style="background:#f6faf8;" />
         <input id="modal-password" type="password" placeholder="Password" autocomplete="current-password"
-               class="w-full px-4 py-3 rounded-lg border border-brand-border text-white text-sm outline-none focus:border-brand-green transition-colors"
-               style="background:#0b0c10;" />
+               class="w-full px-4 py-3 rounded-lg border border-brand-border text-brand-ink text-sm outline-none focus:border-brand-green transition-colors"
+               style="background:#f6faf8;" />
         <p id="modal-error" class="text-xs hidden" style="color:#ef4444;"></p>
         <button id="modal-submit" onclick="submitModal()"
-                class="w-full bg-brand-green hover:bg-brand-gdark text-brand-bg font-semibold py-3 rounded-lg transition-colors text-sm cursor-pointer">
+                class="w-full bg-brand-green hover:bg-brand-gdark text-brand-ink font-semibold py-3 rounded-lg transition-colors text-sm cursor-pointer">
           Login
         </button>
       </div>
@@ -456,7 +443,7 @@
       document.querySelectorAll('.level-link').forEach(function(a) {
         if (a.dataset.level === String(LEVEL)) {
           a.style.borderColor = '#00dc82';
-          a.style.color       = '#ffffff';
+          a.style.color       = '#0b0c10';
         }
       });
 
@@ -513,6 +500,17 @@
       document.getElementById('streak-stars').textContent = '⭐'.repeat(lvl);
     }
 
+    // ── Confetti ───────────────────────────────────────────────────────────
+    function fireConfetti() {
+      if (typeof confetti !== 'function') return;
+      confetti({
+        particleCount: 90,
+        spread:        70,
+        origin:        { y: 0.6 },
+        colors:        ['#00dc82', '#00aa63', '#f6faf8']
+      });
+    }
+
     // ── Puzzle history entry ───────────────────────────────────────────────
     // result: 'green' (solved 1st/2nd try), 'yellow' (solved 3rd try), 'red' (failed)
     function addHistoryEntry(result) {
@@ -536,6 +534,7 @@
         bg = '#ef4444'; fg = '#ffffff'; sym = '✗'; label = 'Failed';
       } else {
         bg = '#00dc82'; fg = '#0b0c10'; sym = '✓'; label = 'Solved';
+        fireConfetti();
       }
 
       var container = document.getElementById('history-checks');
@@ -562,9 +561,9 @@
       var el = document.getElementById('board-theme');
       if (mode === 'practice') {
         el.textContent = [
-          '.black-3c85d{background-color:#9b8ec8!important;}',
-          '.black-3c85d.notation-322f9{color:#2d1a5a!important;}',
-          '.white-1e1d7.notation-322f9{color:#9b8ec8!important;}'
+          '.black-3c85d{background-color:#c4b5fd!important;}',
+          '.black-3c85d.notation-322f9{color:#4c1d95!important;}',
+          '.white-1e1d7.notation-322f9{color:#c4b5fd!important;}'
         ].join('');
       } else {
         el.textContent = '';
@@ -619,7 +618,7 @@
     function setStatus(text, color) {
       var el         = document.getElementById('status');
       el.textContent = text;
-      el.style.color = color || '#9ca3af';
+      el.style.color = color || '#64748b';
     }
 
     // ── Load puzzle ────────────────────────────────────────────────────────
@@ -705,14 +704,14 @@
             updateStreakDisplay();
             addHistoryEntry(wrongAttempts < 2 ? 'green' : 'yellow');
             logAttempt(true);
-            setStatus('✓ Puzzle solved! Well done.', '#00dc82');
+            setStatus('✓ Puzzle solved! Well done.', '#00aa63');
           } else {
-            setStatus('✓ Solved in practice! Click "New Puzzle" for a fresh one.', '#c4b5fd');
+            setStatus('✓ Solved in practice! Click "New Puzzle" for a fresh one.', '#7c3aed');
           }
           return;
         }
 
-        setStatus('✓ Correct! Computer is responding…', '#00dc82');
+        setStatus('✓ Correct! Computer is responding…', '#00aa63');
         playComputerMove();
 
       } else {
@@ -761,9 +760,9 @@
             updateStreakDisplay();
             addHistoryEntry(wrongAttempts < 2 ? 'green' : 'yellow');
             logAttempt(true);
-            setStatus('✓ Puzzle solved! Well done.', '#00dc82');
+            setStatus('✓ Puzzle solved! Well done.', '#00aa63');
           } else {
-            setStatus('✓ Solved in practice! Click "New Puzzle" for a fresh one.', '#c4b5fd');
+            setStatus('✓ Solved in practice! Click "New Puzzle" for a fresh one.', '#7c3aed');
           }
         } else {
           var whose = game.turn() === 'w' ? 'White' : 'Black';
@@ -839,15 +838,15 @@
       var rt  = document.getElementById('tab-register');
       var sub = document.getElementById('modal-submit');
       if (tab === 'login') {
-        lt.classList.add('text-white', 'border-brand-green');
+        lt.classList.add('text-brand-ink', 'border-brand-green');
         lt.classList.remove('text-brand-muted', 'border-transparent');
-        rt.classList.remove('text-white', 'border-brand-green');
+        rt.classList.remove('text-brand-ink', 'border-brand-green');
         rt.classList.add('text-brand-muted', 'border-transparent');
         sub.textContent = 'Login';
       } else {
-        rt.classList.add('text-white', 'border-brand-green');
+        rt.classList.add('text-brand-ink', 'border-brand-green');
         rt.classList.remove('text-brand-muted', 'border-transparent');
-        lt.classList.remove('text-white', 'border-brand-green');
+        lt.classList.remove('text-brand-ink', 'border-brand-green');
         lt.classList.add('text-brand-muted', 'border-transparent');
         sub.textContent = 'Create Account';
       }
@@ -885,7 +884,7 @@
         }
         if (activeModalTab === 'register') {
           switchTab('login');
-          errorEl.style.color = '#00dc82';
+          errorEl.style.color = '#00aa63';
           errorEl.textContent = 'Account created! Please log in.';
           errorEl.classList.remove('hidden');
           document.getElementById('modal-username').value = username;
