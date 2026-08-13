@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{{ section.label }} Curriculum — Synapchess</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              bg:     '#0b0c10',
+              card:   '#131419',
+              border: '#1e2028',
+              green:  '#00dc82',
+              gdark:  '#00aa63',
+              muted:  '#94a3b8',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body { background-color: #0b0c10; }
+
+    /* Custom slim scrollbar for the video list */
+    #video-list::-webkit-scrollbar { width: 8px; }
+    #video-list::-webkit-scrollbar-track { background: #0b0c10; }
+    #video-list::-webkit-scrollbar-thumb { background: #1e2028; border-radius: 8px; }
+    #video-list::-webkit-scrollbar-thumb:hover { background: #00aa63; }
+    #video-list { scrollbar-width: thin; scrollbar-color: #1e2028 #0b0c10; }
+
+    .video-row[aria-current="true"] {
+      border-color: #00dc82;
+      background: #1a1f1a;
+    }
+    .video-row:focus-visible {
+      outline: 2px solid #00dc82;
+      outline-offset: 2px;
+    }
+    .mark-btn:focus-visible {
+      outline: 2px solid #00dc82;
+      outline-offset: 2px;
+    }
+  </style>
+</head>
+<body class="text-white antialiased" style="font-family: Inter, system-ui, sans-serif;">
+
+  <!-- ─── SiteHeader ────────────────────────────────────────────────────── -->
+  <header class="sticky top-0 z-50 border-b border-brand-border" style="background:#0b0c10;">
+    <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+
+      <a href="/" class="flex items-center gap-2 font-semibold text-white text-sm">
+        <span class="flex items-center justify-center w-7 h-7 rounded-md bg-brand-green text-brand-bg font-bold text-base">♟</span>
+        Synapchess
+      </a>
+
+      <nav class="hidden md:flex items-center gap-6 text-sm text-brand-muted">
+        <div class="relative">
+          <button id="nav-learn-btn" type="button"
+                  class="flex items-center gap-1 text-white font-semibold transition-colors cursor-pointer">
+            Learn
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+            </svg>
+          </button>
+          <div id="nav-learn-menu"
+               class="hidden absolute left-0 top-full mt-3 w-52 rounded-lg border border-brand-border py-1.5 z-50 shadow-2xl"
+               style="background:#131419;">
+            <a href="/curriculum"    class="block px-4 py-2 text-sm text-brand-green font-semibold bg-white/5 transition-colors">Curriculum</a>
+            <a href="/basics"        class="block px-4 py-2 text-sm text-brand-muted hover:bg-white/5 hover:text-white transition-colors">Chess Basics</a>
+            <a href="/special-rules" class="block px-4 py-2 text-sm text-brand-muted hover:bg-white/5 hover:text-white transition-colors">Special Rules</a>
+          </div>
+        </div>
+        <a href="/trainer"  class="hover:text-white transition-colors">Solve</a>
+        <a href="/analysis" class="hover:text-white transition-colors">Analyze</a>
+      </nav>
+
+      <div class="flex items-center gap-4 text-sm">
+        <a href="/#train" class="text-brand-muted hover:text-white transition-colors">Sign in</a>
+        <a href="/#train"
+           class="bg-brand-green hover:bg-brand-gdark text-brand-bg font-semibold px-4 py-2 rounded-md transition-colors">
+          Launch Dashboard
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- ─── Page Header ───────────────────────────────────────────────────── -->
+  <section class="py-12 px-6 border-b border-brand-border" style="background:#0b0c10;">
+    <div class="max-w-6xl mx-auto space-y-6">
+
+      <a href="/curriculum"
+         class="inline-flex items-center gap-2 text-brand-muted hover:text-white transition-colors text-sm group">
+        <svg class="w-4 h-4 transition-transform group-hover:-translate-x-1"
+             fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
+        </svg>
+        Back to Curriculum
+      </a>
+
+      <div>
+        <p class="text-brand-green text-xs font-semibold tracking-widest uppercase">{{ section.tagline }}</p>
+        <h1 class="text-3xl md:text-4xl font-extrabold text-white leading-tight mt-1">
+          {{ section.label }} Curriculum
+        </h1>
+        <p class="text-brand-muted text-base max-w-2xl leading-relaxed mt-3">
+          {{ section.description }}
+        </p>
+      </div>
+
+      <!-- ── Tier navigation (accessible tab-style links between sections) ── -->
+      <nav aria-label="Curriculum tiers" class="flex flex-wrap gap-2 pt-2">
+        {% for s in all_sections %}
+        <a href="/curriculum/{{ s.slug }}"
+           {% if s.slug == section.slug %}aria-current="page"{% endif %}
+           class="px-4 py-2 rounded-md text-sm font-semibold border transition-colors
+                  {% if s.slug == section.slug %}
+                  bg-brand-green text-brand-bg border-brand-green
+                  {% else %}
+                  text-brand-muted border-brand-border hover:text-white hover:border-brand-green/50
+                  {% endif %}">
+          {{ s.label }}
+        </a>
+        {% endfor %}
+      </nav>
+
+      <!-- Progress -->
+      <div class="max-w-md">
+        <div class="flex items-center justify-between text-xs text-brand-muted mb-1.5">
+          <span id="progress-label">0 of {{ videos|length }} watched</span>
+          <span id="progress-pct">0%</span>
+        </div>
+        <div class="h-2 rounded-full border border-brand-border overflow-hidden" style="background:#131419;">
+          <div id="progress-bar" class="h-full bg-brand-green transition-all" style="width:0%;"></div>
+        </div>
+        <p id="progress-status" class="sr-only" role="status" aria-live="polite"></p>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ─── Player + Scrollable Playlist ──────────────────────────────────── -->
+  <section class="py-12 px-6" style="background:#0b0c10;">
+    <div class="max-w-6xl mx-auto grid lg:grid-cols-3 gap-8 items-start">
+
+      <!-- Player (main) -->
+      <div class="lg:col-span-2 flex flex-col gap-4">
+        <div class="rounded-2xl border border-brand-border overflow-hidden shadow-lg" style="background:#131419;">
+          <div style="aspect-ratio:16/9;">
+            <iframe id="player-frame"
+                    class="w-full h-full"
+                    src="https://www.youtube-nocookie.com/embed/{{ videos[0].id }}"
+                    title="{{ videos[0].title }}"
+                    frameborder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowfullscreen>
+            </iframe>
+          </div>
+        </div>
+        <div class="rounded-xl border border-brand-border px-5 py-4" style="background:#131419;">
+          <h2 id="player-title" class="font-bold text-white text-base leading-snug">{{ videos[0].title }}</h2>
+          <p id="player-meta" class="text-brand-muted text-xs mt-1.5">{{ videos[0].channel }} · {{ videos[0].duration_label }}</p>
+        </div>
+      </div>
+
+      <!-- Scrollable playlist (side) -->
+      <div class="rounded-2xl border border-brand-border flex flex-col overflow-hidden" style="background:#131419; max-height: 640px;">
+        <div class="px-5 py-4 border-b border-brand-border flex items-center justify-between">
+          <h3 class="text-white font-semibold text-sm">Playlist</h3>
+          <span class="text-brand-muted text-xs">{{ videos|length }} videos</span>
+        </div>
+        <div id="video-list" class="flex-1 overflow-y-auto divide-y divide-brand-border" role="list" aria-label="{{ section.label }} videos">
+          {% for v in videos %}
+          <button type="button"
+                  class="video-row w-full text-left flex gap-3 px-4 py-3 border-l-2 border-transparent hover:bg-white/5 transition-colors cursor-pointer"
+                  role="listitem"
+                  data-video-id="{{ v.id }}"
+                  data-video-title="{{ v.title|e }}"
+                  data-video-channel="{{ v.channel|e }}"
+                  data-video-duration="{{ v.duration_label }}"
+                  aria-current="{{ 'true' if loop.first else 'false' }}"
+                  aria-label="Play {{ v.title }} ({{ v.duration_label }}), by {{ v.channel }}">
+            <span class="relative flex-shrink-0 w-24 h-14 rounded-md overflow-hidden bg-black">
+              <img src="https://i.ytimg.com/vi/{{ v.id }}/mqdefault.jpg" alt="" class="w-full h-full object-cover" loading="lazy" />
+              <span class="watched-badge absolute top-1 right-1 hidden w-5 h-5 rounded-full bg-brand-green text-brand-bg items-center justify-center text-xs font-bold">✓</span>
+            </span>
+            <span class="flex-1 min-w-0">
+              <span class="block text-sm text-white font-medium leading-snug line-clamp-2">{{ v.title }}</span>
+              <span class="block text-xs text-brand-muted mt-1">{{ v.channel }} · {{ v.duration_label }}</span>
+            </span>
+          </button>
+          {% endfor %}
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ─── SiteFooter ────────────────────────────────────────────────────── -->
+  <footer class="border-t border-brand-border pt-16 pb-8 px-6" style="background:#0b0c10;">
+    <div class="max-w-6xl mx-auto">
+
+      <div class="grid grid-cols-2 md:grid-cols-5 gap-10 mb-14">
+        <div class="col-span-2 space-y-3">
+          <a href="/" class="flex items-center gap-2 font-semibold text-white text-sm">
+            <span class="flex items-center justify-center w-7 h-7 rounded-md bg-brand-green text-brand-bg font-bold text-base">♟</span>
+            Synapchess
+          </a>
+          <p class="text-brand-muted text-sm leading-relaxed max-w-xs">
+            Synapchess is fiscally sponsored by HCB Foundation, closing the cognitive equity gap in Title I schools.
+          </p>
+        </div>
+
+        <div class="space-y-3">
+          <h4 class="text-white text-sm font-semibold">Program</h4>
+          <ul class="space-y-2 text-sm text-brand-muted">
+            <li><a href="/basics"      class="hover:text-white transition-colors">Chess Basics</a></li>
+            <li><a href="/curriculum"  class="text-white">Curriculum</a></li>
+            <li><a href="/#outcomes"   class="hover:text-white transition-colors">Outcomes</a></li>
+          </ul>
+        </div>
+
+        <div class="space-y-3">
+          <h4 class="text-white text-sm font-semibold">Foundation</h4>
+          <ul class="space-y-2 text-sm text-brand-muted">
+            <li><a href="#" class="hover:text-white transition-colors">Our mission</a></li>
+            <li><a href="#" class="hover:text-white transition-colors">Partners</a></li>
+            <li><a href="#" class="hover:text-white transition-colors">Donate</a></li>
+            <li><a href="#" class="hover:text-white transition-colors">Careers</a></li>
+          </ul>
+        </div>
+
+        <div class="space-y-3">
+          <h4 class="text-white text-sm font-semibold">Resources</h4>
+          <ul class="space-y-2 text-sm text-brand-muted">
+            <li><a href="/#train"     class="hover:text-white transition-colors">Training dashboard</a></li>
+            <li><a href="#"           class="hover:text-white transition-colors">Support</a></li>
+            <li><a href="#"           class="hover:text-white transition-colors">Contact</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="border-t border-brand-border pt-6 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-brand-muted">
+        <span>© 2026 Synapchess. All rights reserved.</span>
+        <div class="flex gap-5">
+          <a href="#" class="hover:text-white transition-colors">Privacy</a>
+          <a href="#" class="hover:text-white transition-colors">Terms</a>
+        </div>
+      </div>
+
+    </div>
+  </footer>
+
+  <!-- ─── Nav dropdown (Learn tab) ──────────────────────────────────────── -->
+  <script>
+    (function() {
+      var btn  = document.getElementById('nav-learn-btn');
+      var menu = document.getElementById('nav-learn-menu');
+      if (!btn || !menu) return;
+      btn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        menu.classList.toggle('hidden');
+      });
+      document.addEventListener('click', function(e) {
+        if (!menu.contains(e.target) && e.target !== btn) menu.classList.add('hidden');
+      });
+      document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') menu.classList.add('hidden');
+      });
+    })();
+  </script>
+
+  <!-- ─── Playlist player + watched-progress tracking ────────────────────── -->
+  <script>
+    (function() {
+      var SECTION       = {{ section.slug|tojson }};
+      var STORAGE_KEY    = 'curriculum_progress_v1';
+      var rows            = Array.prototype.slice.call(document.querySelectorAll('.video-row'));
+      var frame            = document.getElementById('player-frame');
+      var titleEl           = document.getElementById('player-title');
+      var metaEl              = document.getElementById('player-meta');
+      var progressLabel        = document.getElementById('progress-label');
+      var progressPct           = document.getElementById('progress-pct');
+      var progressBar             = document.getElementById('progress-bar');
+      var progressStatus            = document.getElementById('progress-status');
+      var totalVideos = rows.length;
+
+      var loggedIn = false;
+      var completed = {}; // video_id -> true
+
+      function loadLocalProgress() {
+        try {
+          var all = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+          return all[SECTION] || {};
+        } catch (e) {
+          return {};
+        }
+      }
+
+      function saveLocalProgress() {
+        try {
+          var all = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+          all[SECTION] = completed;
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(all));
+        } catch (e) { /* localStorage unavailable — progress just won't persist */ }
+      }
+
+      function renderWatchedState() {
+        var count = 0;
+        rows.forEach(function(row) {
+          var vid = row.getAttribute('data-video-id');
+          var badge = row.querySelector('.watched-badge');
+          if (completed[vid]) {
+            count++;
+            badge.classList.remove('hidden');
+            badge.classList.add('flex');
+          } else {
+            badge.classList.add('hidden');
+            badge.classList.remove('flex');
+          }
+        });
+        var pct = totalVideos ? Math.round((count / totalVideos) * 100) : 0;
+        progressLabel.textContent = count + ' of ' + totalVideos + ' watched';
+        progressPct.textContent = pct + '%';
+        progressBar.style.width = pct + '%';
+        return count;
+      }
+
+      function markComplete(videoId) {
+        if (completed[videoId]) return;
+        completed[videoId] = true;
+        var count = renderWatchedState();
+        progressStatus.textContent = count + ' of ' + totalVideos + ' videos watched';
+
+        if (loggedIn) {
+          fetch('/api/video-progress', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ video_id: videoId, section: SECTION, completed: true })
+          }).catch(function() { /* best-effort — local state already updated */ });
+        } else {
+          saveLocalProgress();
+        }
+      }
+
+      function playVideo(row) {
+        var vid     = row.getAttribute('data-video-id');
+        var title   = row.getAttribute('data-video-title');
+        var channel = row.getAttribute('data-video-channel');
+        var dur     = row.getAttribute('data-video-duration');
+
+        frame.src = 'https://www.youtube-nocookie.com/embed/' + vid + '?autoplay=1';
+        frame.title = title;
+        titleEl.textContent = title;
+        metaEl.textContent = channel + ' · ' + dur;
+
+        rows.forEach(function(r) { r.setAttribute('aria-current', r === row ? 'true' : 'false'); });
+        row.scrollIntoView({ block: 'nearest' });
+
+        markComplete(vid);
+      }
+
+      rows.forEach(function(row) {
+        row.addEventListener('click', function() { playVideo(row); });
+      });
+
+      function init(serverCompleted, isLoggedIn) {
+        loggedIn = isLoggedIn;
+        if (loggedIn) {
+          completed = {};
+          serverCompleted.forEach(function(vid) { completed[vid] = true; });
+        } else {
+          completed = loadLocalProgress();
+        }
+        renderWatchedState();
+      }
+
+      fetch('/api/video-progress')
+        .then(function(r) { return r.json(); })
+        .then(function(data) { init(data.completed || [], !!data.logged_in); })
+        .catch(function() { init([], false); });
+    })();
+  </script>
+
+</body>
+</html>

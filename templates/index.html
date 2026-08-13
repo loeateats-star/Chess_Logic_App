@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Chessalgo</title>
+  <title>Synapchess</title>
 
   <!-- Tailwind CSS CDN (cdn.tailwindcss.com is the correct play-CDN endpoint) -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -18,7 +18,7 @@
               border: '#1e2028',
               green:  '#00dc82',
               gdark:  '#00aa63',
-              muted:  '#9ca3af',
+              muted:  '#94a3b8',
             }
           }
         }
@@ -33,6 +33,8 @@
   <!-- Chessboard.js 1.0.0 -->
   <link rel="stylesheet" href="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.css" />
   <script src="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.js"></script>
+  <!-- canvas-confetti (puzzle-solved celebration) -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
 
   <style>
     body  { background-color: #0b0c10; }
@@ -44,6 +46,97 @@
     /* Keep coordinate labels legible against the new green tone */
     .black-3c85d.notation-322f9 { color: #1a3d2b !important; }
     .white-1e1d7.notation-322f9 { color: #66b38c !important; }
+
+    /* ── Fluid animated gradient background (hero) ─────────────────────── */
+    .hero-fluid-bg {
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+      pointer-events: none;
+      z-index: 0;
+    }
+    .hero-fluid-bg span {
+      position: absolute;
+      border-radius: 9999px;
+      filter: blur(90px);
+      opacity: 0.35;
+      will-change: transform;
+    }
+    .blob-1 {
+      width: 34rem; height: 34rem; top: -14rem; left: -8rem;
+      background: radial-gradient(circle at 30% 30%, #00dc82, transparent 70%);
+      animation: driftA 22s ease-in-out infinite;
+    }
+    .blob-2 {
+      width: 30rem; height: 30rem; top: -6rem; right: -10rem;
+      background: radial-gradient(circle at 60% 40%, #38bdf8, transparent 70%);
+      animation: driftB 26s ease-in-out infinite;
+    }
+    .blob-3 {
+      width: 26rem; height: 26rem; bottom: -14rem; left: 30%;
+      background: radial-gradient(circle at 50% 50%, #00aa63, transparent 70%);
+      animation: driftC 30s ease-in-out infinite;
+    }
+    @keyframes driftA {
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      50%      { transform: translate(6%, 8%) scale(1.12); }
+    }
+    @keyframes driftB {
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      50%      { transform: translate(-8%, 6%) scale(1.08); }
+    }
+    @keyframes driftC {
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      50%      { transform: translate(4%, -6%) scale(1.15); }
+    }
+
+    /* ── Fluid animated gradient heading text ───────────────────────────── */
+    .gradient-text {
+      background: linear-gradient(90deg, #00dc82, #38bdf8, #00dc82);
+      background-size: 200% auto;
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      color: transparent;
+      animation: gradientShift 6s ease-in-out infinite;
+    }
+    @keyframes gradientShift {
+      0%   { background-position: 0% 50%; }
+      50%  { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    /* ── Free Forever badge ─────────────────────────────────────────────── */
+    .free-forever-badge {
+      background: linear-gradient(120deg, rgba(0,220,130,0.16), rgba(56,189,248,0.16));
+      background-size: 200% auto;
+      animation: gradientShift 5s ease-in-out infinite;
+      border: 1px solid rgba(0,220,130,0.4);
+    }
+
+    /* ── Demo stat cards: count-up + grow-in bars ───────────────────────── */
+    .stat-bar {
+      transform: scaleY(0);
+      transform-origin: bottom;
+      transition: transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .stat-card.in-view .stat-bar {
+      transform: scaleY(1);
+    }
+    .demo-badge-pulse {
+      animation: demoPulse 2.4s ease-in-out infinite;
+    }
+    @keyframes demoPulse {
+      0%, 100% { opacity: 1;   transform: scale(1); }
+      50%      { opacity: 0.7; transform: scale(1.04); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .hero-fluid-bg span, .gradient-text, .free-forever-badge, .stat-bar, .demo-badge-pulse {
+        animation: none !important;
+        transition: none !important;
+      }
+    }
   </style>
 </head>
 <body class="text-white antialiased" style="font-family: Inter, system-ui, sans-serif;">
@@ -55,17 +148,29 @@
       <!-- Logo -->
       <a href="#" class="flex items-center gap-2 font-semibold text-white text-sm">
         <span class="flex items-center justify-center w-7 h-7 rounded-md bg-brand-green text-brand-bg font-bold text-base">♟</span>
-        Chessalgo
+        Synapchess
       </a>
 
       <!-- Center nav -->
-      <nav class="hidden md:flex items-center gap-5 text-sm text-brand-muted">
-        <a href="#mission"    class="hover:text-white transition-colors">Mission</a>
-        <a href="/curriculum" class="hover:text-white transition-colors">Curriculum</a>
-        <a href="/worksheets" class="hover:text-white transition-colors">Printable Sheets</a>
-        <a href="/basics"     class="text-brand-green hover:text-brand-gdark font-medium transition-colors">Chess Basics</a>
-        <a href="#outcomes"   class="hover:text-white transition-colors">Outcomes</a>
-        <a href="#foundation" class="hover:text-white transition-colors">Foundation</a>
+      <nav class="hidden md:flex items-center gap-6 text-sm text-brand-muted">
+        <div class="relative">
+          <button id="nav-learn-btn" type="button"
+                  class="flex items-center gap-1 hover:text-white transition-colors cursor-pointer">
+            Learn
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+            </svg>
+          </button>
+          <div id="nav-learn-menu"
+               class="hidden absolute left-0 top-full mt-3 w-52 rounded-lg border border-brand-border py-1.5 z-50 shadow-2xl"
+               style="background:#131419;">
+            <a href="/curriculum"    class="block px-4 py-2 text-sm text-brand-muted hover:bg-white/5 hover:text-white transition-colors">Curriculum</a>
+            <a href="/basics"        class="block px-4 py-2 text-sm text-brand-muted hover:bg-white/5 hover:text-white transition-colors">Chess Basics</a>
+            <a href="/special-rules" class="block px-4 py-2 text-sm text-brand-muted hover:bg-white/5 hover:text-white transition-colors">Special Rules</a>
+          </div>
+        </div>
+        <a href="/trainer"  class="hover:text-white transition-colors">Solve</a>
+        <a href="/analysis" class="hover:text-white transition-colors">Analyze</a>
       </nav>
 
       <!-- Right actions -->
@@ -109,24 +214,40 @@
   </header>
 
   <!-- ─── Hero ─────────────────────────────────────────────────────────── -->
-  <section class="pt-24 pb-32 px-6 text-center" style="background:#0b0c10;">
-    <div class="max-w-3xl mx-auto space-y-6">
+  <section class="relative pt-24 pb-32 px-6 text-center overflow-hidden" style="background:#0b0c10;">
+
+    <!-- Fluid animated gradient blobs -->
+    <div class="hero-fluid-bg" aria-hidden="true">
+      <span class="blob-1"></span>
+      <span class="blob-2"></span>
+      <span class="blob-3"></span>
+    </div>
+
+    <div class="relative max-w-3xl mx-auto space-y-6" style="z-index:1;">
 
       <!-- Pill badge -->
       <p class="text-brand-muted text-sm tracking-wide">
         <span class="text-brand-green mr-1">•</span>
-        501(c)(3) nonprofit &nbsp;·&nbsp; Now serving 142 Title I schools
+        Fiscally sponsored by HCB Foundation &nbsp;·&nbsp; Now serving 142 Title I schools
+        <span class="ml-1 text-amber-400 text-xs font-semibold align-middle">(demo data)</span>
       </p>
+
+      <!-- Free Forever badge -->
+      <div>
+        <span class="free-forever-badge inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold text-white">
+          <span class="text-brand-green">✓</span> Free Forever — no paywalls, no tiers
+        </span>
+      </div>
 
       <!-- Heading -->
       <h1 class="text-5xl md:text-6xl font-extrabold leading-tight text-white">
-        Reducing the cognitive equity<br class="hidden md:block" /> gap, one move at a time
+        <span class="gradient-text">Reducing the cognitive equity</span><br class="hidden md:block" /> gap, one move at a time
       </h1>
 
       <!-- Sub-copy -->
       <p class="text-brand-muted text-lg max-w-xl mx-auto leading-relaxed">
         Reducing the cognitive equity gap in Title I schools through master-level chess
-        curriculum and data-focused training materials.
+        curriculum and data-focused training materials — free, forever.
       </p>
 
       <!-- CTAs -->
@@ -143,7 +264,10 @@
       </div>
 
       <!-- Trust line -->
-      <p class="text-brand-muted text-xs pt-2">Trusted by district partners across 38 states</p>
+      <p class="text-brand-muted text-xs pt-2">
+        Trusted by district partners across 38 states
+        <span class="text-amber-400 font-semibold">(demo data)</span>
+      </p>
     </div>
   </section>
 
@@ -164,10 +288,10 @@
           Live Puzzle Training
         </span>
         <h2 class="text-3xl font-bold text-white leading-snug">
-          Train on your actual blunders,<br /> not generic puzzles
+          Train on curated puzzles,<br /> built to sharpen your tactics
         </h2>
         <p class="text-brand-muted text-base leading-relaxed max-w-md">
-          Every position is extracted from real games. Find the engine's best move —
+          Every position is drawn from our database of 4,000+ puzzles. Find the engine's best move —
           if you're wrong the piece snaps back and you try again.
         </p>
 
@@ -194,7 +318,7 @@
             style="background:#131419;">
             Show Solution
           </button>
-          <p id="status" class="text-sm" style="color:#9ca3af;">
+          <p id="status" class="text-sm" style="color:#94a3b8;">
             Click "Train New Puzzle" to begin.
           </p>
         </div>
@@ -236,7 +360,6 @@
           <div class="flex flex-wrap gap-4 pt-2 border-t border-brand-border text-xs">
             <a href="/basics"     class="text-brand-green hover:text-brand-gdark transition-colors font-medium">▶ Interactive Board</a>
             <a href="/curriculum" class="text-brand-muted hover:text-white transition-colors">📹 Video Lecture</a>
-            <a href="/worksheets" class="text-brand-muted hover:text-white transition-colors">📄 Worksheet</a>
           </div>
         </div>
 
@@ -257,7 +380,6 @@
           <div class="flex flex-wrap gap-4 pt-2 border-t border-brand-border text-xs">
             <a href="/trainer?level=1" class="text-brand-green hover:text-brand-gdark transition-colors font-medium">▶ Puzzle Trainer</a>
             <a href="/curriculum"      class="text-brand-muted hover:text-white transition-colors">📹 Video Lecture</a>
-            <a href="/worksheets"      class="text-brand-muted hover:text-white transition-colors">📄 Worksheet</a>
           </div>
         </div>
 
@@ -278,7 +400,6 @@
           <div class="flex flex-wrap gap-4 pt-2 border-t border-brand-border text-xs">
             <a href="/trainer?level=2" class="text-brand-green hover:text-brand-gdark transition-colors font-medium">▶ Puzzle Trainer</a>
             <a href="/curriculum"      class="text-brand-muted hover:text-white transition-colors">📹 Video Lecture</a>
-            <a href="/worksheets"      class="text-brand-muted hover:text-white transition-colors">📄 Worksheet</a>
           </div>
         </div>
 
@@ -299,7 +420,6 @@
           <div class="flex flex-wrap gap-4 pt-2 border-t border-brand-border text-xs">
             <a href="/trainer?level=3" class="text-brand-green hover:text-brand-gdark transition-colors font-medium">▶ Puzzle Trainer</a>
             <a href="/curriculum"      class="text-brand-muted hover:text-white transition-colors">📹 Video Lecture</a>
-            <a href="/worksheets"      class="text-brand-muted hover:text-white transition-colors">📄 Worksheet</a>
           </div>
         </div>
 
@@ -312,14 +432,20 @@
     <div class="max-w-6xl mx-auto">
 
       <div class="text-center mb-14 space-y-4">
-        <p class="text-brand-green text-xs font-semibold tracking-widest uppercase flex items-center justify-center gap-2">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-          Measured Outcomes
-        </p>
+        <div class="flex items-center justify-center gap-2 flex-wrap">
+          <p class="text-brand-green text-xs font-semibold tracking-widest uppercase flex items-center justify-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+            Measured Outcomes
+          </p>
+          <span class="demo-badge-pulse inline-flex items-center gap-1 border border-amber-500/40 text-amber-400 text-[10px] font-bold tracking-widest uppercase px-2 py-0.5 rounded-full"
+                style="background:rgba(245,158,11,0.08);">
+            Demo Data — Not Real
+          </span>
+        </div>
         <h2 class="text-4xl font-bold text-white">Student cognitive growth, quantified</h2>
         <p class="text-brand-muted text-base max-w-2xl mx-auto leading-relaxed">
-          Every cohort is tracked against district baselines so educators can see exactly how chess
-          training compounds reasoning skills over time.
+          The figures below are illustrative sample data for demonstration purposes only.
+          They are not drawn from a live deployment or verified study and should not be cited as real outcomes.
         </p>
       </div>
 
@@ -327,27 +453,27 @@
       <div class="grid md:grid-cols-3 gap-6">
 
         <!-- Card 1 -->
-        <div class="rounded-2xl border border-brand-border p-6 flex flex-col gap-4" style="background:#131419;">
+        <div class="stat-card rounded-2xl border border-brand-border p-6 flex flex-col gap-4" style="background:#131419;">
           <div class="flex items-center justify-between text-xs text-brand-muted">
             <div class="w-8 h-8 rounded-lg flex items-center justify-center text-brand-green" style="background:#1a1f1a;">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
             </div>
-            <span>vs. district baseline</span>
+            <span>vs. district baseline (demo)</span>
           </div>
           <div>
-            <div class="text-4xl font-extrabold text-white">+34%</div>
+            <div class="text-4xl font-extrabold text-white"><span class="stat-num" data-target="34" data-prefix="+" data-suffix="%">0%</span></div>
             <div class="text-brand-muted text-sm mt-1">Cognitive growth index</div>
           </div>
           <!-- Mini bar chart -->
           <div class="flex items-end gap-1 h-10">
-            <div class="flex-1 rounded-sm" style="background:#1e2028; height:30%;"></div>
-            <div class="flex-1 rounded-sm" style="background:#1e2028; height:40%;"></div>
-            <div class="flex-1 rounded-sm" style="background:#1e2028; height:35%;"></div>
-            <div class="flex-1 rounded-sm" style="background:#1e2028; height:50%;"></div>
-            <div class="flex-1 rounded-sm" style="background:#1e2028; height:45%;"></div>
-            <div class="flex-1 rounded-sm" style="background:#1e2028; height:60%;"></div>
-            <div class="flex-1 rounded-sm" style="background:#1e2028; height:55%;"></div>
-            <div class="flex-1 rounded-sm" style="background:#00dc82; height:100%;"></div>
+            <div class="flex-1 rounded-sm stat-bar" style="background:#1e2028; height:30%; transition-delay:0.02s;"></div>
+            <div class="flex-1 rounded-sm stat-bar" style="background:#1e2028; height:40%; transition-delay:0.06s;"></div>
+            <div class="flex-1 rounded-sm stat-bar" style="background:#1e2028; height:35%; transition-delay:0.10s;"></div>
+            <div class="flex-1 rounded-sm stat-bar" style="background:#1e2028; height:50%; transition-delay:0.14s;"></div>
+            <div class="flex-1 rounded-sm stat-bar" style="background:#1e2028; height:45%; transition-delay:0.18s;"></div>
+            <div class="flex-1 rounded-sm stat-bar" style="background:#1e2028; height:60%; transition-delay:0.22s;"></div>
+            <div class="flex-1 rounded-sm stat-bar" style="background:#1e2028; height:55%; transition-delay:0.26s;"></div>
+            <div class="flex-1 rounded-sm stat-bar" style="background:#00dc82; height:100%; transition-delay:0.30s;"></div>
           </div>
           <p class="text-brand-muted text-xs leading-relaxed">
             Working-memory &amp; pattern-recognition gains across one school year.
@@ -355,26 +481,26 @@
         </div>
 
         <!-- Card 2 -->
-        <div class="rounded-2xl border border-brand-border p-6 flex flex-col gap-4" style="background:#131419;">
+        <div class="stat-card rounded-2xl border border-brand-border p-6 flex flex-col gap-4" style="background:#131419;">
           <div class="flex items-center justify-between text-xs text-brand-muted">
             <div class="w-8 h-8 rounded-lg flex items-center justify-center text-brand-green" style="background:#1a1f1a;">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
             </div>
-            <span>+18.2 pts YoY</span>
+            <span>+18.2 pts YoY (demo)</span>
           </div>
           <div>
-            <div class="text-4xl font-extrabold text-white">92.4%</div>
+            <div class="text-4xl font-extrabold text-white"><span class="stat-num" data-target="92.4" data-suffix="%">0%</span></div>
             <div class="text-brand-muted text-sm mt-1">Problem-solving accuracy</div>
           </div>
           <div class="flex items-end gap-1 h-10">
-            <div class="flex-1 rounded-sm" style="background:#1e2028; height:40%;"></div>
-            <div class="flex-1 rounded-sm" style="background:#1e2028; height:55%;"></div>
-            <div class="flex-1 rounded-sm" style="background:#1e2028; height:50%;"></div>
-            <div class="flex-1 rounded-sm" style="background:#1e2028; height:65%;"></div>
-            <div class="flex-1 rounded-sm" style="background:#1e2028; height:60%;"></div>
-            <div class="flex-1 rounded-sm" style="background:#1e2028; height:75%;"></div>
-            <div class="flex-1 rounded-sm" style="background:#1e2028; height:70%;"></div>
-            <div class="flex-1 rounded-sm" style="background:#00dc82; height:100%;"></div>
+            <div class="flex-1 rounded-sm stat-bar" style="background:#1e2028; height:40%; transition-delay:0.02s;"></div>
+            <div class="flex-1 rounded-sm stat-bar" style="background:#1e2028; height:55%; transition-delay:0.06s;"></div>
+            <div class="flex-1 rounded-sm stat-bar" style="background:#1e2028; height:50%; transition-delay:0.10s;"></div>
+            <div class="flex-1 rounded-sm stat-bar" style="background:#1e2028; height:65%; transition-delay:0.14s;"></div>
+            <div class="flex-1 rounded-sm stat-bar" style="background:#1e2028; height:60%; transition-delay:0.18s;"></div>
+            <div class="flex-1 rounded-sm stat-bar" style="background:#1e2028; height:75%; transition-delay:0.22s;"></div>
+            <div class="flex-1 rounded-sm stat-bar" style="background:#1e2028; height:70%; transition-delay:0.26s;"></div>
+            <div class="flex-1 rounded-sm stat-bar" style="background:#00dc82; height:100%; transition-delay:0.30s;"></div>
           </div>
           <p class="text-brand-muted text-xs leading-relaxed">
             Measured on standardized spatial-reasoning assessments.
@@ -382,26 +508,26 @@
         </div>
 
         <!-- Card 3 -->
-        <div class="rounded-2xl border border-brand-border p-6 flex flex-col gap-4" style="background:#131419;">
+        <div class="stat-card rounded-2xl border border-brand-border p-6 flex flex-col gap-4" style="background:#131419;">
           <div class="flex items-center justify-between text-xs text-brand-muted">
             <div class="w-8 h-8 rounded-lg flex items-center justify-center text-brand-green" style="background:#1a1f1a;">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
             </div>
-            <span>across 142 schools</span>
+            <span>across 142 schools (demo)</span>
           </div>
           <div>
-            <div class="text-4xl font-extrabold text-white">27,840</div>
+            <div class="text-4xl font-extrabold text-white"><span class="stat-num" data-target="27840">0</span></div>
             <div class="text-brand-muted text-sm mt-1">Students reached</div>
           </div>
           <div class="flex items-end gap-1 h-10">
-            <div class="flex-1 rounded-sm" style="background:#1e2028; height:25%;"></div>
-            <div class="flex-1 rounded-sm" style="background:#1e2028; height:35%;"></div>
-            <div class="flex-1 rounded-sm" style="background:#1e2028; height:45%;"></div>
-            <div class="flex-1 rounded-sm" style="background:#1e2028; height:40%;"></div>
-            <div class="flex-1 rounded-sm" style="background:#1e2028; height:55%;"></div>
-            <div class="flex-1 rounded-sm" style="background:#1e2028; height:50%;"></div>
-            <div class="flex-1 rounded-sm" style="background:#1e2028; height:65%;"></div>
-            <div class="flex-1 rounded-sm" style="background:#00dc82; height:100%;"></div>
+            <div class="flex-1 rounded-sm stat-bar" style="background:#1e2028; height:25%; transition-delay:0.02s;"></div>
+            <div class="flex-1 rounded-sm stat-bar" style="background:#1e2028; height:35%; transition-delay:0.06s;"></div>
+            <div class="flex-1 rounded-sm stat-bar" style="background:#1e2028; height:45%; transition-delay:0.10s;"></div>
+            <div class="flex-1 rounded-sm stat-bar" style="background:#1e2028; height:40%; transition-delay:0.14s;"></div>
+            <div class="flex-1 rounded-sm stat-bar" style="background:#1e2028; height:55%; transition-delay:0.18s;"></div>
+            <div class="flex-1 rounded-sm stat-bar" style="background:#1e2028; height:50%; transition-delay:0.22s;"></div>
+            <div class="flex-1 rounded-sm stat-bar" style="background:#1e2028; height:65%; transition-delay:0.26s;"></div>
+            <div class="flex-1 rounded-sm stat-bar" style="background:#00dc82; height:100%; transition-delay:0.30s;"></div>
           </div>
           <p class="text-brand-muted text-xs leading-relaxed">
             Active learners on the master-level chess curriculum.
@@ -442,10 +568,10 @@
         <div class="col-span-2 md:col-span-2 space-y-3">
           <a href="#" class="flex items-center gap-2 font-semibold text-white text-sm">
             <span class="flex items-center justify-center w-7 h-7 rounded-md bg-brand-green text-brand-bg font-bold text-base">♟</span>
-            Chessalgo
+            Synapchess
           </a>
           <p class="text-brand-muted text-sm leading-relaxed max-w-xs">
-            The Chessalgo Foundation is a 501(c)(3) nonprofit closing the cognitive equity gap in Title I schools.
+            Synapchess is fiscally sponsored by HCB Foundation, closing the cognitive equity gap in Title I schools.
           </p>
         </div>
 
@@ -486,7 +612,7 @@
 
       <!-- Bottom row -->
       <div class="border-t border-brand-border pt-6 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-brand-muted">
-        <span>© 2026 The Chessalgo Foundation. All rights reserved.</span>
+        <span>© 2026 Synapchess. All rights reserved.</span>
         <div class="flex gap-5">
           <a href="#" class="hover:text-white transition-colors">Privacy</a>
           <a href="#" class="hover:text-white transition-colors">Terms</a>
@@ -583,6 +709,143 @@
     </div>
   </div>
 
+  <!-- ─── Daily Training Complete Overlay ─────────────────────────────── -->
+  <div id="daily-limit-banner" class="fixed inset-0 z-[200] flex items-center justify-center hidden">
+    <div class="absolute inset-0" style="background:rgba(0,0,0,0.88);"></div>
+    <div class="relative z-10 w-full max-w-md mx-4 rounded-2xl border p-10 text-center space-y-5"
+         style="background:#131419; border-color:rgba(0,220,130,0.35);">
+      <div class="w-16 h-16 rounded-full flex items-center justify-center mx-auto"
+           style="background:rgba(0,220,130,0.08); border:1px solid rgba(0,220,130,0.25);">
+        <span class="text-3xl">♟</span>
+      </div>
+      <div class="space-y-2">
+        <h2 class="text-xl font-bold text-white leading-snug">
+          Daily Synapchess Training Block Complete!
+        </h2>
+        <p class="text-brand-muted text-sm leading-relaxed">
+          You've hit your daily goal. Consistency is the key to mastery —
+          your brain is growing even when you're not at the board.
+        </p>
+        <p class="text-brand-green text-sm font-semibold pt-1">See you tomorrow.</p>
+      </div>
+      <button onclick="document.getElementById('daily-limit-banner').classList.add('hidden')"
+              class="border border-brand-border hover:border-brand-green text-brand-muted hover:text-white px-6 py-2.5 rounded-lg text-sm transition-colors cursor-pointer"
+              style="background:#0b0c10;">
+        Dismiss
+      </button>
+    </div>
+  </div>
+
+  <!-- ─── Onboarding Diagnostic Wizard ────────────────────────────────── -->
+  <div id="wizard-modal" class="fixed inset-0 z-[150] flex items-center justify-center hidden">
+    <div class="absolute inset-0" style="background:rgba(0,0,0,0.88);"></div>
+
+    <div class="relative z-10 w-full max-w-lg mx-4 rounded-2xl border border-brand-border p-8 space-y-7"
+         style="background:#131419;">
+
+      <!-- Progress dots + skip -->
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <div class="wiz-dot w-2.5 h-2.5 rounded-full transition-colors" style="background:#00dc82;"></div>
+          <div class="wiz-dot w-2.5 h-2.5 rounded-full transition-colors" style="background:#1e2028;"></div>
+          <div class="wiz-dot w-2.5 h-2.5 rounded-full transition-colors" style="background:#1e2028;"></div>
+        </div>
+        <button onclick="skipWizard()"
+                class="text-brand-muted hover:text-white text-xs transition-colors cursor-pointer">
+          Skip for now →
+        </button>
+      </div>
+
+      <!-- Step 1: Background -->
+      <div id="wiz-step-1" class="space-y-5">
+        <div class="space-y-1">
+          <p class="text-brand-green text-xs font-semibold tracking-widest uppercase">Step 1 of 3</p>
+          <h3 class="text-2xl font-bold text-white">What is your chess background?</h3>
+          <p class="text-brand-muted text-sm">We'll tailor your training path to match your experience.</p>
+        </div>
+        <div class="grid gap-3">
+          <button class="wiz-card text-left rounded-xl border border-brand-border p-4 transition-colors cursor-pointer hover:border-brand-green/60"
+                  style="background:#0b0c10;"
+                  onclick="wizSelectBackground('Absolute Beginner', '/basics', this)">
+            <div class="text-white font-semibold text-sm mb-1">♟ Absolute Beginner</div>
+            <div class="text-brand-muted text-xs">I don't know how the pieces move yet</div>
+          </button>
+          <button class="wiz-card text-left rounded-xl border border-brand-border p-4 transition-colors cursor-pointer hover:border-brand-green/60"
+                  style="background:#0b0c10;"
+                  onclick="wizSelectBackground('Casual', '/trainer?level=1', this)">
+            <div class="text-white font-semibold text-sm mb-1">⭐ Casual</div>
+            <div class="text-brand-muted text-xs">I know the rules and play occasionally</div>
+          </button>
+          <button class="wiz-card text-left rounded-xl border border-brand-border p-4 transition-colors cursor-pointer hover:border-brand-green/60"
+                  style="background:#0b0c10;"
+                  onclick="wizSelectBackground('Club/Competitive', '/trainer?level=2', this)">
+            <div class="text-white font-semibold text-sm mb-1">⭐⭐ Club / Competitive</div>
+            <div class="text-brand-muted text-xs">I play in tournaments or study seriously</div>
+          </button>
+        </div>
+      </div>
+
+      <!-- Step 2: Daily time -->
+      <div id="wiz-step-2" class="space-y-5 hidden">
+        <div class="space-y-1">
+          <p class="text-brand-green text-xs font-semibold tracking-widest uppercase">Step 2 of 3</p>
+          <h3 class="text-2xl font-bold text-white">How much time can you train daily?</h3>
+          <p class="text-brand-muted text-sm">We'll enforce a training block limit to keep you consistent.</p>
+        </div>
+        <div class="grid grid-cols-3 gap-3">
+          <button class="wiz-card rounded-xl border border-brand-border p-5 text-center transition-colors cursor-pointer hover:border-brand-green/60"
+                  style="background:#0b0c10;"
+                  onclick="wizSelectTime(15, this)">
+            <div class="text-3xl font-extrabold text-white mb-1">15</div>
+            <div class="text-brand-muted text-xs">minutes</div>
+          </button>
+          <button class="wiz-card rounded-xl border border-brand-border p-5 text-center transition-colors cursor-pointer hover:border-brand-green/60"
+                  style="background:#0b0c10;"
+                  onclick="wizSelectTime(30, this)">
+            <div class="text-3xl font-extrabold text-white mb-1">30</div>
+            <div class="text-brand-muted text-xs">minutes</div>
+          </button>
+          <button class="wiz-card rounded-xl border border-brand-border p-5 text-center transition-colors cursor-pointer hover:border-brand-green/60"
+                  style="background:#0b0c10;"
+                  onclick="wizSelectTime(60, this)">
+            <div class="text-3xl font-extrabold text-white mb-1">60</div>
+            <div class="text-brand-muted text-xs">minutes</div>
+          </button>
+        </div>
+      </div>
+
+      <!-- Step 3: Core target -->
+      <div id="wiz-step-3" class="space-y-5 hidden">
+        <div class="space-y-1">
+          <p class="text-brand-green text-xs font-semibold tracking-widest uppercase">Step 3 of 3</p>
+          <h3 class="text-2xl font-bold text-white">What is your core target?</h3>
+          <p class="text-brand-muted text-sm">Choose the skill you most want to develop right now.</p>
+        </div>
+        <div class="grid gap-3">
+          <button class="wiz-card text-left rounded-xl border border-brand-border p-4 transition-colors cursor-pointer hover:border-brand-green/60"
+                  style="background:#0b0c10;"
+                  onclick="wizSelectGoal('Learn Rules', this)">
+            <div class="text-white font-semibold text-sm mb-1">📖 Learn the Rules</div>
+            <div class="text-brand-muted text-xs">Master piece movement and basic principles</div>
+          </button>
+          <button class="wiz-card text-left rounded-xl border border-brand-border p-4 transition-colors cursor-pointer hover:border-brand-green/60"
+                  style="background:#0b0c10;"
+                  onclick="wizSelectGoal('Master Tactics', this)">
+            <div class="text-white font-semibold text-sm mb-1">⚡ Master Tactics</div>
+            <div class="text-brand-muted text-xs">Win material with pins, forks, and combinations</div>
+          </button>
+          <button class="wiz-card text-left rounded-xl border border-brand-border p-4 transition-colors cursor-pointer hover:border-brand-green/60"
+                  style="background:#0b0c10;"
+                  onclick="wizSelectGoal('Deep Calculation', this)">
+            <div class="text-white font-semibold text-sm mb-1">🔭 Deep Calculation</div>
+            <div class="text-brand-muted text-xs">Calculate 5+ move sequences like a master</div>
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
   <!-- ─── Chess Engine ────────────────────────────────────────────────── -->
   <script>
     let board                 = null;
@@ -599,6 +862,8 @@
     let currentUser           = null;   // { username } when logged in, else null
     let activeModalTab        = 'login';
     let telemetryOpen         = false;
+    let dailyBudgetMs         = 0;      // user's daily time limit in ms (0 = no limit)
+    let sessionTrainingMs     = 0;      // accumulated active puzzle time this session
 
     function updateStreakDisplay() {
       const level = puzzlesSolvedInStreak < 5 ? 1 : puzzlesSolvedInStreak < 10 ? 2 : 3;
@@ -609,7 +874,20 @@
     function setStatus(text, color) {
       const el = document.getElementById('status');
       el.textContent = text;
-      el.style.color = color || '#9ca3af';
+      el.style.color = color || '#94a3b8';
+    }
+
+    // Confetti burst on a correctly solved puzzle
+    function fireConfetti() {
+      if (typeof confetti !== 'function') return;
+      confetti({
+        particleCount: 90,
+        spread:        70,
+        startVelocity: 38,
+        origin:        { y: 0.65 },
+        colors:        ['#00dc82', '#00aa63', '#38bdf8', '#ffffff'],
+        disableForReducedMotion: true
+      });
     }
 
     // Auto-plays the computer's response move after a short delay.
@@ -631,10 +909,11 @@
           updateStreakDisplay();
           logAttempt(true);
           setStatus('✓ Puzzle Completed Successfully!', '#00dc82');
+          fireConfetti();
         } else {
           const whose = game.turn() === 'w' ? 'White' : 'Black';
           const left  = Math.ceil((solutionMoves.length - currentMoveIndex) / 2);
-          setStatus(whose + ' to move — ' + left + ' move' + (left > 1 ? 's' : '') + ' left.', '#9ca3af');
+          setStatus(whose + ' to move — ' + left + ' move' + (left > 1 ? 's' : '') + ' left.', '#94a3b8');
         }
       }, 450);
     }
@@ -661,6 +940,7 @@
           updateStreakDisplay();
           logAttempt(true);
           setStatus('✓ Puzzle Completed Successfully!', '#00dc82');
+          fireConfetti();
           return;
         }
 
@@ -734,10 +1014,20 @@
         });
     }
 
+    // ── Daily budget enforcement ─────────────────────────────────────────────
+    function checkDailyLimit(elapsedMs) {
+      if (!dailyBudgetMs) return;
+      sessionTrainingMs += elapsedMs;
+      if (sessionTrainingMs >= dailyBudgetMs) {
+        document.getElementById('daily-limit-banner').classList.remove('hidden');
+      }
+    }
+
     // ── Telemetry ───────────────────────────────────────────────────────────
     function logAttempt(isCorrect) {
       if (!currentPuzzleId || !currentUser) return;
       const timeMs = puzzleStartTime ? Math.round(performance.now() - puzzleStartTime) : null;
+      if (timeMs) checkDailyLimit(timeMs);
       fetch('/log-attempt', {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -854,10 +1144,17 @@
           puzzlesSolvedInStreak = res.data.streak;
           updateStreakDisplay();
         }
+        if (typeof res.data.daily_time_budget === 'number' && res.data.daily_time_budget > 0) {
+          dailyBudgetMs = res.data.daily_time_budget * 60 * 1000;
+        }
         closeModal();
         updateNavAuth();
         fetchAnalytics();
-        loadPuzzle();
+        if (res.data.diagnostic_done === 0) {
+          openWizard();
+        } else {
+          loadPuzzle();
+        }
       })
       .catch(function() {
         errorEl.style.color = '#ef4444';
@@ -907,6 +1204,80 @@
         updateNavAuth();
         setStatus('Logged out. Click "Train New Puzzle" to continue as guest.');
       });
+    }
+
+    // ── Onboarding Wizard ───────────────────────────────────────────────────
+    var wizData     = { experience_level: '', daily_time_budget: 30, training_goal: '' };
+    var wizRedirect = '/';
+
+    function openWizard() {
+      wizData     = { experience_level: '', daily_time_budget: 30, training_goal: '' };
+      wizRedirect = '/';
+      showWizStep(1);
+      document.getElementById('wizard-modal').classList.remove('hidden');
+    }
+
+    function closeWizard() {
+      document.getElementById('wizard-modal').classList.add('hidden');
+    }
+
+    function showWizStep(n) {
+      [1, 2, 3].forEach(function(i) {
+        document.getElementById('wiz-step-' + i).classList.add('hidden');
+      });
+      document.getElementById('wiz-step-' + n).classList.remove('hidden');
+      document.querySelectorAll('.wiz-dot').forEach(function(d, idx) {
+        d.style.background = idx < n ? '#00dc82' : '#1e2028';
+      });
+    }
+
+    function wizSelectBackground(val, redirect, el) {
+      wizData.experience_level = val;
+      wizRedirect              = redirect;
+      document.querySelectorAll('#wiz-step-1 .wiz-card').forEach(function(c) {
+        c.style.borderColor = '#1e2028';
+      });
+      el.style.borderColor = '#00dc82';
+      setTimeout(function() { showWizStep(2); }, 320);
+    }
+
+    function wizSelectTime(val, el) {
+      wizData.daily_time_budget = val;
+      document.querySelectorAll('#wiz-step-2 .wiz-card').forEach(function(c) {
+        c.style.borderColor = '#1e2028';
+      });
+      el.style.borderColor = '#00dc82';
+      setTimeout(function() { showWizStep(3); }, 320);
+    }
+
+    function wizSelectGoal(val, el) {
+      wizData.training_goal = val;
+      document.querySelectorAll('#wiz-step-3 .wiz-card').forEach(function(c) {
+        c.style.borderColor = '#1e2028';
+      });
+      el.style.borderColor = '#00dc82';
+      setTimeout(submitWizard, 400);
+    }
+
+    function submitWizard() {
+      fetch('/save-diagnostic', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify(wizData)
+      })
+      .then(function() {
+        if (wizData.daily_time_budget > 0) {
+          dailyBudgetMs = wizData.daily_time_budget * 60 * 1000;
+        }
+        closeWizard();
+        window.location.href = wizRedirect;
+      })
+      .catch(function() { closeWizard(); window.location.href = wizRedirect; });
+    }
+
+    function skipWizard() {
+      closeWizard();
+      loadPuzzle();
     }
 
     // Nav button wiring
@@ -967,6 +1338,79 @@
 
       playNextMove(0);
     });
+  </script>
+
+  <!-- ─── Nav dropdown (Learn tab) ──────────────────────────────────────── -->
+  <script>
+    (function() {
+      var btn  = document.getElementById('nav-learn-btn');
+      var menu = document.getElementById('nav-learn-menu');
+      if (!btn || !menu) return;
+      btn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        menu.classList.toggle('hidden');
+      });
+      document.addEventListener('click', function(e) {
+        if (!menu.contains(e.target) && e.target !== btn) menu.classList.add('hidden');
+      });
+      document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') menu.classList.add('hidden');
+      });
+    })();
+  </script>
+
+  <!-- ─── Demo stat cards: count-up + grow-in bars on scroll into view ───── -->
+  <script>
+    (function() {
+      var cards = Array.prototype.slice.call(document.querySelectorAll('.stat-card'));
+      if (!cards.length) return;
+
+      var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      function formatNum(n, decimals) {
+        return decimals ? n.toFixed(1) : Math.round(n).toLocaleString('en-US');
+      }
+
+      function animateCount(el) {
+        var target   = parseFloat(el.dataset.target);
+        var prefix   = el.dataset.prefix || '';
+        var suffix   = el.dataset.suffix || '';
+        var decimals = el.dataset.target.indexOf('.') !== -1;
+
+        if (reduceMotion) {
+          el.textContent = prefix + formatNum(target, decimals) + suffix;
+          return;
+        }
+
+        var duration = 1200;
+        var start    = null;
+
+        function step(ts) {
+          if (start === null) start = ts;
+          var progress = Math.min(1, (ts - start) / duration);
+          var eased    = 1 - Math.pow(1 - progress, 3); // ease-out cubic
+          el.textContent = prefix + formatNum(target * eased, decimals) + suffix;
+          if (progress < 1) requestAnimationFrame(step);
+        }
+        requestAnimationFrame(step);
+      }
+
+      var observer = new IntersectionObserver(function(entries) {
+        entries.forEach(function(entry) {
+          if (!entry.isIntersecting) return;
+          var card = entry.target;
+          card.classList.add('in-view');
+          var numEl = card.querySelector('.stat-num');
+          if (numEl && !numEl.dataset.animated) {
+            numEl.dataset.animated = '1';
+            animateCount(numEl);
+          }
+          observer.unobserve(card);
+        });
+      }, { threshold: 0.35 });
+
+      cards.forEach(function(card) { observer.observe(card); });
+    })();
   </script>
 
 </body>

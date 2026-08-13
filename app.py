@@ -1,13 +1,15 @@
+import atexit
 import sqlite3
 import os
 from datetime import datetime, timedelta, timezone
 from flask import Flask, render_template, jsonify, request, session
 from werkzeug.security import generate_password_hash, check_password_hash
 
+from db import DB_PATH
+from curriculum_data import get_section, ordered_sections, format_duration
+
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'dev-secret-change-before-deploying')
-
-DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'chess_data.db')
 
 # ── Space-count expression reused across tier queries ─────────────────────────
 # N UCI moves separated by spaces → N-1 spaces in the string.
@@ -52,13 +54,41 @@ def init_db():
                 next_review DATETIME DEFAULT CURRENT_TIMESTAMP,
                 PRIMARY KEY (user_id, puzzle_id)
             );
+
+            CREATE TABLE IF NOT EXISTS user_video_progress (
+                user_id      INTEGER  NOT NULL,
+                section      TEXT     NOT NULL,
+                video_id     TEXT     NOT NULL,
+                completed_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                PRIMARY KEY (user_id, video_id)
+            );
         ''')
+        conn.commit()
+        # Backwards-compatible schema migrations
+        for stmt in [
+            'ALTER TABLE users ADD COLUMN experience_level  TEXT',
+            'ALTER TABLE users ADD COLUMN daily_time_budget INTEGER DEFAULT 30',
+            'ALTER TABLE users ADD COLUMN training_goal     TEXT',
+            'ALTER TABLE users ADD COLUMN diagnostic_done   INTEGER DEFAULT 0',
+        ]:
+            try:
+                conn.execute(stmt)
+            except Exception:
+                pass
         conn.commit()
     finally:
         conn.close()
 
 
 init_db()
+
+# ── Game analysis feature (Requirements: move tracking, save/rename, engine) ──
+from game_analysis import games_bp, init_games_db  # noqa: E402
+from engine_service import shutdown_engine  # noqa: E402
+
+init_games_db()
+app.register_blueprint(games_bp)
+atexit.register(shutdown_engine)
 
 
 # ── SM-2 spaced-repetition ────────────────────────────────────────────────────
@@ -143,17 +173,40 @@ def index():
 
 @app.route('/curriculum')
 def curriculum():
-    return render_template('curriculum.html')
+    return render_template('curriculum.html', sections=ordered_sections())
 
 
-@app.route('/worksheets')
-def worksheets():
-    return render_template('worksheets.html')
+@app.route('/curriculum/<section_slug>')
+def curriculum_section(section_slug):
+    section = get_section(section_slug)
+    if section is None:
+        return render_template('curriculum.html', sections=ordered_sections()), 404
+
+    videos = [
+        dict(v, duration_label=format_duration(v.get('duration')))
+        for v in section['videos']
+    ]
+    return render_template(
+        'curriculum_section.html',
+        section=section,
+        videos=videos,
+        all_sections=ordered_sections(),
+    )
 
 
 @app.route('/basics')
 def basics():
     return render_template('basics.html')
+
+
+@app.route('/special-rules')
+def special_rules():
+    return render_template('special_rules.html')
+
+
+@app.route('/analysis')
+def analysis_page():
+    return render_template('analysis.html')
 
 
 @app.route('/trainer')
@@ -171,14 +224,21 @@ def me():
     conn = get_db()
     try:
         row = conn.execute(
-            'SELECT username, current_streak FROM users WHERE id = ?', (user_id,)
+            'SELECT username, current_streak, diagnostic_done, daily_time_budget '
+            'FROM users WHERE id = ?', (user_id,)
         ).fetchone()
     finally:
         conn.close()
     if row is None:
         session.clear()
         return jsonify({'logged_in': False})
-    return jsonify({'logged_in': True, 'username': row['username'], 'streak': row['current_streak']})
+    return jsonify({
+        'logged_in':         True,
+        'username':          row['username'],
+        'streak':            row['current_streak'],
+        'diagnostic_done':   row['diagnostic_done']  if row['diagnostic_done']  is not None else 0,
+        'daily_time_budget': row['daily_time_budget'] if row['daily_time_budget'] is not None else 30,
+    })
 
 
 # ── Auth routes ───────────────────────────────────────────────────────────────
@@ -215,7 +275,8 @@ def login():
     conn = get_db()
     try:
         row = conn.execute(
-            'SELECT id, password_hash, current_streak FROM users WHERE username = ?',
+            'SELECT id, password_hash, current_streak, diagnostic_done, daily_time_budget '
+            'FROM users WHERE username = ?',
             (username,)
         ).fetchone()
     finally:
@@ -227,8 +288,10 @@ def login():
     session['user_id']  = row['id']
     session['username'] = username
     return jsonify({
-        'message': f'Welcome back, {username}!',
-        'streak':  row['current_streak']
+        'message':           f'Welcome back, {username}!',
+        'streak':            row['current_streak'],
+        'diagnostic_done':   row['diagnostic_done']  if row['diagnostic_done']  is not None else 0,
+        'daily_time_budget': row['daily_time_budget'] if row['daily_time_budget'] is not None else 30,
     })
 
 
@@ -236,6 +299,34 @@ def login():
 def logout():
     session.clear()
     return jsonify({'message': 'Logged out.'})
+
+
+@app.route('/save-diagnostic', methods=['POST'])
+def save_diagnostic():
+    user_id = session.get('user_id')
+    if user_id is None:
+        return jsonify({'error': 'Not authenticated.'}), 401
+
+    data              = request.get_json(force=True) or {}
+    experience_level  = (data.get('experience_level') or '').strip()
+    daily_time_budget = int(data.get('daily_time_budget') or 30)
+    training_goal     = (data.get('training_goal') or '').strip()
+
+    conn = get_db()
+    try:
+        conn.execute(
+            '''UPDATE users
+               SET experience_level  = ?,
+                   daily_time_budget = ?,
+                   training_goal     = ?,
+                   diagnostic_done   = 1
+               WHERE id = ?''',
+            (experience_level, daily_time_budget, training_goal, user_id)
+        )
+        conn.commit()
+        return jsonify({'message': 'Diagnostic saved.', 'daily_time_budget': daily_time_budget})
+    finally:
+        conn.close()
 
 
 @app.route('/get-analytics')
@@ -341,6 +432,65 @@ def log_attempt():
         return jsonify({'message': 'Attempt logged.', 'next_review': next_review})
     finally:
         conn.close()
+
+
+# ── Curriculum video progress ────────────────────────────────────────────────
+
+@app.route('/api/video-progress')
+def get_video_progress():
+    """Return the list of video IDs the current user has marked complete.
+
+    Anonymous visitors get an empty list — the front-end falls back to
+    localStorage for them instead of server-side persistence.
+    """
+    user_id = session.get('user_id')
+    if user_id is None:
+        return jsonify({'logged_in': False, 'completed': []})
+
+    conn = get_db()
+    try:
+        rows = conn.execute(
+            'SELECT video_id FROM user_video_progress WHERE user_id = ?',
+            (user_id,)
+        ).fetchall()
+    finally:
+        conn.close()
+    return jsonify({'logged_in': True, 'completed': [r['video_id'] for r in rows]})
+
+
+@app.route('/api/video-progress', methods=['POST'])
+def set_video_progress():
+    """Mark a video complete/incomplete for the current logged-in user."""
+    user_id = session.get('user_id')
+    if user_id is None:
+        return jsonify({'error': 'Not authenticated.'}), 401
+
+    data      = request.get_json(force=True) or {}
+    video_id  = (data.get('video_id') or '').strip()
+    section   = (data.get('section') or '').strip()
+    completed = bool(data.get('completed', True))
+
+    if not video_id or not section:
+        return jsonify({'error': 'video_id and section are required.'}), 400
+
+    conn = get_db()
+    try:
+        if completed:
+            conn.execute(
+                '''INSERT INTO user_video_progress (user_id, section, video_id)
+                   VALUES (?, ?, ?)
+                   ON CONFLICT(user_id, video_id) DO NOTHING''',
+                (user_id, section, video_id)
+            )
+        else:
+            conn.execute(
+                'DELETE FROM user_video_progress WHERE user_id = ? AND video_id = ?',
+                (user_id, video_id)
+            )
+        conn.commit()
+    finally:
+        conn.close()
+    return jsonify({'message': 'Progress saved.', 'video_id': video_id, 'completed': completed})
 
 
 # ── Puzzle serving ────────────────────────────────────────────────────────────

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Chess Basics — Chessalgo</title>
+  <title>Chess Basics — Synapchess</title>
 
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
@@ -17,7 +17,7 @@
               border: '#1e2028',
               green:  '#00dc82',
               gdark:  '#00aa63',
-              muted:  '#9ca3af',
+              muted:  '#94a3b8',
             }
           }
         }
@@ -68,16 +68,28 @@
 
       <a href="/" class="flex items-center gap-2 font-semibold text-white text-sm">
         <span class="flex items-center justify-center w-7 h-7 rounded-md bg-brand-green text-brand-bg font-bold text-base">♟</span>
-        Chessalgo
+        Synapchess
       </a>
 
-      <nav class="hidden md:flex items-center gap-5 text-sm text-brand-muted">
-        <a href="/#mission"    class="hover:text-white transition-colors">Mission</a>
-        <a href="/curriculum"  class="hover:text-white transition-colors">Curriculum</a>
-        <a href="/worksheets"  class="hover:text-white transition-colors">Printable Sheets</a>
-        <a href="/basics"      class="text-white font-semibold">Chess Basics</a>
-        <a href="/#outcomes"   class="hover:text-white transition-colors">Outcomes</a>
-        <a href="/#foundation" class="hover:text-white transition-colors">Foundation</a>
+      <nav class="hidden md:flex items-center gap-6 text-sm text-brand-muted">
+        <div class="relative">
+          <button id="nav-learn-btn" type="button"
+                  class="flex items-center gap-1 text-white font-semibold transition-colors cursor-pointer">
+            Learn
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+            </svg>
+          </button>
+          <div id="nav-learn-menu"
+               class="hidden absolute left-0 top-full mt-3 w-52 rounded-lg border border-brand-border py-1.5 z-50 shadow-2xl"
+               style="background:#131419;">
+            <a href="/curriculum"    class="block px-4 py-2 text-sm text-brand-muted hover:bg-white/5 hover:text-white transition-colors">Curriculum</a>
+            <a href="/basics"        class="block px-4 py-2 text-sm text-brand-green font-semibold bg-white/5 transition-colors">Chess Basics</a>
+            <a href="/special-rules" class="block px-4 py-2 text-sm text-brand-muted hover:bg-white/5 hover:text-white transition-colors">Special Rules</a>
+          </div>
+        </div>
+        <a href="/trainer"  class="hover:text-white transition-colors">Solve</a>
+        <a href="/analysis" class="hover:text-white transition-colors">Analyze</a>
       </nav>
 
       <div class="flex items-center gap-4 text-sm">
@@ -266,14 +278,49 @@
           <!-- All-done message (hidden until knight lesson complete) -->
           <div id="complete-msg" class="hidden space-y-3">
             <p class="text-white font-semibold text-base">You've completed all six basics lessons!</p>
+            <a href="/special-rules"
+               class="inline-flex items-center gap-2 bg-brand-green hover:bg-brand-gdark text-brand-bg font-semibold px-6 py-3 rounded-lg transition-colors text-sm">
+              Next: Special Rules of Chess →
+            </a>
             <a href="/#train"
-               class="inline-flex items-center gap-2 border border-brand-green text-brand-green hover:bg-brand-green hover:text-brand-bg font-semibold px-6 py-3 rounded-lg transition-colors text-sm">
-              Start Puzzle Training →
+               class="inline-flex items-center gap-2 border border-brand-border hover:border-brand-green text-brand-muted hover:text-white px-6 py-3 rounded-lg transition-colors text-sm"
+               style="background:#0b0c10;">
+              Skip to Puzzle Training
             </a>
           </div>
         </div>
 
       </div>
+    </div>
+  </section>
+
+  <!-- ─── Next Chapter Navigation ─────────────────────────────────────── -->
+  <section class="py-12 px-6 border-t border-brand-border" style="background:#0b0c10;">
+    <div class="max-w-6xl mx-auto flex items-center justify-between">
+
+      <!-- Breadcrumb position indicator -->
+      <div class="space-y-1">
+        <p class="text-brand-muted text-xs tracking-widest uppercase font-semibold">Level 0 · Foundation</p>
+        <p class="text-white font-semibold text-sm">How the Pieces Move</p>
+      </div>
+
+      <!-- Next chapter arrow card -->
+      <a href="/special-rules"
+         class="group flex items-center gap-5 rounded-2xl border border-brand-border hover:border-brand-green px-8 py-5 transition-all duration-200"
+         style="background:#131419;">
+        <div class="text-right space-y-0.5">
+          <p class="text-brand-muted text-xs font-semibold tracking-widest uppercase">Next Chapter</p>
+          <p class="text-white font-bold text-base leading-tight">Special Rules of Chess</p>
+          <p class="text-brand-muted text-xs">Check · Checkmate · Stalemate · En Passant · Castling</p>
+        </div>
+        <div class="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 transition-colors"
+             style="background:#00dc82;">
+          <svg class="w-5 h-5 group-hover:translate-x-0.5 transition-transform" style="color:#0b0c10;"
+               fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+          </svg>
+        </div>
+      </a>
     </div>
   </section>
 
@@ -285,10 +332,10 @@
         <div class="col-span-2 space-y-3">
           <a href="/" class="flex items-center gap-2 font-semibold text-white text-sm">
             <span class="flex items-center justify-center w-7 h-7 rounded-md bg-brand-green text-brand-bg font-bold text-base">♟</span>
-            Chessalgo
+            Synapchess
           </a>
           <p class="text-brand-muted text-sm leading-relaxed max-w-xs">
-            The Chessalgo Foundation is a 501(c)(3) nonprofit closing the cognitive equity gap in Title I schools.
+            Synapchess is fiscally sponsored by HCB Foundation, closing the cognitive equity gap in Title I schools.
           </p>
         </div>
 
@@ -297,7 +344,6 @@
           <ul class="space-y-2 text-sm text-brand-muted">
             <li><a href="/basics"      class="text-white">Chess Basics</a></li>
             <li><a href="/curriculum"  class="hover:text-white transition-colors">Curriculum</a></li>
-            <li><a href="/worksheets"  class="hover:text-white transition-colors">Printable Sheets</a></li>
             <li><a href="/#outcomes"   class="hover:text-white transition-colors">Outcomes</a></li>
           </ul>
         </div>
@@ -316,7 +362,6 @@
           <h4 class="text-white text-sm font-semibold">Resources</h4>
           <ul class="space-y-2 text-sm text-brand-muted">
             <li><a href="/#train"     class="hover:text-white transition-colors">Training dashboard</a></li>
-            <li><a href="/worksheets" class="hover:text-white transition-colors">Worksheets</a></li>
             <li><a href="#"           class="hover:text-white transition-colors">Support</a></li>
             <li><a href="#"           class="hover:text-white transition-colors">Contact</a></li>
           </ul>
@@ -324,7 +369,7 @@
       </div>
 
       <div class="border-t border-brand-border pt-6 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-brand-muted">
-        <span>© 2026 The Chessalgo Foundation. All rights reserved.</span>
+        <span>© 2026 Synapchess. All rights reserved.</span>
         <div class="flex gap-5">
           <a href="#" class="hover:text-white transition-colors">Privacy</a>
           <a href="#" class="hover:text-white transition-colors">Terms</a>
@@ -546,7 +591,7 @@
     function setStatus(msg, color) {
       var el        = document.getElementById('status-msg');
       el.textContent = msg;
-      el.style.color = color || '#9ca3af';
+      el.style.color = color || '#94a3b8';
     }
 
     function triggerShake() {
@@ -558,6 +603,25 @@
 
     // ── Auto-load first lesson ─────────────────────────────────────────────
     document.addEventListener('DOMContentLoaded', function() { loadLesson('rook'); });
+  </script>
+
+  <!-- ─── Nav dropdown (Learn tab) ──────────────────────────────────────── -->
+  <script>
+    (function() {
+      var btn  = document.getElementById('nav-learn-btn');
+      var menu = document.getElementById('nav-learn-menu');
+      if (!btn || !menu) return;
+      btn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        menu.classList.toggle('hidden');
+      });
+      document.addEventListener('click', function(e) {
+        if (!menu.contains(e.target) && e.target !== btn) menu.classList.add('hidden');
+      });
+      document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') menu.classList.add('hidden');
+      });
+    })();
   </script>
 
 </body>

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Curriculum — Chessalgo</title>
+  <title>Curriculum — Synapchess</title>
 
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
@@ -17,7 +17,7 @@
               border: '#1e2028',
               green:  '#00dc82',
               gdark:  '#00aa63',
-              muted:  '#9ca3af',
+              muted:  '#94a3b8',
             }
           }
         }
@@ -37,16 +37,28 @@
 
       <a href="/" class="flex items-center gap-2 font-semibold text-white text-sm">
         <span class="flex items-center justify-center w-7 h-7 rounded-md bg-brand-green text-brand-bg font-bold text-base">♟</span>
-        Chessalgo
+        Synapchess
       </a>
 
-      <nav class="hidden md:flex items-center gap-5 text-sm text-brand-muted">
-        <a href="/#mission"    class="hover:text-white transition-colors">Mission</a>
-        <a href="/curriculum"  class="text-white font-semibold">Curriculum</a>
-        <a href="/worksheets"  class="hover:text-white transition-colors">Printable Sheets</a>
-        <a href="/basics"      class="text-brand-green hover:text-brand-gdark font-medium transition-colors">Chess Basics</a>
-        <a href="/#outcomes"   class="hover:text-white transition-colors">Outcomes</a>
-        <a href="/#foundation" class="hover:text-white transition-colors">Foundation</a>
+      <nav class="hidden md:flex items-center gap-6 text-sm text-brand-muted">
+        <div class="relative">
+          <button id="nav-learn-btn" type="button"
+                  class="flex items-center gap-1 text-white font-semibold transition-colors cursor-pointer">
+            Learn
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+            </svg>
+          </button>
+          <div id="nav-learn-menu"
+               class="hidden absolute left-0 top-full mt-3 w-52 rounded-lg border border-brand-border py-1.5 z-50 shadow-2xl"
+               style="background:#131419;">
+            <a href="/curriculum"    class="block px-4 py-2 text-sm text-brand-green font-semibold bg-white/5 transition-colors">Curriculum</a>
+            <a href="/basics"        class="block px-4 py-2 text-sm text-brand-muted hover:bg-white/5 hover:text-white transition-colors">Chess Basics</a>
+            <a href="/special-rules" class="block px-4 py-2 text-sm text-brand-muted hover:bg-white/5 hover:text-white transition-colors">Special Rules</a>
+          </div>
+        </div>
+        <a href="/trainer"  class="hover:text-white transition-colors">Solve</a>
+        <a href="/analysis" class="hover:text-white transition-colors">Analyze</a>
       </nav>
 
       <div class="flex items-center gap-4 text-sm">
@@ -80,8 +92,8 @@
       </h1>
 
       <p class="text-brand-muted text-lg max-w-2xl leading-relaxed">
-        Four level-calibrated lecture modules engineered with grandmasters and learning scientists.
-        Work through each level at your own pace, then drill positions on the training board.
+        Four skill-tiered lecture playlists, curated from trusted chess educators.
+        Work through a tier at your own pace — the app remembers every video you've watched.
       </p>
 
       <!-- Meta pills -->
@@ -90,171 +102,54 @@
           <svg class="w-3.5 h-3.5 text-brand-green" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/>
           </svg>
-          4 level lectures
+          4 tiered playlists
         </span>
         <span class="inline-flex items-center gap-1.5 border border-brand-border rounded-md px-3 py-1.5 text-xs text-brand-muted" style="background:#131419;">
           <svg class="w-3.5 h-3.5 text-brand-green" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
           </svg>
-          Levels 0–3
+          Progress tracked automatically
         </span>
         <span class="inline-flex items-center gap-1.5 border border-brand-border rounded-md px-3 py-1.5 text-xs text-brand-muted" style="background:#131419;">
           <span class="text-brand-green">•</span>
-          501(c)(3) free access
+          Fiscally sponsored by HCB Foundation
         </span>
       </div>
 
     </div>
   </section>
 
-  <!-- ─── 4-Level Video Grid ────────────────────────────────────────────── -->
+  <!-- ─── 4-Tier Playlist Grid ──────────────────────────────────────────── -->
   <section class="py-24 px-6" style="background:#0b0c10;">
     <div class="max-w-6xl mx-auto grid md:grid-cols-2 gap-6">
-
-      <!-- ── Level 0 ──────────────────────────────────────────────────── -->
+      {% for section in sections %}
       <article class="flex flex-col rounded-2xl border border-brand-border overflow-hidden hover:border-brand-green/40 transition-colors"
                style="background:#131419;">
 
         <div class="flex items-center gap-3 px-6 pt-6 pb-4 border-b border-brand-border">
           <div class="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 text-brand-green text-lg font-bold"
-               style="background:#1a1f1a;">0</div>
+               style="background:#1a1f1a;">{{ loop.index0 }}</div>
           <div>
-            <p class="text-brand-green text-xs font-semibold tracking-widest uppercase">Level 0 · The Foundation</p>
-            <p class="text-brand-muted text-xs">Rules &amp; Basic Checkmate Patterns</p>
+            <p class="text-brand-green text-xs font-semibold tracking-widest uppercase">{{ section.label }}</p>
+            <p class="text-brand-muted text-xs">{{ section.tagline }}</p>
           </div>
         </div>
 
-        <div class="px-6 py-5">
-          <video controls
-                 class="w-full rounded-xl border border-brand-border shadow-lg"
-                 style="background:#0b0c10; aspect-ratio:16/9; object-fit:cover;">
-            <source src="/static/videos/level0_basics.mp4" type="video/mp4">
-            Your browser does not support HTML5 video.
-          </video>
-        </div>
-
-        <div class="flex flex-col flex-1 px-6 pb-6 gap-3">
+        <div class="flex flex-col flex-1 px-6 pt-5 pb-6 gap-3">
           <h2 class="font-bold text-white text-base leading-snug">
-            Level 0 Video: How the Pieces Move and Basic Checkmate Patterns
+            {{ section.label }} Lecture Series
           </h2>
           <p class="text-brand-muted text-sm leading-relaxed flex-1">
-            The foundational lecture covering board orientation, how every piece moves, and the three most common checkmate patterns every beginner must know before drilling puzzles.
+            {{ section.description }}
           </p>
           <div class="flex items-center justify-between pt-3 border-t border-brand-border text-xs text-brand-muted">
-            <span>Foundation · Level 0</span>
-            <a href="/basics" class="text-brand-green font-medium hover:text-brand-gdark transition-colors">▶ Interactive Board →</a>
+            <span>{{ section.videos|length }} video{{ 's' if section.videos|length != 1 else '' }}</span>
+            <a href="/curriculum/{{ section.slug }}"
+               class="text-brand-green font-medium hover:text-brand-gdark transition-colors">▶ Watch Series →</a>
           </div>
         </div>
       </article>
-
-      <!-- ── Level 1 ──────────────────────────────────────────────────── -->
-      <article class="flex flex-col rounded-2xl border border-brand-border overflow-hidden hover:border-brand-green/40 transition-colors"
-               style="background:#131419;">
-
-        <div class="flex items-center gap-3 px-6 pt-6 pb-4 border-b border-brand-border">
-          <div class="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 text-brand-green text-lg font-bold"
-               style="background:#1a1f1a;">1</div>
-          <div>
-            <p class="text-brand-green text-xs font-semibold tracking-widest uppercase">Level 1 · Beginner Tactics</p>
-            <p class="text-brand-muted text-xs">1-Star Matrices · Streak 0–4</p>
-          </div>
-        </div>
-
-        <div class="px-6 py-5">
-          <video controls
-                 class="w-full rounded-xl border border-brand-border shadow-lg"
-                 style="background:#0b0c10; aspect-ratio:16/9; object-fit:cover;">
-            <source src="/static/videos/level1_tactics.mp4" type="video/mp4">
-            Your browser does not support HTML5 video.
-          </video>
-        </div>
-
-        <div class="flex flex-col flex-1 px-6 pb-6 gap-3">
-          <h2 class="font-bold text-white text-base leading-snug">
-            Level 1 Video: Tactical Motifs — Absolute Pins, Skewers &amp; Double Attacks
-          </h2>
-          <p class="text-brand-muted text-sm leading-relaxed flex-1">
-            A systematic breakdown of the three core tactical motifs underlying the majority of beginner-level combinations. Includes annotated master-game examples and positional drill sequences.
-          </p>
-          <div class="flex items-center justify-between pt-3 border-t border-brand-border text-xs text-brand-muted">
-            <span>Beginner Tactics · Level 1</span>
-            <span class="text-brand-green font-medium">⭐ 1-Star</span>
-          </div>
-        </div>
-      </article>
-
-      <!-- ── Level 2 ──────────────────────────────────────────────────── -->
-      <article class="flex flex-col rounded-2xl border border-brand-border overflow-hidden hover:border-brand-green/40 transition-colors"
-               style="background:#131419;">
-
-        <div class="flex items-center gap-3 px-6 pt-6 pb-4 border-b border-brand-border">
-          <div class="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 text-brand-green text-lg font-bold"
-               style="background:#1a1f1a;">2</div>
-          <div>
-            <p class="text-brand-green text-xs font-semibold tracking-widest uppercase">Level 2 · Intermediate Strategy</p>
-            <p class="text-brand-muted text-xs">2-Star Matrices · Streak 5–9</p>
-          </div>
-        </div>
-
-        <div class="px-6 py-5">
-          <video controls
-                 class="w-full rounded-xl border border-brand-border shadow-lg"
-                 style="background:#0b0c10; aspect-ratio:16/9; object-fit:cover;">
-            <source src="/static/videos/level2_strategy.mp4" type="video/mp4">
-            Your browser does not support HTML5 video.
-          </video>
-        </div>
-
-        <div class="flex flex-col flex-1 px-6 pb-6 gap-3">
-          <h2 class="font-bold text-white text-base leading-snug">
-            Level 2 Video: Positional Play, Piece Overloads &amp; Decoy Sacrifices
-          </h2>
-          <p class="text-brand-muted text-sm leading-relaxed flex-1">
-            Advanced techniques covering piece overloads, decoy sacrifices, and positional play principles — the concepts that separate intermediate players from beginners in 3–4 ply combinations.
-          </p>
-          <div class="flex items-center justify-between pt-3 border-t border-brand-border text-xs text-brand-muted">
-            <span>Intermediate Strategy · Level 2</span>
-            <span class="text-brand-green font-medium">⭐⭐ 2-Star</span>
-          </div>
-        </div>
-      </article>
-
-      <!-- ── Level 3 ──────────────────────────────────────────────────── -->
-      <article class="flex flex-col rounded-2xl border border-brand-border overflow-hidden hover:border-brand-green/40 transition-colors"
-               style="background:#131419;">
-
-        <div class="flex items-center gap-3 px-6 pt-6 pb-4 border-b border-brand-border">
-          <div class="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 text-brand-green text-lg font-bold"
-               style="background:#1a1f1a;">3</div>
-          <div>
-            <p class="text-brand-green text-xs font-semibold tracking-widest uppercase">Level 3 · Advanced Calculation</p>
-            <p class="text-brand-muted text-xs">3-Star Master · Streak 10+</p>
-          </div>
-        </div>
-
-        <div class="px-6 py-5">
-          <video controls
-                 class="w-full rounded-xl border border-brand-border shadow-lg"
-                 style="background:#0b0c10; aspect-ratio:16/9; object-fit:cover;">
-            <source src="/static/videos/level3_advanced.mp4" type="video/mp4">
-            Your browser does not support HTML5 video.
-          </video>
-        </div>
-
-        <div class="flex flex-col flex-1 px-6 pb-6 gap-3">
-          <h2 class="font-bold text-white text-base leading-snug">
-            Level 3 Video: Horizon Calculation Matrices &amp; Deep Endgame Logic
-          </h2>
-          <p class="text-brand-muted text-sm leading-relaxed flex-1">
-            Master-level calculation training covering the horizon effect, 5+ ply deep endgame logic, and the algorithmic approach to position evaluation that distinguishes grandmaster-level play.
-          </p>
-          <div class="flex items-center justify-between pt-3 border-t border-brand-border text-xs text-brand-muted">
-            <span>Advanced Calculation · Level 3</span>
-            <span class="text-brand-green font-medium">⭐⭐⭐ Master</span>
-          </div>
-        </div>
-      </article>
-
+      {% endfor %}
     </div>
   </section>
 
@@ -284,10 +179,10 @@
         <div class="col-span-2 space-y-3">
           <a href="/" class="flex items-center gap-2 font-semibold text-white text-sm">
             <span class="flex items-center justify-center w-7 h-7 rounded-md bg-brand-green text-brand-bg font-bold text-base">♟</span>
-            Chessalgo
+            Synapchess
           </a>
           <p class="text-brand-muted text-sm leading-relaxed max-w-xs">
-            The Chessalgo Foundation is a 501(c)(3) nonprofit closing the cognitive equity gap in Title I schools.
+            Synapchess is fiscally sponsored by HCB Foundation, closing the cognitive equity gap in Title I schools.
           </p>
         </div>
 
@@ -296,7 +191,6 @@
           <ul class="space-y-2 text-sm text-brand-muted">
             <li><a href="/basics"      class="hover:text-white transition-colors">Chess Basics</a></li>
             <li><a href="/curriculum"  class="text-white">Curriculum</a></li>
-            <li><a href="/worksheets"  class="hover:text-white transition-colors">Printable Sheets</a></li>
             <li><a href="/#outcomes"   class="hover:text-white transition-colors">Outcomes</a></li>
           </ul>
         </div>
@@ -315,7 +209,6 @@
           <h4 class="text-white text-sm font-semibold">Resources</h4>
           <ul class="space-y-2 text-sm text-brand-muted">
             <li><a href="/#train"     class="hover:text-white transition-colors">Training dashboard</a></li>
-            <li><a href="/worksheets" class="hover:text-white transition-colors">Worksheets</a></li>
             <li><a href="#"           class="hover:text-white transition-colors">Support</a></li>
             <li><a href="#"           class="hover:text-white transition-colors">Contact</a></li>
           </ul>
@@ -323,7 +216,7 @@
       </div>
 
       <div class="border-t border-brand-border pt-6 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-brand-muted">
-        <span>© 2026 The Chessalgo Foundation. All rights reserved.</span>
+        <span>© 2026 Synapchess. All rights reserved.</span>
         <div class="flex gap-5">
           <a href="#" class="hover:text-white transition-colors">Privacy</a>
           <a href="#" class="hover:text-white transition-colors">Terms</a>
@@ -332,6 +225,25 @@
 
     </div>
   </footer>
+
+  <!-- ─── Nav dropdown (Learn tab) ──────────────────────────────────────── -->
+  <script>
+    (function() {
+      var btn  = document.getElementById('nav-learn-btn');
+      var menu = document.getElementById('nav-learn-menu');
+      if (!btn || !menu) return;
+      btn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        menu.classList.toggle('hidden');
+      });
+      document.addEventListener('click', function(e) {
+        if (!menu.contains(e.target) && e.target !== btn) menu.classList.add('hidden');
+      });
+      document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') menu.classList.add('hidden');
+      });
+    })();
+  </script>
 
 </body>
 </html>
