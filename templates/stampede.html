@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Stampede — AlgoGambit</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: { extend: { colors: { brand: { bg:'#0b0c10', card:'#131419', border:'#1e2028', green:'#00dc82', gdark:'#00aa63', muted:'#9ca3af' } } } }
+    }
+  </script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
+  <link rel="stylesheet" href="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.css" />
+  <script src="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.js"></script>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+
+    body {
+      background-color: #07000f;
+      background-image:
+        radial-gradient(ellipse at 15% 20%, rgba(139,92,246,0.20) 0%, transparent 55%),
+        radial-gradient(ellipse at 85% 15%, rgba(168,85,247,0.14) 0%, transparent 45%),
+        radial-gradient(ellipse at 70% 85%, rgba(109,40,217,0.18) 0%, transparent 50%),
+        radial-gradient(ellipse at 25% 80%, rgba(88,28,135,0.14) 0%, transparent 45%),
+        radial-gradient(ellipse at 50% 50%, rgba(76,29,149,0.08) 0%, transparent 65%);
+    }
+
+    /* ── Stars ── */
+    .star { position: absolute; border-radius: 50%; background: white; pointer-events: none; }
+    @keyframes twinkle {
+      0%, 100% { opacity: 0.15; }
+      50%       { opacity: 1; }
+    }
+
+    /* ── Board theme: purple galaxy ── */
+    #board { width: 400px; }
+    .board-b72b1 {
+      border: 2px solid rgba(168,85,247,0.75) !important;
+      border-radius: 6px;
+      box-shadow: 0 0 35px rgba(168,85,247,0.22), 0 0 70px rgba(139,92,246,0.10);
+      transition: box-shadow 0.4s ease, border-color 0.3s ease;
+    }
+    .black-3c85d { background-color: #5b21b6 !important; }
+    .black-3c85d.notation-322f9 { color: #2e1065 !important; }
+    .white-1e1d7.notation-322f9 { color: #7c3aed !important; }
+
+    /* ── Countdown ring transitions ── */
+    #countdown-ring {
+      transition: stroke-dashoffset 1s linear, stroke 0.35s ease;
+    }
+
+    @keyframes pulseGlow {
+      0%, 100% { filter: drop-shadow(0 0 5px rgba(239,68,68,0.7)); }
+      50%       { filter: drop-shadow(0 0 16px rgba(239,68,68,1));  }
+    }
+    .ring-critical #countdown-ring {
+      animation: pulseGlow 0.55s ease-in-out infinite;
+    }
+
+    /* ── Galaxy glass cards ── */
+    .galaxy-card {
+      background: rgba(20, 6, 54, 0.78);
+      border: 1px solid rgba(139,92,246,0.30);
+      backdrop-filter: blur(14px);
+    }
+
+    /* ── Count option cards ── */
+    .count-card {
+      background: rgba(26,8,64,0.65);
+      border: 2px solid rgba(139,92,246,0.28);
+      cursor: pointer;
+      transition: border-color 0.18s ease, background 0.18s ease, transform 0.15s ease, box-shadow 0.18s ease;
+    }
+    .count-card:hover {
+      border-color: rgba(168,85,247,0.85);
+      background: rgba(88,28,135,0.42);
+      box-shadow: 0 0 28px rgba(168,85,247,0.30);
+      transform: translateY(-3px);
+    }
+    .count-card:active { transform: translateY(0); }
+
+    /* ── Progress dots ── */
+    .pdot {
+      width: 10px; height: 10px; border-radius: 50%;
+      background: rgba(139,92,246,0.22);
+      transition: background 0.25s ease, box-shadow 0.25s ease;
+      flex-shrink: 0;
+    }
+    .pdot.correct { background:#22c55e; box-shadow:0 0 7px rgba(34,197,94,0.85); }
+    .pdot.missed  { background:#ef4444; box-shadow:0 0 7px rgba(239,68,68,0.85); }
+    .pdot.current { background:rgba(168,85,247,0.7); box-shadow:0 0 7px rgba(168,85,247,0.6); }
+
+    /* ── Neon purple button ── */
+    .btn-galaxy {
+      background: linear-gradient(135deg, #7c3aed 0%, #a855f7 100%);
+      color: white;
+      font-weight: 700;
+      border: none;
+      cursor: pointer;
+      transition: box-shadow 0.2s ease, transform 0.15s ease, opacity 0.2s ease;
+    }
+    .btn-galaxy:hover {
+      box-shadow: 0 0 22px rgba(168,85,247,0.55);
+      transform: translateY(-1px);
+    }
+    .btn-galaxy:active { transform: translateY(0); opacity: 0.9; }
+
+    /* ── Slide-up entrance ── */
+    @keyframes slideUp {
+      from { transform: translateY(24px); opacity: 0; }
+      to   { transform: translateY(0);    opacity: 1; }
+    }
+    .slide-up  { animation: slideUp 0.45s cubic-bezier(0.22,1,0.36,1) both; }
+    .delay-100 { animation-delay: 0.10s; }
+    .delay-200 { animation-delay: 0.20s; }
+    .delay-300 { animation-delay: 0.30s; }
+
+    /* ── Star-glow for results ── */
+    @keyframes starGlow {
+      0%,100% { text-shadow: 0 0 10px rgba(251,191,36,0.5); }
+      50%      { text-shadow: 0 0 28px rgba(251,191,36,1), 0 0 50px rgba(251,191,36,0.45); }
+    }
+    .star-glow { animation: starGlow 1.6s ease-in-out infinite; }
+
+    /* ── Back button ── */
+    .btn-ghost {
+      background: transparent;
+      border: 1px solid rgba(139,92,246,0.30);
+      color: #a78bfa;
+      cursor: pointer;
+      transition: border-color 0.2s ease, color 0.2s ease;
+    }
+    .btn-ghost:hover { border-color: rgba(168,85,247,0.65); color:#e9d5ff; }
+  </style>
+</head>
+<body class="text-white antialiased min-h-screen" style="font-family: Inter, system-ui, sans-serif;">
+
+  <!-- ── Starfield ──────────────────────────────────────────────────────── -->
+  <div id="starfield" class="fixed inset-0 z-0 pointer-events-none overflow-hidden"></div>
+
+  <!-- ── Header ─────────────────────────────────────────────────────────── -->
+  <header class="sticky top-0 z-50 border-b"
+          style="background:rgba(7,0,15,0.82); border-color:rgba(139,92,246,0.22); backdrop-filter:blur(14px);">
+    <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+
+      <a href="/" class="flex items-center gap-2 font-semibold text-white text-sm">
+        <span class="flex items-center justify-center w-7 h-7 rounded-md font-bold text-base"
+              style="background:linear-gradient(135deg,#7c3aed,#a855f7);">♟</span>
+        AlgoGambit
+      </a>
+
+      <nav class="hidden md:flex items-center gap-5 text-sm" style="color:#a78bfa;">
+        <a href="/#mission"        class="hover:text-white transition-colors">Mission</a>
+        <a href="/curriculum"      class="hover:text-white transition-colors">Curriculum</a>
+        <a href="/worksheets"      class="hover:text-white transition-colors">Printable Sheets</a>
+        <a href="/basics"          class="hover:text-white transition-colors">Chess Basics</a>
+        <a href="/trainer?level=1" class="hover:text-white transition-colors">Trainer</a>
+        <a href="/stampede"        class="font-semibold transition-colors" style="color:#c084fc;">Stampede ⚡</a>
+      </nav>
+
+      <a href="/" class="btn-galaxy px-4 py-2 rounded-md text-sm">Dashboard</a>
+    </div>
+  </header>
+
+  <!-- ── Page content ─────────────────────────────────────────────────────── -->
+  <main class="relative z-10">
+
+    <!-- ══════════════════════════════════════════════════════════════════════
+         SETUP SCREEN
+    ════════════════════════════════════════════════════════════════════════ -->
+    <div id="setup-screen" class="flex flex-col items-center px-6 py-16 gap-12">
+
+      <!-- Hero -->
+      <div class="text-center space-y-5 slide-up">
+        <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold tracking-widest uppercase"
+             style="background:rgba(139,92,246,0.14); border:1px solid rgba(139,92,246,0.38); color:#c084fc;">
+          ⚡ Speed Rush Mode
+        </div>
+        <h1 class="text-7xl md:text-8xl font-black tracking-tighter"
+            style="background:linear-gradient(140deg,#f3e8ff 0%,#a855f7 45%,#7c3aed 80%);
+                   -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+                   text-shadow: none;">
+          Stampede
+        </h1>
+        <p class="text-base max-w-sm mx-auto leading-relaxed" style="color:#c4b5fd;">
+          10 seconds per puzzle. No mercy on the clock.<br/>
+          How many can you conquer before the herd passes?
+        </p>
+      </div>
+
+      <!-- Puzzle count picker -->
+      <div class="w-full max-w-xl slide-up delay-100">
+        <p class="text-center text-xs uppercase tracking-widest font-semibold mb-5" style="color:#7c3aed;">
+          Choose your gauntlet
+        </p>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+
+          <button class="count-card rounded-2xl p-6 text-center" onclick="startStampede(5)">
+            <div class="text-5xl font-black text-white mb-1">5</div>
+            <div class="text-xs font-bold uppercase tracking-wider" style="color:#a78bfa;">Quick Run</div>
+            <div class="text-xs mt-1.5 opacity-60" style="color:#a78bfa;">~50 sec</div>
+          </button>
+
+          <button class="count-card rounded-2xl p-6 text-center" onclick="startStampede(10)">
+            <div class="text-5xl font-black text-white mb-1">10</div>
+            <div class="text-xs font-bold uppercase tracking-wider" style="color:#a78bfa;">Sprint</div>
+            <div class="text-xs mt-1.5 opacity-60" style="color:#a78bfa;">~1.5 min</div>
+          </button>
+
+          <button class="count-card rounded-2xl p-6 text-center" onclick="startStampede(20)">
+            <div class="text-5xl font-black text-white mb-1">20</div>
+            <div class="text-xs font-bold uppercase tracking-wider" style="color:#a78bfa;">Marathon</div>
+            <div class="text-xs mt-1.5 opacity-60" style="color:#a78bfa;">~3.5 min</div>
+          </button>
+
+          <button class="count-card rounded-2xl p-6 text-center" onclick="startStampede(50)">
+            <div class="text-5xl font-black mb-1" style="color:#c084fc;">50</div>
+            <div class="text-xs font-bold uppercase tracking-wider" style="color:#c084fc;">Chaos</div>
+            <div class="text-xs mt-1.5 opacity-60" style="color:#c084fc;">~8 min</div>
+          </button>
+
+        </div>
+      </div>
+
+      <!-- Rules card -->
+      <div class="galaxy-card rounded-2xl p-6 max-w-sm w-full space-y-3 slide-up delay-200">
+        <h3 class="text-xs font-bold uppercase tracking-widest" style="color:#c084fc;">Rules of the Stampede</h3>
+        <ul class="space-y-2.5 text-sm" style="color:#c4b5fd;">
+          <li class="flex items-start gap-2.5">
+            <span style="color:#a855f7;" class="mt-px flex-shrink-0 text-base">⏱</span>
+            <span>You have <strong class="text-white">10 seconds</strong> to find the engine's best move.</span>
+          </li>
+          <li class="flex items-start gap-2.5">
+            <span style="color:#22c55e;" class="mt-px flex-shrink-0 text-base">✓</span>
+            <span>Correct move? <strong class="text-white">Instantly advances</strong> to next puzzle.</span>
+          </li>
+          <li class="flex items-start gap-2.5">
+            <span style="color:#ef4444;" class="mt-px flex-shrink-0 text-base">⌛</span>
+            <span>Timer hits zero? Solution replays, then on you go.</span>
+          </li>
+          <li class="flex items-start gap-2.5">
+            <span style="color:#fbbf24;" class="mt-px flex-shrink-0 text-base">★</span>
+            <span>Finish strong — your accuracy rating appears at the end.</span>
+          </li>
+        </ul>
+      </div>
+
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════════════════════
+         GAME SCREEN
+    ════════════════════════════════════════════════════════════════════════ -->
+    <div id="game-screen" class="hidden flex flex-col items-center px-6 py-8 gap-5">
+
+      <!-- Top bar: progress + counters + back -->
+      <div class="w-full max-w-lg flex items-center gap-3">
+
+        <!-- Back button -->
+        <button onclick="confirmBack()" class="btn-ghost rounded-lg px-3 py-1.5 text-xs flex-shrink-0">
+          ← Back
+        </button>
+
+        <!-- Progress dots -->
+        <div id="progress-dots" class="flex gap-1.5 flex-wrap flex-1 items-center"></div>
+
+        <!-- Counters -->
+        <div class="flex items-center gap-2 text-sm flex-shrink-0">
+          <span id="correct-count" class="font-bold tabular-nums" style="color:#22c55e;">✓ 0</span>
+          <span id="missed-count"  class="font-bold tabular-nums" style="color:#ef4444;">✗ 0</span>
+        </div>
+      </div>
+
+      <!-- Puzzle label -->
+      <p id="puzzle-label" class="text-xs font-semibold uppercase tracking-widest" style="color:#7c3aed;">
+        Puzzle 1 of 10
+      </p>
+
+      <!-- Countdown ring -->
+      <div id="countdown-wrapper" class="relative flex items-center justify-center" style="width:110px;height:110px;">
+        <svg viewBox="0 0 110 110" width="110" height="110">
+          <!-- Track -->
+          <circle cx="55" cy="55" r="47"
+                  fill="none" stroke="rgba(139,92,246,0.18)" stroke-width="7"/>
+          <!-- Progress -->
+          <circle id="countdown-ring"
+                  cx="55" cy="55" r="47"
+                  fill="none"
+                  stroke="#a855f7"
+                  stroke-width="7"
+                  stroke-dasharray="295.3"
+                  stroke-dashoffset="0"
+                  stroke-linecap="round"
+                  transform="rotate(-90 55 55)"/>
+        </svg>
+        <div class="absolute inset-0 flex items-center justify-center">
+          <span id="countdown-text" class="font-black" style="font-size:2.6rem;line-height:1;color:#fff;">10</span>
+        </div>
+      </div>
+
+      <!-- Board -->
+      <div id="board-wrapper" class="rounded-lg overflow-hidden">
+        <div id="board"></div>
+      </div>
+
+      <!-- Status text -->
+      <p id="status" class="text-sm font-medium text-center px-4 min-h-5" style="color:#a78bfa;">
+        Loading puzzle…
+      </p>
+
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════════════════════
+         RESULTS SCREEN
+    ════════════════════════════════════════════════════════════════════════ -->
+    <div id="results-screen" class="hidden flex flex-col items-center justify-center px-6 py-16">
+      <div class="galaxy-card rounded-3xl p-10 max-w-sm w-full text-center space-y-8">
+
+        <!-- Trophy + title -->
+        <div class="space-y-2">
+          <div id="results-trophy" class="text-6xl mb-3">🏆</div>
+          <h2 class="text-3xl font-black text-white">Stampede Complete!</h2>
+          <p style="color:#a78bfa;" class="text-sm">The herd has passed. Here's your score.</p>
+        </div>
+
+        <!-- Score grid -->
+        <div class="space-y-3">
+
+          <div class="rounded-2xl p-5" style="background:rgba(139,92,246,0.12); border:1px solid rgba(139,92,246,0.30);">
+            <div id="results-score" class="text-6xl font-black text-white mb-0.5">0/0</div>
+            <div class="text-xs uppercase tracking-widest" style="color:#a78bfa;">Puzzles Solved</div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div class="rounded-xl p-4" style="background:rgba(34,197,94,0.10); border:1px solid rgba(34,197,94,0.28);">
+              <div id="results-correct" class="text-4xl font-black" style="color:#22c55e;">0</div>
+              <div class="text-xs uppercase tracking-wider mt-1" style="color:rgba(34,197,94,0.7);">Correct</div>
+            </div>
+            <div class="rounded-xl p-4" style="background:rgba(239,68,68,0.10); border:1px solid rgba(239,68,68,0.28);">
+              <div id="results-missed" class="text-4xl font-black" style="color:#ef4444;">0</div>
+              <div class="text-xs uppercase tracking-wider mt-1" style="color:rgba(239,68,68,0.7);">Missed</div>
+            </div>
+          </div>
+
+          <div class="rounded-xl p-4" style="background:rgba(139,92,246,0.10); border:1px solid rgba(139,92,246,0.28);">
+            <div id="results-accuracy" class="text-4xl font-black" style="color:#c084fc;">0%</div>
+            <div class="text-xs uppercase tracking-wider mt-1" style="color:#a78bfa;">Accuracy</div>
+          </div>
+
+          <div id="results-stars" class="text-4xl star-glow py-1"></div>
+        </div>
+
+        <!-- Action buttons -->
+        <div class="flex flex-col gap-3">
+          <button onclick="resetToSetup()" class="btn-galaxy px-6 py-3 rounded-xl text-sm w-full">
+            Play Again
+          </button>
+          <a href="/trainer?level=1"
+             class="text-sm transition-colors text-center" style="color:#a78bfa;">
+            ← Back to Trainer
+          </a>
+        </div>
+
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ─── Engine ──────────────────────────────────────────────────────────── -->
+  <script>
+    // ── Constants ──────────────────────────────────────────────────────────
+    var CIRCUMFERENCE = 295.3; // 2 * Math.PI * 47
+
+    // ── State ──────────────────────────────────────────────────────────────
+    var board              = null;
+    var game               = null;
+    var currentFen         = null;
+    var solutionMoves      = [];
+    var currentMoveIndex   = 0;
+    var waitingForComputer = false;
+    var currentPuzzleId    = null;
+
+    var stampedeTotal   = 0;
+    var stampedeIndex   = 0;
+    var stampedeCorrect = 0;
+    var stampedeMissed  = 0;
+    var puzzleActive    = false;
+    var isReplaying     = false;
+
+    var countdownInterval = null;
+    var timeLeft          = 10;
+    var replayTimeout     = null;
+
+    // ── Starfield ──────────────────────────────────────────────────────────
+    (function () {
+      var c = document.getElementById('starfield');
+      for (var i = 0; i < 220; i++) {
+        var s    = document.createElement('div');
+        var size = Math.random() < 0.75 ? 1 : Math.random() < 0.6 ? 2 : 3;
+        s.className  = 'star';
+        s.style.left    = (Math.random() * 100) + '%';
+        s.style.top     = (Math.random() * 100) + '%';
+        s.style.width   = size + 'px';
+        s.style.height  = size + 'px';
+        s.style.opacity = (0.15 + Math.random() * 0.85).toFixed(2);
+        if (Math.random() > 0.5) {
+          s.style.animation = 'twinkle ' + (1.8 + Math.random() * 4) + 's ease-in-out infinite ' + (Math.random() * 4) + 's';
+        }
+        c.appendChild(s);
+      }
+    })();
+
+    // ── Screen management ──────────────────────────────────────────────────
+    function showScreen(which) {
+      ['setup-screen','game-screen','results-screen'].forEach(function(id) {
+        document.getElementById(id).classList.add('hidden');
+      });
+      document.getElementById(which + '-screen').classList.remove('hidden');
+    }
+
+    // ── Start stampede ─────────────────────────────────────────────────────
+    function startStampede(count) {
+      stampedeTotal   = count;
+      stampedeIndex   = 0;
+      stampedeCorrect = 0;
+      stampedeMissed  = 0;
+      puzzleActive    = false;
+      isReplaying     = false;
+
+      // Build progress dots (max 25 visible)
+      var dots    = document.getElementById('progress-dots');
+      dots.innerHTML = '';
+      var visible = Math.min(count, 25);
+      for (var i = 0; i < visible; i++) {
+        var d = document.createElement('div');
+        d.className = 'pdot';
+        d.id = 'dot-' + i;
+        dots.appendChild(d);
+      }
+      if (count > 25) {
+        var more = document.createElement('span');
+        more.textContent = '+' + (count - 25) + ' more';
+        more.style.cssText = 'font-size:10px;color:#7c3aed;line-height:10px;align-self:center;white-space:nowrap;';
+        dots.appendChild(more);
+      }
+
+      showScreen('game');
+      loadNextPuzzle();
+    }
+
+    function resetToSetup() {
+      clearCountdown();
+      clearTimeout(replayTimeout);
+      isReplaying  = false;
+      puzzleActive = false;
+      if (board) { board.destroy(); board = null; }
+      showScreen('setup');
+    }
+
+    function confirmBack() {
+      clearCountdown();
+      clearTimeout(replayTimeout);
+      isReplaying  = false;
+      puzzleActive = false;
+      if (board) { board.destroy(); board = null; }
+      showScreen('setup');
+    }
+
+    // ── Puzzle loading ─────────────────────────────────────────────────────
+    function loadNextPuzzle() {
+      clearCountdown();
+      clearTimeout(replayTimeout);
+      isReplaying  = false;
+      puzzleActive = false;
+
+      resetCountdownRing();
+      updateLabels();
+      setStatus('Loading…');
+
+      // Pulse current dot
+      var curDot = document.getElementById('dot-' + stampedeIndex);
+      if (curDot) curDot.classList.add('current');
+
+      fetch('/get-puzzle?random=1')
+        .then(function(r) {
+          if (!r.ok) throw new Error('No puzzles available.');
+          return r.json();
+        })
+        .then(function(data) {
+          currentFen         = data.fen;
+          currentPuzzleId    = data.puzzle_id;
+          solutionMoves      = data.engine_best_move.split(' ').filter(Boolean);
+          currentMoveIndex   = 0;
+          waitingForComputer = false;
+
+          game = new Chess(currentFen);
+          if (board) board.destroy();
+          board = Chessboard('board', {
+            position:    currentFen,
+            draggable:   true,
+            pieceTheme:  '/static/img/chesspieces/wikipedia/{piece}.png',
+            moveSpeed:   500,
+            snapSpeed:   60,
+            onDragStart: function() {
+              if (!puzzleActive || isReplaying || waitingForComputer) return false;
+              if (!game || game.game_over()) return false;
+              if (currentMoveIndex >= solutionMoves.length) return false;
+            },
+            onDrop:      onDrop,
+            orientation: game.turn() === 'w' ? 'white' : 'black'
+          });
+
+          var whose = game.turn() === 'w' ? 'White' : 'Black';
+          setStatus(whose + ' to move — find the best move!');
+          puzzleActive = true;
+          startCountdown();
+        })
+        .catch(function(err) {
+          setStatus('Error: ' + err.message, '#ef4444');
+        });
+    }
+
+    // ── Drop handler ───────────────────────────────────────────────────────
+    function onDrop(source, target) {
+      if (!puzzleActive || isReplaying || waitingForComputer) return 'snapback';
+
+      var move = game.move({ from: source, to: target, promotion: 'q' });
+      if (move === null) return 'snapback';
+
+      if ((source + target) === solutionMoves[currentMoveIndex].slice(0, 4)) {
+        // Piece is already at target from the drag — instant sync handles castling/en-passant
+        board.position(game.fen(), false);
+        currentMoveIndex++;
+        if (currentMoveIndex >= solutionMoves.length) {
+          onCorrect();
+        } else {
+          setStatus('✓ Correct! Computer responding…', '#22c55e');
+          playComputerMove();
+        }
+      } else {
+        game.undo();
+        setStatus('✗ Wrong move — keep trying!', '#ef4444');
+        flashBoardWrap('#ef4444', 0.5);
+        return 'snapback';
+      }
+    }
+
+    function playComputerMove() {
+      waitingForComputer = true;
+      setTimeout(function () {
+        var uci   = solutionMoves[currentMoveIndex];
+        var from  = uci.slice(0, 2);
+        var to    = uci.slice(2, 4);
+        var promo = uci.length > 4 ? uci[4] : 'q';
+        game.move({ from: from, to: to, promotion: promo });
+
+        // Animate the piece sliding (drag-like) then sync for castling/en-passant/promotions
+        board.move(from + '-' + to);
+        var snapFen = game.fen();
+        setTimeout(function() { board.position(snapFen, false); }, 540);
+
+        currentMoveIndex++;
+        waitingForComputer = false;
+
+        if (currentMoveIndex >= solutionMoves.length) {
+          setTimeout(onCorrect, 540);
+        } else {
+          var whose = game.turn() === 'w' ? 'White' : 'Black';
+          setStatus(whose + ' to move — ' + Math.ceil((solutionMoves.length - currentMoveIndex) / 2) + ' move(s) left.');
+        }
+      }, 350);
+    }
+
+    // ── Correct ────────────────────────────────────────────────────────────
+    function onCorrect() {
+      clearCountdown();
+      puzzleActive = false;
+      stampedeCorrect++;
+
+      setDot(stampedeIndex, 'correct');
+      updateCounters();
+      flashBoardWrap('#22c55e', 0.6);
+      setStatus('✓ Solved!', '#22c55e');
+
+      stampedeIndex++;
+      if (stampedeIndex >= stampedeTotal) {
+        replayTimeout = setTimeout(endStampede, 700);
+      } else {
+        replayTimeout = setTimeout(loadNextPuzzle, 800);
+      }
+    }
+
+    // ── Timeout ────────────────────────────────────────────────────────────
+    function onTimeout() {
+      clearCountdown();
+      puzzleActive = false;
+      stampedeMissed++;
+
+      setDot(stampedeIndex, 'missed');
+      updateCounters();
+      setStatus("Time's up! Replaying solution…", '#f59e0b');
+      flashBoardWrap('#f59e0b', 0.55);
+
+      // Fast flip-book replay: instant board states every 160ms, then advance after 800ms
+      isReplaying = true;
+      var replayGame = new Chess(currentFen);
+      board.position(currentFen, false);
+
+      function playNext(idx) {
+        if (idx >= solutionMoves.length) {
+          isReplaying = false;
+          stampedeIndex++;
+          if (stampedeIndex >= stampedeTotal) {
+            replayTimeout = setTimeout(endStampede, 800);
+          } else {
+            replayTimeout = setTimeout(loadNextPuzzle, 800);
+          }
+          return;
+        }
+        replayTimeout = setTimeout(function () {
+          var uci = solutionMoves[idx];
+          replayGame.move({ from: uci.slice(0,2), to: uci.slice(2,4), promotion: uci.length > 4 ? uci[4] : 'q' });
+          board.position(replayGame.fen(), false); // instant — emphasises the speed-game feel
+          playNext(idx + 1);
+        }, 160);
+      }
+      playNext(0);
+    }
+
+    // ── Results ────────────────────────────────────────────────────────────
+    function endStampede() {
+      clearCountdown();
+      clearTimeout(replayTimeout);
+      if (board) { board.destroy(); board = null; }
+
+      var accuracy = stampedeTotal > 0
+        ? Math.round((stampedeCorrect / stampedeTotal) * 100) : 0;
+
+      document.getElementById('results-score').textContent    = stampedeCorrect + ' / ' + stampedeTotal;
+      document.getElementById('results-correct').textContent  = stampedeCorrect;
+      document.getElementById('results-missed').textContent   = stampedeMissed;
+      document.getElementById('results-accuracy').textContent = accuracy + '%';
+
+      var stars  = accuracy >= 80 ? '⭐⭐⭐' : accuracy >= 50 ? '⭐⭐' : '⭐';
+      var trophy = accuracy >= 80 ? '🏆' : accuracy >= 50 ? '🥈' : '🎯';
+      document.getElementById('results-stars').textContent  = stars;
+      document.getElementById('results-trophy').textContent = trophy;
+
+      showScreen('results');
+    }
+
+    // ── Countdown ──────────────────────────────────────────────────────────
+    function startCountdown() {
+      timeLeft = 10;
+      updateCountdownUI();
+      countdownInterval = setInterval(function () {
+        timeLeft = Math.max(0, timeLeft - 1);
+        updateCountdownUI();
+        if (timeLeft <= 0) onTimeout();
+      }, 1000);
+    }
+
+    function clearCountdown() {
+      if (countdownInterval) { clearInterval(countdownInterval); countdownInterval = null; }
+    }
+
+    function updateCountdownUI() {
+      var ring    = document.getElementById('countdown-ring');
+      var text    = document.getElementById('countdown-text');
+      var wrapper = document.getElementById('countdown-wrapper');
+
+      ring.style.strokeDashoffset = CIRCUMFERENCE * (1 - timeLeft / 10);
+      text.textContent = timeLeft;
+
+      if (timeLeft <= 3) {
+        ring.style.stroke = '#ef4444';
+        text.style.color  = '#ef4444';
+        wrapper.classList.add('ring-critical');
+      } else if (timeLeft <= 5) {
+        ring.style.stroke = '#f59e0b';
+        text.style.color  = '#f59e0b';
+        wrapper.classList.remove('ring-critical');
+      } else {
+        ring.style.stroke = '#a855f7';
+        text.style.color  = '#ffffff';
+        wrapper.classList.remove('ring-critical');
+      }
+    }
+
+    function resetCountdownRing() {
+      var ring    = document.getElementById('countdown-ring');
+      var text    = document.getElementById('countdown-text');
+      var wrapper = document.getElementById('countdown-wrapper');
+      wrapper.classList.remove('ring-critical');
+      // Disable transition for instant visual reset
+      ring.style.transition = 'none';
+      ring.style.strokeDashoffset = '0';
+      ring.style.stroke = '#a855f7';
+      text.textContent = '10';
+      text.style.color = '#ffffff';
+      // Re-enable transition after browser commits the reset
+      requestAnimationFrame(function () {
+        requestAnimationFrame(function () {
+          ring.style.transition = 'stroke-dashoffset 1s linear, stroke 0.35s ease';
+        });
+      });
+    }
+
+    // ── Helpers ────────────────────────────────────────────────────────────
+    function setStatus(text, color) {
+      var el = document.getElementById('status');
+      el.textContent = text;
+      el.style.color = color || '#a78bfa';
+    }
+
+    function flashBoardWrap(colorHex, alpha) {
+      var bw = document.getElementById('board-wrapper');
+      var r  = parseInt(colorHex.slice(1, 3), 16);
+      var g  = parseInt(colorHex.slice(3, 5), 16);
+      var b  = parseInt(colorHex.slice(5, 7), 16);
+      bw.style.boxShadow = '0 0 40px rgba(' + r + ',' + g + ',' + b + ',' + alpha + '), 0 0 80px rgba(' + r + ',' + g + ',' + b + ',' + (alpha * 0.4) + ')';
+      setTimeout(function () {
+        bw.style.boxShadow = '0 0 35px rgba(168,85,247,0.22), 0 0 70px rgba(139,92,246,0.10)';
+      }, 550);
+    }
+
+    function setDot(index, state) {
+      var d = document.getElementById('dot-' + index);
+      if (!d) return;
+      d.classList.remove('current', 'correct', 'missed');
+      d.classList.add(state);
+    }
+
+    function updateCounters() {
+      document.getElementById('correct-count').textContent = '✓ ' + stampedeCorrect;
+      document.getElementById('missed-count').textContent  = '✗ ' + stampedeMissed;
+    }
+
+    function updateLabels() {
+      document.getElementById('puzzle-label').textContent =
+        'Puzzle ' + (stampedeIndex + 1) + ' of ' + stampedeTotal;
+      updateCounters();
+    }
+  </script>
+
+</body>
+</html>

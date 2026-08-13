@@ -1,15 +1,13 @@
-import atexit
 import sqlite3
 import os
 from datetime import datetime, timedelta, timezone
 from flask import Flask, render_template, jsonify, request, session
 from werkzeug.security import generate_password_hash, check_password_hash
 
-from db import DB_PATH
-from curriculum_data import get_section, ordered_sections, format_duration
-
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'dev-secret-change-before-deploying')
+
+DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'chess_data.db')
 
 # ── Space-count expression reused across tier queries ─────────────────────────
 # N UCI moves separated by spaces → N-1 spaces in the string.
@@ -54,14 +52,6 @@ def init_db():
                 next_review DATETIME DEFAULT CURRENT_TIMESTAMP,
                 PRIMARY KEY (user_id, puzzle_id)
             );
-
-            CREATE TABLE IF NOT EXISTS user_video_progress (
-                user_id      INTEGER  NOT NULL,
-                section      TEXT     NOT NULL,
-                video_id     TEXT     NOT NULL,
-                completed_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-                PRIMARY KEY (user_id, video_id)
-            );
         ''')
         conn.commit()
         # Backwards-compatible schema migrations
@@ -81,14 +71,6 @@ def init_db():
 
 
 init_db()
-
-# ── Game analysis feature (Requirements: move tracking, save/rename, engine) ──
-from game_analysis import games_bp, init_games_db  # noqa: E402
-from engine_service import shutdown_engine  # noqa: E402
-
-init_games_db()
-app.register_blueprint(games_bp)
-atexit.register(shutdown_engine)
 
 
 # ── SM-2 spaced-repetition ────────────────────────────────────────────────────
@@ -173,40 +155,12 @@ def index():
 
 @app.route('/curriculum')
 def curriculum():
-    return render_template('curriculum.html', sections=ordered_sections())
+    return render_template('curriculum.html')
 
 
-@app.route('/curriculum/<section_slug>')
-def curriculum_section(section_slug):
-    section = get_section(section_slug)
-    if section is None:
-        return render_template('curriculum.html', sections=ordered_sections()), 404
-
-    videos = [
-        dict(v, duration_label=format_duration(v.get('duration')))
-        for v in section['videos']
-    ]
-    return render_template(
-        'curriculum_section.html',
-        section=section,
-        videos=videos,
-        all_sections=ordered_sections(),
-    )
-
-
-@app.route('/learn')
-def learn():
-    return render_template('learn.html')
-
-
-@app.route('/join')
-def join():
-    return render_template('join.html')
-
-
-@app.route('/donate')
-def donate():
-    return render_template('donate.html')
+@app.route('/worksheets')
+def worksheets():
+    return render_template('worksheets.html')
 
 
 @app.route('/basics')
@@ -219,9 +173,9 @@ def special_rules():
     return render_template('special_rules.html')
 
 
-@app.route('/analysis')
-def analysis_page():
-    return render_template('analysis.html')
+@app.route('/stampede')
+def stampede():
+    return render_template('stampede.html')
 
 
 @app.route('/trainer')
@@ -449,65 +403,6 @@ def log_attempt():
         conn.close()
 
 
-# ── Curriculum video progress ────────────────────────────────────────────────
-
-@app.route('/api/video-progress')
-def get_video_progress():
-    """Return the list of video IDs the current user has marked complete.
-
-    Anonymous visitors get an empty list — the front-end falls back to
-    localStorage for them instead of server-side persistence.
-    """
-    user_id = session.get('user_id')
-    if user_id is None:
-        return jsonify({'logged_in': False, 'completed': []})
-
-    conn = get_db()
-    try:
-        rows = conn.execute(
-            'SELECT video_id FROM user_video_progress WHERE user_id = ?',
-            (user_id,)
-        ).fetchall()
-    finally:
-        conn.close()
-    return jsonify({'logged_in': True, 'completed': [r['video_id'] for r in rows]})
-
-
-@app.route('/api/video-progress', methods=['POST'])
-def set_video_progress():
-    """Mark a video complete/incomplete for the current logged-in user."""
-    user_id = session.get('user_id')
-    if user_id is None:
-        return jsonify({'error': 'Not authenticated.'}), 401
-
-    data      = request.get_json(force=True) or {}
-    video_id  = (data.get('video_id') or '').strip()
-    section   = (data.get('section') or '').strip()
-    completed = bool(data.get('completed', True))
-
-    if not video_id or not section:
-        return jsonify({'error': 'video_id and section are required.'}), 400
-
-    conn = get_db()
-    try:
-        if completed:
-            conn.execute(
-                '''INSERT INTO user_video_progress (user_id, section, video_id)
-                   VALUES (?, ?, ?)
-                   ON CONFLICT(user_id, video_id) DO NOTHING''',
-                (user_id, section, video_id)
-            )
-        else:
-            conn.execute(
-                'DELETE FROM user_video_progress WHERE user_id = ? AND video_id = ?',
-                (user_id, video_id)
-            )
-        conn.commit()
-    finally:
-        conn.close()
-    return jsonify({'message': 'Progress saved.', 'video_id': video_id, 'completed': completed})
-
-
 # ── Puzzle serving ────────────────────────────────────────────────────────────
 
 @app.route('/get-puzzle', methods=['GET'])
@@ -515,6 +410,23 @@ def get_puzzle():
     user_id = session.get('user_id')
 
     level_param = request.args.get('level', type=int)   # explicit level override
+
+    # ── Stampede / fully-random mode: bypass all tier/SRS logic ──────────────
+    if request.args.get('random', type=int) == 1:
+        conn = get_db()
+        try:
+            row = conn.execute(
+                'SELECT id, fen, engine_best_move FROM personal_blunders ORDER BY RANDOM() LIMIT 1'
+            ).fetchone()
+            if row is None:
+                return jsonify({'error': 'No puzzles found.'}), 404
+            return jsonify({
+                'puzzle_id':        row['id'],
+                'fen':              row['fen'],
+                'engine_best_move': row['engine_best_move'],
+            })
+        finally:
+            conn.close()
 
     # ── Anonymous: tier-based random delivery ─────────────────────────────────
     if user_id is None:

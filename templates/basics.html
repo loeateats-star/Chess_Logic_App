@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Chess Basics — Synapchess</title>
+  <title>Chess Basics — AlgoGambit</title>
 
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
@@ -12,13 +12,12 @@
         extend: {
           colors: {
             brand: {
-              bg:     '#ffffff',
-              card:   '#f6faf8',
-              border: '#e7ebe9',
+              bg:     '#0b0c10',
+              card:   '#131419',
+              border: '#1e2028',
               green:  '#00dc82',
               gdark:  '#00aa63',
-              muted:  '#64748b',
-              ink:    '#0b0c10',
+              muted:  '#9ca3af',
             }
           }
         }
@@ -33,7 +32,7 @@
   <script src="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.js"></script>
 
   <style>
-    body { background-color: #ffffff; }
+    body { background-color: #0b0c10; }
 
     /* Chessboard sizing and theme overrides */
     #board { width: 400px; }
@@ -61,49 +60,52 @@
     .status-shake { animation: statusShake 0.38s ease-in-out; }
   </style>
 </head>
-<body class="text-brand-ink antialiased" style="font-family: Inter, system-ui, sans-serif;">
+<body class="text-white antialiased" style="font-family: Inter, system-ui, sans-serif;">
 
   <!-- ─── SiteHeader ────────────────────────────────────────────────────── -->
-  <header class="sticky top-0 z-50 border-b border-brand-border" style="background:rgba(255,255,255,0.92); backdrop-filter:blur(8px);">
+  <header class="sticky top-0 z-50 border-b border-brand-border" style="background:#0b0c10;">
     <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
 
-      <a href="/" class="flex items-center gap-2 font-semibold text-brand-ink text-sm">
-        <span class="flex items-center justify-center w-7 h-7 rounded-md bg-brand-green text-brand-ink font-bold text-base">♟</span>
-        Synapchess
+      <a href="/" class="flex items-center gap-2 font-semibold text-white text-sm">
+        <span class="flex items-center justify-center w-7 h-7 rounded-md bg-brand-green text-brand-bg font-bold text-base">♟</span>
+        AlgoGambit
       </a>
 
-      <nav class="hidden md:flex items-center gap-8 text-sm font-medium">
-        <a href="/learn"  class="text-brand-ink">Learn</a>
-        <a href="/join"   class="text-brand-muted hover:text-brand-ink transition-colors">Join</a>
-        <a href="/donate" class="text-brand-muted hover:text-brand-ink transition-colors">Donate</a>
+      <nav class="hidden md:flex items-center gap-5 text-sm text-brand-muted">
+        <a href="/#mission"    class="hover:text-white transition-colors">Mission</a>
+        <a href="/curriculum"  class="hover:text-white transition-colors">Curriculum</a>
+        <a href="/worksheets"  class="hover:text-white transition-colors">Printable Sheets</a>
+        <a href="/basics"      class="text-white font-semibold">Chess Basics</a>
+        <a href="/#outcomes"   class="hover:text-white transition-colors">Outcomes</a>
+        <a href="/#foundation" class="hover:text-white transition-colors">Foundation</a>
       </nav>
 
       <div class="flex items-center gap-4 text-sm">
-        <a href="/#train" class="text-brand-muted hover:text-brand-ink transition-colors">Sign in</a>
-        <a href="/trainer"
-           class="bg-brand-green hover:bg-brand-gdark text-brand-ink font-semibold px-4 py-2 rounded-md transition-colors">
-          Start Training
+        <a href="/#train" class="text-brand-muted hover:text-white transition-colors">Sign in</a>
+        <a href="/#train"
+           class="bg-brand-green hover:bg-brand-gdark text-brand-bg font-semibold px-4 py-2 rounded-md transition-colors">
+          Launch Dashboard
         </a>
       </div>
     </div>
   </header>
 
   <!-- ─── Page Header ───────────────────────────────────────────────────── -->
-  <section class="py-12 px-6 border-b border-brand-border" style="background:#ffffff;">
+  <section class="py-12 px-6 border-b border-brand-border" style="background:#0b0c10;">
     <div class="max-w-6xl mx-auto space-y-4">
 
-      <a href="/learn"
-         class="inline-flex items-center gap-2 text-brand-muted hover:text-brand-ink transition-colors text-sm group">
+      <a href="/"
+         class="inline-flex items-center gap-2 text-brand-muted hover:text-white transition-colors text-sm group">
         <svg class="w-4 h-4 transition-transform group-hover:-translate-x-1"
              fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
         </svg>
-        Back to Learn
+        Back to Dashboard
       </a>
 
-      <p class="text-brand-gdark text-xs font-semibold tracking-widest uppercase">Level 0 · Interactive Learning</p>
+      <p class="text-brand-green text-xs font-semibold tracking-widest uppercase">Level 0 · Interactive Learning</p>
 
-      <h1 class="text-4xl md:text-5xl font-extrabold text-brand-ink leading-tight">
+      <h1 class="text-4xl md:text-5xl font-extrabold text-white leading-tight">
         Chess Basics:<br class="hidden md:block" /> How the Pieces Move
       </h1>
 
@@ -114,10 +116,9 @@
     </div>
   </section>
 
-  <!-- ─── Main Learning Interface ─────────────────────────────────────── -->
-  <section class="py-12 px-6" style="background:#ffffff;">
-    <div class="max-w-6xl mx-auto">
-    <div class="flex gap-8 items-start">
+  <!-- ─── Main Learning Interface ──────────────────────────────────────── -->
+  <section class="py-12 px-6" style="background:#0b0c10;">
+    <div class="max-w-6xl mx-auto flex gap-8 items-start">
 
       <!-- ── Left sidebar: module list ────────────────────────────────── -->
       <aside class="w-72 flex-shrink-0 space-y-3">
@@ -128,9 +129,9 @@
              class="flex items-center gap-4 p-4 rounded-xl border cursor-pointer transition-all duration-200"
              style="border-color:transparent; background:transparent;">
           <div class="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 text-xl"
-               style="background:#e6f9f0; color:#00aa63;">♖</div>
+               style="background:#1a1f1a; color:#00dc82;">♖</div>
           <div class="flex-1 min-w-0">
-            <p class="text-sm font-semibold text-brand-ink">How the Rook Moves</p>
+            <p class="text-sm font-semibold text-white">How the Rook Moves</p>
             <p class="text-xs text-brand-muted">Straight-line power</p>
           </div>
           <span id="check-rook" class="text-brand-green text-sm font-bold hidden">✓</span>
@@ -141,9 +142,9 @@
              class="flex items-center gap-4 p-4 rounded-xl border cursor-pointer transition-all duration-200"
              style="border-color:transparent; background:transparent;">
           <div class="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 text-xl"
-               style="background:#e6f9f0; color:#00aa63;">♗</div>
+               style="background:#1a1f1a; color:#00dc82;">♗</div>
           <div class="flex-1 min-w-0">
-            <p class="text-sm font-semibold text-brand-ink">How the Bishop Moves</p>
+            <p class="text-sm font-semibold text-white">How the Bishop Moves</p>
             <p class="text-xs text-brand-muted">Diagonal strike</p>
           </div>
           <span id="check-bishop" class="text-brand-green text-sm font-bold hidden">✓</span>
@@ -154,9 +155,9 @@
              class="flex items-center gap-4 p-4 rounded-xl border cursor-pointer transition-all duration-200"
              style="border-color:transparent; background:transparent;">
           <div class="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 text-xl"
-               style="background:#e6f9f0; color:#00aa63;">♘</div>
+               style="background:#1a1f1a; color:#00dc82;">♘</div>
           <div class="flex-1 min-w-0">
-            <p class="text-sm font-semibold text-brand-ink">How the Knight Moves</p>
+            <p class="text-sm font-semibold text-white">How the Knight Moves</p>
             <p class="text-xs text-brand-muted">The L-shape leap</p>
           </div>
           <span id="check-knight" class="text-brand-green text-sm font-bold hidden">✓</span>
@@ -167,9 +168,9 @@
              class="flex items-center gap-4 p-4 rounded-xl border cursor-pointer transition-all duration-200"
              style="border-color:transparent; background:transparent;">
           <div class="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 text-xl"
-               style="background:#e6f9f0; color:#00aa63;">♔</div>
+               style="background:#1a1f1a; color:#00dc82;">♔</div>
           <div class="flex-1 min-w-0">
-            <p class="text-sm font-semibold text-brand-ink">How the King Moves</p>
+            <p class="text-sm font-semibold text-white">How the King Moves</p>
             <p class="text-xs text-brand-muted">One royal step</p>
           </div>
           <span id="check-king" class="text-brand-green text-sm font-bold hidden">✓</span>
@@ -180,9 +181,9 @@
              class="flex items-center gap-4 p-4 rounded-xl border cursor-pointer transition-all duration-200"
              style="border-color:transparent; background:transparent;">
           <div class="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 text-xl"
-               style="background:#e6f9f0; color:#00aa63;">♕</div>
+               style="background:#1a1f1a; color:#00dc82;">♕</div>
           <div class="flex-1 min-w-0">
-            <p class="text-sm font-semibold text-brand-ink">How the Queen Moves</p>
+            <p class="text-sm font-semibold text-white">How the Queen Moves</p>
             <p class="text-xs text-brand-muted">The supreme commander</p>
           </div>
           <span id="check-queen" class="text-brand-green text-sm font-bold hidden">✓</span>
@@ -193,9 +194,9 @@
              class="flex items-center gap-4 p-4 rounded-xl border cursor-pointer transition-all duration-200"
              style="border-color:transparent; background:transparent;">
           <div class="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 text-xl"
-               style="background:#e6f9f0; color:#00aa63;">♙</div>
+               style="background:#1a1f1a; color:#00dc82;">♙</div>
           <div class="flex-1 min-w-0">
-            <p class="text-sm font-semibold text-brand-ink">How the Pawn Moves</p>
+            <p class="text-sm font-semibold text-white">How the Pawn Moves</p>
             <p class="text-xs text-brand-muted">Forward march, diagonal strike</p>
           </div>
           <span id="check-pawn" class="text-brand-green text-sm font-bold hidden">✓</span>
@@ -203,8 +204,9 @@
 
         <!-- Tip card -->
         <div class="border-t border-brand-border pt-5 mt-5">
-          <div class="rounded-xl border border-brand-border p-4 text-xs text-brand-muted leading-relaxed bg-white">
-            <p class="text-brand-ink text-xs font-semibold mb-1">Tip</p>
+          <div class="rounded-xl border border-brand-border p-4 text-xs text-brand-muted leading-relaxed"
+               style="background:#131419;">
+            <p class="text-white text-xs font-semibold mb-1">Tip</p>
             Complete all three modules, then head to the puzzle trainer to apply what you've learned under real game conditions.
           </div>
         </div>
@@ -214,15 +216,16 @@
       <div class="flex-1 flex flex-col items-center gap-6">
 
         <!-- Instruction card -->
-        <div class="w-full max-w-xl rounded-2xl border border-brand-border p-6 space-y-3 bg-white">
-          <p class="text-brand-gdark text-xs font-semibold tracking-widest uppercase"
+        <div class="w-full max-w-xl rounded-2xl border border-brand-border p-6 space-y-3"
+             style="background:#131419;">
+          <p class="text-brand-green text-xs font-semibold tracking-widest uppercase"
              id="lesson-label">Select a module to begin</p>
-          <h2 class="text-xl font-bold text-brand-ink" id="lesson-title">—</h2>
+          <h2 class="text-xl font-bold text-white" id="lesson-title">—</h2>
           <p class="text-brand-muted text-sm leading-relaxed"
              id="lesson-instruction">Click a module on the left to start your first interactive lesson.</p>
           <div id="task-row" class="hidden items-start gap-2 pt-1">
             <span class="text-brand-green flex-shrink-0 mt-0.5 text-sm">▶</span>
-            <p class="text-brand-ink text-sm font-medium" id="lesson-task"></p>
+            <p class="text-white text-sm font-medium" id="lesson-task"></p>
           </div>
         </div>
 
@@ -239,7 +242,7 @@
         <!-- Success panel (hidden until lesson complete) -->
         <div id="success-panel"
              class="hidden w-full max-w-xl rounded-2xl border p-6 text-center space-y-4"
-             style="background:#f6faf8; border-color:#00dc82;">
+             style="background:#131419; border-color:#00dc82;">
 
           <!-- Checkmark with ping rings (visual "sound animation") -->
           <div class="relative inline-flex items-center justify-center">
@@ -251,24 +254,25 @@
           </div>
 
           <div>
-            <p class="text-brand-gdark text-xs font-semibold tracking-widest uppercase mb-2">Lesson Complete</p>
-            <p class="text-brand-ink text-sm leading-relaxed" id="success-text"></p>
+            <p class="text-brand-green text-xs font-semibold tracking-widest uppercase mb-2">Lesson Complete</p>
+            <p class="text-white text-sm leading-relaxed" id="success-text"></p>
           </div>
 
           <!-- Next lesson button (hidden on last lesson) -->
           <button id="next-btn"
-                  class="hidden inline-flex items-center gap-2 bg-brand-green hover:bg-brand-gdark text-brand-ink font-semibold px-6 py-3 rounded-lg transition-colors text-sm cursor-pointer">
+                  class="hidden inline-flex items-center gap-2 bg-brand-green hover:bg-brand-gdark text-brand-bg font-semibold px-6 py-3 rounded-lg transition-colors text-sm cursor-pointer">
           </button>
 
           <!-- All-done message (hidden until knight lesson complete) -->
           <div id="complete-msg" class="hidden space-y-3">
-            <p class="text-brand-ink font-semibold text-base">You've completed all six basics lessons!</p>
+            <p class="text-white font-semibold text-base">You've completed all six basics lessons!</p>
             <a href="/special-rules"
-               class="inline-flex items-center gap-2 bg-brand-green hover:bg-brand-gdark text-brand-ink font-semibold px-6 py-3 rounded-lg transition-colors text-sm">
+               class="inline-flex items-center gap-2 bg-brand-green hover:bg-brand-gdark text-brand-bg font-semibold px-6 py-3 rounded-lg transition-colors text-sm">
               Next: Special Rules of Chess →
             </a>
-            <a href="/trainer"
-               class="inline-flex items-center gap-2 border border-brand-border hover:border-brand-green text-brand-muted hover:text-brand-ink px-6 py-3 rounded-lg transition-colors text-sm bg-white">
+            <a href="/#train"
+               class="inline-flex items-center gap-2 border border-brand-border hover:border-brand-green text-brand-muted hover:text-white px-6 py-3 rounded-lg transition-colors text-sm"
+               style="background:#0b0c10;">
               Skip to Puzzle Training
             </a>
           </div>
@@ -276,25 +280,25 @@
 
       </div>
     </div>
-    </div>
   </section>
 
   <!-- ─── Next Chapter Navigation ─────────────────────────────────────── -->
-  <section class="py-12 px-6 border-t border-brand-border" style="background:#f6faf8;">
+  <section class="py-12 px-6 border-t border-brand-border" style="background:#0b0c10;">
     <div class="max-w-6xl mx-auto flex items-center justify-between">
 
       <!-- Breadcrumb position indicator -->
       <div class="space-y-1">
         <p class="text-brand-muted text-xs tracking-widest uppercase font-semibold">Level 0 · Foundation</p>
-        <p class="text-brand-ink font-semibold text-sm">How the Pieces Move</p>
+        <p class="text-white font-semibold text-sm">How the Pieces Move</p>
       </div>
 
       <!-- Next chapter arrow card -->
       <a href="/special-rules"
-         class="group flex items-center gap-5 rounded-2xl border border-brand-border hover:border-brand-green px-8 py-5 transition-all duration-200 bg-white">
+         class="group flex items-center gap-5 rounded-2xl border border-brand-border hover:border-brand-green px-8 py-5 transition-all duration-200"
+         style="background:#131419;">
         <div class="text-right space-y-0.5">
           <p class="text-brand-muted text-xs font-semibold tracking-widest uppercase">Next Chapter</p>
-          <p class="text-brand-ink font-bold text-base leading-tight">Special Rules of Chess</p>
+          <p class="text-white font-bold text-base leading-tight">Special Rules of Chess</p>
           <p class="text-brand-muted text-xs">Check · Checkmate · Stalemate · En Passant · Castling</p>
         </div>
         <div class="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 transition-colors"
@@ -309,43 +313,56 @@
   </section>
 
   <!-- ─── SiteFooter ────────────────────────────────────────────────────── -->
-  <footer class="border-t border-brand-border pt-16 pb-8 px-6" style="background:#ffffff;">
+  <footer class="border-t border-brand-border pt-16 pb-8 px-6 mt-8" style="background:#0b0c10;">
     <div class="max-w-6xl mx-auto">
 
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-10 mb-14">
+      <div class="grid grid-cols-2 md:grid-cols-5 gap-10 mb-14">
         <div class="col-span-2 space-y-3">
-          <a href="/" class="flex items-center gap-2 font-semibold text-brand-ink text-sm">
-            <span class="flex items-center justify-center w-7 h-7 rounded-md bg-brand-green text-brand-ink font-bold text-base">♟</span>
-            Synapchess
+          <a href="/" class="flex items-center gap-2 font-semibold text-white text-sm">
+            <span class="flex items-center justify-center w-7 h-7 rounded-md bg-brand-green text-brand-bg font-bold text-base">♟</span>
+            AlgoGambit
           </a>
           <p class="text-brand-muted text-sm leading-relaxed max-w-xs">
-            Synapchess is fiscally sponsored by HCB Foundation, closing the cognitive equity gap in Title I schools.
+            The AlgoGambit Foundation is a 501(c)(3) nonprofit closing the cognitive equity gap in Title I schools.
           </p>
         </div>
 
         <div class="space-y-3">
-          <h4 class="text-brand-ink text-sm font-semibold">Site</h4>
+          <h4 class="text-white text-sm font-semibold">Program</h4>
           <ul class="space-y-2 text-sm text-brand-muted">
-            <li><a href="/learn"  class="hover:text-brand-ink transition-colors">Learn</a></li>
-            <li><a href="/join"   class="hover:text-brand-ink transition-colors">Join</a></li>
-            <li><a href="/donate" class="hover:text-brand-ink transition-colors">Donate</a></li>
+            <li><a href="/basics"      class="text-white">Chess Basics</a></li>
+            <li><a href="/curriculum"  class="hover:text-white transition-colors">Curriculum</a></li>
+            <li><a href="/worksheets"  class="hover:text-white transition-colors">Printable Sheets</a></li>
+            <li><a href="/#outcomes"   class="hover:text-white transition-colors">Outcomes</a></li>
           </ul>
         </div>
 
         <div class="space-y-3">
-          <h4 class="text-brand-ink text-sm font-semibold">Resources</h4>
+          <h4 class="text-white text-sm font-semibold">Foundation</h4>
           <ul class="space-y-2 text-sm text-brand-muted">
-            <li><a href="/trainer"  class="hover:text-brand-ink transition-colors">Puzzle Trainer</a></li>
-            <li><a href="/analysis" class="hover:text-brand-ink transition-colors">Game Analysis</a></li>
+            <li><a href="#" class="hover:text-white transition-colors">Our mission</a></li>
+            <li><a href="#" class="hover:text-white transition-colors">Partners</a></li>
+            <li><a href="#" class="hover:text-white transition-colors">Donate</a></li>
+            <li><a href="#" class="hover:text-white transition-colors">Careers</a></li>
+          </ul>
+        </div>
+
+        <div class="space-y-3">
+          <h4 class="text-white text-sm font-semibold">Resources</h4>
+          <ul class="space-y-2 text-sm text-brand-muted">
+            <li><a href="/#train"     class="hover:text-white transition-colors">Training dashboard</a></li>
+            <li><a href="/worksheets" class="hover:text-white transition-colors">Worksheets</a></li>
+            <li><a href="#"           class="hover:text-white transition-colors">Support</a></li>
+            <li><a href="#"           class="hover:text-white transition-colors">Contact</a></li>
           </ul>
         </div>
       </div>
 
       <div class="border-t border-brand-border pt-6 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-brand-muted">
-        <span>© 2026 Synapchess. All rights reserved.</span>
+        <span>© 2026 The AlgoGambit Foundation. All rights reserved.</span>
         <div class="flex gap-5">
-          <a href="#" class="hover:text-brand-ink transition-colors">Privacy</a>
-          <a href="#" class="hover:text-brand-ink transition-colors">Terms</a>
+          <a href="#" class="hover:text-white transition-colors">Privacy</a>
+          <a href="#" class="hover:text-white transition-colors">Terms</a>
         </div>
       </div>
     </div>
@@ -439,7 +456,7 @@
       var el = document.getElementById('module-' + id);
       if (!el) return;
       if (isActive) {
-        el.style.background   = '#f6faf8';
+        el.style.background   = '#131419';
         el.style.borderColor  = '#00dc82';
       } else {
         el.style.background   = 'transparent';
@@ -564,7 +581,7 @@
     function setStatus(msg, color) {
       var el        = document.getElementById('status-msg');
       el.textContent = msg;
-      el.style.color = color || '#94a3b8';
+      el.style.color = color || '#9ca3af';
     }
 
     function triggerShake() {
