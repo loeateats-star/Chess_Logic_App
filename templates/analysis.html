@@ -12,12 +12,13 @@
         extend: {
           colors: {
             brand: {
-              bg:     '#0b0c10',
-              card:   '#131419',
-              border: '#1e2028',
+              bg:     '#ffffff',
+              card:   '#f6faf8',
+              border: '#e7ebe9',
               green:  '#00dc82',
               gdark:  '#00aa63',
-              muted:  '#94a3b8',
+              muted:  '#64748b',
+              ink:    '#0b0c10',
             }
           }
         }
@@ -31,87 +32,72 @@
   <script src="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.js"></script>
 
   <style>
-    body { background-color: #0b0c10; }
+    body { background-color: #ffffff; }
     #board { width: 420px; }
     .board-b72b1 { border: 2px solid #00dc82 !important; border-radius: 6px; }
 
     .badge { display:inline-flex; align-items:center; gap:4px; padding:2px 8px; border-radius:999px; font-size:11px; font-weight:700; white-space:nowrap; }
     .move-row { cursor:pointer; }
-    .move-row:hover { background:#1a1c22; }
-    .move-row.active { background:#182a22; border-left:2px solid #00dc82; }
+    .move-row:hover { background:#f6faf8; }
+    .move-row.active { background:#e6f9f0; border-left:2px solid #00dc82; }
 
     #eval-tooltip { pointer-events:none; }
     ::-webkit-scrollbar { width: 6px; height: 6px; }
-    ::-webkit-scrollbar-thumb { background: #1e2028; border-radius: 3px; }
+    ::-webkit-scrollbar-thumb { background: #e7ebe9; border-radius: 3px; }
   </style>
 </head>
-<body class="text-white antialiased" style="font-family: Inter, system-ui, sans-serif;">
+<body class="text-brand-ink antialiased" style="font-family: Inter, system-ui, sans-serif;">
 
   <!-- ─── SiteHeader ────────────────────────────────────────────────────── -->
-  <header class="sticky top-0 z-50 border-b border-brand-border" style="background:#0b0c10;">
+  <header class="sticky top-0 z-50 border-b border-slate-200" style="background:rgba(255,255,255,0.92); backdrop-filter:blur(8px);">
     <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-      <a href="/" class="flex items-center gap-2 font-semibold text-white text-sm">
-        <span class="flex items-center justify-center w-7 h-7 rounded-md bg-brand-green text-brand-bg font-bold text-base">♟</span>
+      <a href="/" class="flex items-center gap-2 font-semibold text-brand-ink text-sm">
+        <span class="flex items-center justify-center w-7 h-7 rounded-md bg-brand-green text-brand-ink font-bold text-base">♟</span>
         Synapchess
       </a>
-      <nav class="hidden md:flex items-center gap-6 text-sm text-brand-muted">
-        <div class="relative">
-          <button id="nav-learn-btn" type="button"
-                  class="flex items-center gap-1 hover:text-white transition-colors cursor-pointer">
-            Learn
-            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
-            </svg>
-          </button>
-          <div id="nav-learn-menu"
-               class="hidden absolute left-0 top-full mt-3 w-52 rounded-lg border border-brand-border py-1.5 z-50 shadow-2xl"
-               style="background:#131419;">
-            <a href="/curriculum"    class="block px-4 py-2 text-sm text-brand-muted hover:bg-white/5 hover:text-white transition-colors">Curriculum</a>
-            <a href="/basics"        class="block px-4 py-2 text-sm text-brand-muted hover:bg-white/5 hover:text-white transition-colors">Chess Basics</a>
-            <a href="/special-rules" class="block px-4 py-2 text-sm text-brand-muted hover:bg-white/5 hover:text-white transition-colors">Special Rules</a>
-          </div>
-        </div>
-        <a href="/trainer"  class="hover:text-white transition-colors">Solve</a>
-        <a href="/analysis" class="text-white font-semibold transition-colors">Analyze</a>
+      <nav class="hidden md:flex items-center gap-8 text-sm font-medium">
+        <a href="/learn"  class="text-slate-500 hover:text-brand-ink transition-colors">Learn</a>
+        <a href="/join"   class="text-slate-500 hover:text-brand-ink transition-colors">Join</a>
+        <a href="/donate" class="text-slate-500 hover:text-brand-ink transition-colors">Donate</a>
       </nav>
       <div class="flex items-center gap-4 text-sm">
         <div id="auth-logged-out" class="flex items-center gap-3">
-          <button id="btn-login" class="text-brand-muted hover:text-white transition-colors cursor-pointer text-sm">Student Login</button>
+          <button id="btn-login" class="text-slate-500 hover:text-brand-ink transition-colors cursor-pointer text-sm">Student Login</button>
         </div>
         <div id="auth-logged-in" class="hidden items-center gap-3">
-          <span id="nav-welcome" class="text-brand-muted text-xs"></span>
-          <span class="text-brand-border text-xs">|</span>
-          <button id="btn-logout" class="text-brand-muted hover:text-white transition-colors cursor-pointer text-xs">Logout</button>
+          <span id="nav-welcome" class="text-slate-500 text-xs"></span>
+          <span class="text-slate-300 text-xs">|</span>
+          <button id="btn-logout" class="text-slate-500 hover:text-brand-ink transition-colors cursor-pointer text-xs">Logout</button>
         </div>
-        <a href="/" class="bg-brand-green hover:bg-brand-gdark text-brand-bg font-semibold px-4 py-2 rounded-md transition-colors text-sm">Dashboard</a>
+        <a href="/" class="bg-brand-green hover:bg-brand-gdark text-brand-ink font-semibold px-4 py-2 rounded-md transition-colors text-sm">Dashboard</a>
       </div>
     </div>
   </header>
 
   <!-- ─── Page Header ───────────────────────────────────────────────────── -->
-  <section class="py-8 px-6 border-b border-brand-border" style="background:#0b0c10;">
+  <section class="py-8 px-6 border-b border-slate-200" style="background:#ffffff;">
     <div class="max-w-6xl mx-auto space-y-2">
-      <span class="text-brand-green text-xs font-semibold tracking-widest uppercase">Post-Game Review</span>
-      <h1 class="text-3xl md:text-4xl font-extrabold text-white leading-tight">Game Analysis</h1>
-      <p class="text-brand-muted text-sm max-w-2xl leading-relaxed">
+      <span class="text-brand-gdark text-xs font-semibold tracking-widest uppercase">Post-Game Review</span>
+      <h1 class="text-3xl md:text-4xl font-extrabold text-brand-ink leading-tight">Game Analysis</h1>
+      <p class="text-slate-500 text-sm max-w-2xl leading-relaxed">
         Play a game, save it, then run it through Stockfish to see evaluations, best moves, and where each side lost centipawns.
       </p>
-      <p id="save-mode-note" class="text-xs text-brand-muted">
-        Signed out — games save to this browser (localStorage). <button onclick="openModal('login')" class="text-brand-green hover:text-brand-gdark cursor-pointer">Sign in</button> to save them to your account instead.
+      <p id="save-mode-note" class="text-xs text-slate-500">
+        Signed out — games save to this browser (localStorage). <button onclick="openModal('login')" class="text-brand-gdark hover:text-brand-green cursor-pointer">Sign in</button> to save them to your account instead.
       </p>
     </div>
   </section>
 
   <!-- ─── Main Layout ───────────────────────────────────────────────────── -->
-  <section class="py-8 px-6" style="background:#0b0c10;">
+  <section class="py-8 px-6" style="background:#ffffff;">
     <div class="max-w-6xl mx-auto flex gap-6 items-start flex-wrap xl:flex-nowrap">
 
       <!-- ── Left: Saved games ─────────────────────────────────────────── -->
       <aside class="w-full xl:w-60 flex-shrink-0 space-y-4 order-3 xl:order-1">
-        <div class="rounded-xl border border-brand-border p-4 space-y-3" style="background:#131419;">
+        <div class="rounded-xl border border-brand-border p-4 space-y-3" style="background:#f6faf8;">
           <div class="flex items-center justify-between">
             <p class="text-brand-green text-xs font-semibold tracking-widest uppercase">Saved Games</p>
-            <span id="games-count" class="text-white text-xs font-bold px-1.5 py-0.5 rounded" style="background:#1e2028;">0</span>
+            <span id="games-count" class="text-brand-ink text-xs font-bold px-1.5 py-0.5 rounded" style="background:#e7ebe9;">0</span>
           </div>
           <p id="games-empty" class="text-brand-muted text-xs text-center py-3 leading-relaxed">
             Save a game to see it here.
@@ -131,21 +117,21 @@
         </p>
 
         <div class="flex items-center gap-2 flex-wrap justify-center">
-          <button id="btn-new"    class="border border-brand-border hover:border-brand-green text-brand-muted hover:text-white font-semibold px-4 py-2 rounded-md transition-colors text-xs cursor-pointer" style="background:#131419;">New Game</button>
-          <button id="btn-undo"   class="border border-brand-border hover:border-brand-green text-brand-muted hover:text-white font-semibold px-4 py-2 rounded-md transition-colors text-xs cursor-pointer" style="background:#131419;">Undo Move</button>
-          <button id="btn-flip"   class="border border-brand-border hover:border-brand-green text-brand-muted hover:text-white font-semibold px-4 py-2 rounded-md transition-colors text-xs cursor-pointer" style="background:#131419;">Flip Board</button>
-          <button id="btn-save"   class="bg-brand-green hover:bg-brand-gdark text-brand-bg font-semibold px-4 py-2 rounded-md transition-colors text-xs cursor-pointer">Save Game</button>
-          <button id="btn-analyze" class="border border-brand-green text-brand-green hover:bg-brand-green hover:text-brand-bg font-semibold px-4 py-2 rounded-md transition-colors text-xs cursor-pointer">Analyze Game</button>
+          <button id="btn-new"    class="border border-brand-border hover:border-brand-green text-brand-muted hover:text-brand-ink font-semibold px-4 py-2 rounded-md transition-colors text-xs cursor-pointer" style="background:#f6faf8;">New Game</button>
+          <button id="btn-undo"   class="border border-brand-border hover:border-brand-green text-brand-muted hover:text-brand-ink font-semibold px-4 py-2 rounded-md transition-colors text-xs cursor-pointer" style="background:#f6faf8;">Undo Move</button>
+          <button id="btn-flip"   class="border border-brand-border hover:border-brand-green text-brand-muted hover:text-brand-ink font-semibold px-4 py-2 rounded-md transition-colors text-xs cursor-pointer" style="background:#f6faf8;">Flip Board</button>
+          <button id="btn-save"   class="bg-brand-green hover:bg-brand-gdark text-brand-ink font-semibold px-4 py-2 rounded-md transition-colors text-xs cursor-pointer">Save Game</button>
+          <button id="btn-analyze" class="border border-brand-green text-brand-green hover:bg-brand-green hover:text-brand-ink font-semibold px-4 py-2 rounded-md transition-colors text-xs cursor-pointer">Analyze Game</button>
         </div>
 
         <!-- Live engine line -->
-        <div class="w-full max-w-md rounded-xl border border-brand-border p-3 space-y-2" style="background:#131419;">
+        <div class="w-full max-w-md rounded-xl border border-brand-border p-3 space-y-2" style="background:#f6faf8;">
           <div class="flex items-center justify-between">
             <label class="flex items-center gap-2 text-xs text-brand-muted cursor-pointer select-none">
               <input id="chk-live-engine" type="checkbox" checked class="accent-brand-green" />
               Live engine line
             </label>
-            <span id="live-eval" class="text-white text-sm font-bold">—</span>
+            <span id="live-eval" class="text-brand-ink text-sm font-bold">—</span>
           </div>
           <p id="live-pv" class="text-brand-muted text-xs leading-relaxed truncate">Waiting for a position…</p>
         </div>
@@ -153,10 +139,10 @@
 
       <!-- ── Right: Move list ──────────────────────────────────────────── -->
       <aside class="w-full xl:w-64 flex-shrink-0 space-y-4 order-2 xl:order-3">
-        <div class="rounded-xl border border-brand-border p-4 space-y-3" style="background:#131419;">
+        <div class="rounded-xl border border-brand-border p-4 space-y-3" style="background:#f6faf8;">
           <div class="flex items-center justify-between">
             <p class="text-brand-green text-xs font-semibold tracking-widest uppercase">Moves</p>
-            <span id="move-count" class="text-white text-xs font-bold px-1.5 py-0.5 rounded" style="background:#1e2028;">0</span>
+            <span id="move-count" class="text-brand-ink text-xs font-bold px-1.5 py-0.5 rounded" style="background:#e7ebe9;">0</span>
           </div>
           <p id="moves-empty" class="text-brand-muted text-xs text-center py-3 leading-relaxed">No moves yet.</p>
           <div id="move-list" class="max-h-[28rem] overflow-y-auto text-xs"></div>
@@ -166,11 +152,11 @@
   </section>
 
   <!-- ─── Analysis Results ──────────────────────────────────────────────── -->
-  <section id="analysis-section" class="py-4 px-6 hidden" style="background:#0b0c10;">
+  <section id="analysis-section" class="py-4 px-6 hidden" style="background:#ffffff;">
     <div class="max-w-6xl mx-auto space-y-5">
 
       <div class="flex items-center gap-3">
-        <h2 class="text-xl font-bold text-white">Engine Analysis</h2>
+        <h2 class="text-xl font-bold text-brand-ink">Engine Analysis</h2>
         <span id="analysis-depth-note" class="text-brand-muted text-xs"></span>
       </div>
 
@@ -178,7 +164,7 @@
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="summary-cards"></div>
 
       <!-- Eval graph -->
-      <div class="viz-root rounded-xl border border-brand-border p-4" style="background:#131419;">
+      <div class="viz-root rounded-xl border border-brand-border p-4" style="background:#f6faf8;">
         <div class="flex items-center justify-between mb-2">
           <p class="text-brand-green text-xs font-semibold tracking-widest uppercase">Evaluation Over Time</p>
           <div class="flex items-center gap-4 text-xs text-brand-muted">
@@ -188,12 +174,12 @@
         </div>
         <div class="relative">
           <svg id="eval-graph" viewBox="0 0 600 160" preserveAspectRatio="none" class="w-full" style="height:160px; display:block;"></svg>
-          <div id="eval-tooltip" class="absolute hidden text-xs rounded-md px-2 py-1.5 border border-brand-border" style="background:#0b0c10; transform:translate(-50%,-110%); white-space:nowrap;"></div>
+          <div id="eval-tooltip" class="absolute hidden text-xs rounded-md px-2 py-1.5 border border-brand-border" style="background:#ffffff; transform:translate(-50%,-110%); white-space:nowrap;"></div>
         </div>
       </div>
 
       <!-- Annotated move list -->
-      <div class="rounded-xl border border-brand-border p-4" style="background:#131419;">
+      <div class="rounded-xl border border-brand-border p-4" style="background:#f6faf8;">
         <p class="text-brand-green text-xs font-semibold tracking-widest uppercase mb-3">Move-by-Move</p>
         <div id="annotated-moves" class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-1 text-sm"></div>
       </div>
@@ -202,18 +188,18 @@
 
   <!-- ─── Auth Modal (same pattern as trainer.html) ────────────────────── -->
   <div id="auth-modal" class="fixed inset-0 z-[100] flex items-center justify-center hidden">
-    <div class="absolute inset-0" style="background:rgba(0,0,0,0.8);" onclick="closeModal()"></div>
-    <div class="relative z-10 w-full max-w-sm mx-4 rounded-2xl border border-brand-border p-8 space-y-6" style="background:#131419;">
-      <button onclick="closeModal()" class="absolute top-4 right-4 text-brand-muted hover:text-white transition-colors text-lg leading-none cursor-pointer">✕</button>
+    <div class="absolute inset-0" style="background:rgba(15,23,20,0.5);" onclick="closeModal()"></div>
+    <div class="relative z-10 w-full max-w-sm mx-4 rounded-2xl border border-brand-border p-8 space-y-6" style="background:#f6faf8;">
+      <button onclick="closeModal()" class="absolute top-4 right-4 text-brand-muted hover:text-brand-ink transition-colors text-lg leading-none cursor-pointer">✕</button>
       <div class="flex gap-6 border-b border-brand-border pb-4">
-        <button id="tab-login" onclick="switchTab('login')" class="text-white font-semibold text-sm pb-1 border-b-2 border-brand-green cursor-pointer">Login</button>
-        <button id="tab-register" onclick="switchTab('register')" class="text-brand-muted hover:text-white font-semibold text-sm pb-1 border-b-2 border-transparent cursor-pointer">Register</button>
+        <button id="tab-login" onclick="switchTab('login')" class="text-brand-ink font-semibold text-sm pb-1 border-b-2 border-brand-green cursor-pointer">Login</button>
+        <button id="tab-register" onclick="switchTab('register')" class="text-brand-muted hover:text-brand-ink font-semibold text-sm pb-1 border-b-2 border-transparent cursor-pointer">Register</button>
       </div>
       <div class="space-y-4">
-        <input id="modal-username" type="text" placeholder="Username" autocomplete="username" class="w-full px-4 py-3 rounded-lg border border-brand-border text-white text-sm outline-none focus:border-brand-green transition-colors" style="background:#0b0c10;" />
-        <input id="modal-password" type="password" placeholder="Password" autocomplete="current-password" class="w-full px-4 py-3 rounded-lg border border-brand-border text-white text-sm outline-none focus:border-brand-green transition-colors" style="background:#0b0c10;" />
+        <input id="modal-username" type="text" placeholder="Username" autocomplete="username" class="w-full px-4 py-3 rounded-lg border border-brand-border text-brand-ink text-sm outline-none focus:border-brand-green transition-colors" style="background:#ffffff;" />
+        <input id="modal-password" type="password" placeholder="Password" autocomplete="current-password" class="w-full px-4 py-3 rounded-lg border border-brand-border text-brand-ink text-sm outline-none focus:border-brand-green transition-colors" style="background:#ffffff;" />
         <p id="modal-error" class="text-xs hidden" style="color:#ef4444;"></p>
-        <button id="modal-submit" onclick="submitModal()" class="w-full bg-brand-green hover:bg-brand-gdark text-brand-bg font-semibold py-3 rounded-lg transition-colors text-sm cursor-pointer">Login</button>
+        <button id="modal-submit" onclick="submitModal()" class="w-full bg-brand-green hover:bg-brand-gdark text-brand-ink font-semibold py-3 rounded-lg transition-colors text-sm cursor-pointer">Login</button>
       </div>
     </div>
   </div>
@@ -401,8 +387,8 @@
         rows.push(
           '<div class="flex items-center gap-2 px-2 py-1 rounded">' +
             '<span class="text-brand-muted w-5 flex-shrink-0">' + num + '.</span>' +
-            '<span class="text-white font-medium w-14">' + white.san + '</span>' +
-            (black ? '<span class="text-white font-medium">' + black.san + '</span>' : '') +
+            '<span class="text-brand-ink font-medium w-14">' + white.san + '</span>' +
+            (black ? '<span class="text-brand-ink font-medium">' + black.san + '</span>' : '') +
           '</div>'
         );
       }
@@ -527,11 +513,11 @@
       list.innerHTML = games.map(function(g) {
         var when = g.created_at ? new Date(g.created_at).toLocaleString() : '';
         return (
-          '<div class="rounded-lg border border-brand-border p-2 space-y-1" style="background:#0b0c10;">' +
+          '<div class="rounded-lg border border-brand-border p-2 space-y-1" style="background:#ffffff;">' +
             '<div class="flex items-center justify-between gap-2">' +
-              '<button class="text-white text-xs font-semibold text-left truncate flex-1 cursor-pointer hover:text-brand-green" ' +
+              '<button class="text-brand-ink text-xs font-semibold text-left truncate flex-1 cursor-pointer hover:text-brand-green" ' +
                 'onclick="loadGame(\'' + g.id + '\', \'' + g.source + '\')" title="Load this game">' + escapeHtml(g.title) + '</button>' +
-              '<button class="text-brand-muted hover:text-white text-xs cursor-pointer flex-shrink-0" ' +
+              '<button class="text-brand-muted hover:text-brand-ink text-xs cursor-pointer flex-shrink-0" ' +
                 'onclick="renameGame(\'' + g.id + '\', \'' + g.source + '\')" title="Rename">✎</button>' +
               '<button class="text-brand-muted hover:text-red-400 text-xs cursor-pointer flex-shrink-0" ' +
                 'onclick="deleteGame(\'' + g.id + '\', \'' + g.source + '\')" title="Delete">✕</button>' +
@@ -741,12 +727,12 @@
           return '<span class="badge" style="color:' + st.color + '; background:' + st.bg + ';">' + st.icon + ' ' + s.counts[k] + ' ' + st.label + '</span>';
         }).join(' ');
         return (
-          '<div class="rounded-xl border border-brand-border p-4 space-y-3" style="background:#131419;">' +
+          '<div class="rounded-xl border border-brand-border p-4 space-y-3" style="background:#f6faf8;">' +
             '<div class="flex items-center justify-between">' +
-              '<p class="text-white font-semibold text-sm capitalize">' + side + '</p>' +
+              '<p class="text-brand-ink font-semibold text-sm capitalize">' + side + '</p>' +
               '<span class="text-brand-green font-bold text-lg">' + s.accuracy + '%</span>' +
             '</div>' +
-            '<p class="text-brand-muted text-xs">Avg. centipawn loss: <span class="text-white font-semibold">' + s.avg_cpl + '</span></p>' +
+            '<p class="text-brand-muted text-xs">Avg. centipawn loss: <span class="text-brand-ink font-semibold">' + s.avg_cpl + '</span></p>' +
             '<div class="flex flex-wrap gap-1.5">' + (chips || '<span class="text-brand-muted text-xs">No data</span>') + '</div>' +
           '</div>'
         );
@@ -777,7 +763,7 @@
 
       var parts = [];
       // baseline
-      parts.push('<line x1="' + M + '" y1="' + (H / 2) + '" x2="' + (W - M) + '" y2="' + (H / 2) + '" stroke="#1e2028" stroke-width="1" />');
+      parts.push('<line x1="' + M + '" y1="' + (H / 2) + '" x2="' + (W - M) + '" y2="' + (H / 2) + '" stroke="#d5ddd9" stroke-width="1" />');
       // segments, colored by sign of the average of their two endpoints
       for (var i = 0; i < n; i++) {
         var a = points[i], b = points[i + 1];
@@ -813,8 +799,8 @@
       var evalText = Math.abs(point.cp) >= 600 ? (point.cp > 0 ? 'Mate for White' : 'Mate for Black') : ((point.cp / 100 >= 0 ? '+' : '') + (point.cp / 100).toFixed(2));
       var label = point.row ? (point.row.ply + '. ' + point.row.san) : 'Start';
       var cls = point.row ? CLASS_STYLE[point.row.classification] : null;
-      tip.innerHTML = '<div class="text-white font-semibold">' + label + '</div>' +
-        '<div class="text-brand-muted">Eval: <span class="text-white">' + evalText + '</span></div>' +
+      tip.innerHTML = '<div class="text-brand-ink font-semibold">' + label + '</div>' +
+        '<div class="text-brand-muted">Eval: <span class="text-brand-ink">' + evalText + '</span></div>' +
         (cls ? '<div style="color:' + cls.color + ';">' + cls.icon + ' ' + cls.label + '</div>' : '');
       tip.style.left = pxX + 'px';
       tip.style.top = pxY + 'px';
@@ -830,7 +816,7 @@
         return (
           '<div class="move-row flex items-center gap-2 px-2 py-1.5 rounded-md" onclick="jumpToPly(' + row.ply + ')">' +
             '<span class="text-brand-muted text-xs w-8 flex-shrink-0">' + row.ply + '.</span>' +
-            '<span class="text-white font-medium w-14 flex-shrink-0">' + row.san + '</span>' +
+            '<span class="text-brand-ink font-medium w-14 flex-shrink-0">' + row.san + '</span>' +
             '<span class="badge" style="color:' + st.color + '; background:' + st.bg + ';">' + st.icon + ' ' + st.label + '</span>' +
             bestNote +
           '</div>'
@@ -863,12 +849,12 @@
       activeModalTab = tab;
       var lt = document.getElementById('tab-login'), rt = document.getElementById('tab-register'), sub = document.getElementById('modal-submit');
       if (tab === 'login') {
-        lt.classList.add('text-white', 'border-brand-green'); lt.classList.remove('text-brand-muted', 'border-transparent');
-        rt.classList.remove('text-white', 'border-brand-green'); rt.classList.add('text-brand-muted', 'border-transparent');
+        lt.classList.add('text-brand-ink', 'border-brand-green'); lt.classList.remove('text-brand-muted', 'border-transparent');
+        rt.classList.remove('text-brand-ink', 'border-brand-green'); rt.classList.add('text-brand-muted', 'border-transparent');
         sub.textContent = 'Login';
       } else {
-        rt.classList.add('text-white', 'border-brand-green'); rt.classList.remove('text-brand-muted', 'border-transparent');
-        lt.classList.remove('text-white', 'border-brand-green'); lt.classList.add('text-brand-muted', 'border-transparent');
+        rt.classList.add('text-brand-ink', 'border-brand-green'); rt.classList.remove('text-brand-muted', 'border-transparent');
+        lt.classList.remove('text-brand-ink', 'border-brand-green'); lt.classList.add('text-brand-muted', 'border-transparent');
         sub.textContent = 'Create Account';
       }
     }
@@ -914,23 +900,5 @@
     }
   </script>
 
-  <!-- ─── Nav dropdown (Learn tab) ──────────────────────────────────────── -->
-  <script>
-    (function() {
-      var btn  = document.getElementById('nav-learn-btn');
-      var menu = document.getElementById('nav-learn-menu');
-      if (!btn || !menu) return;
-      btn.addEventListener('click', function(e) {
-        e.stopPropagation();
-        menu.classList.toggle('hidden');
-      });
-      document.addEventListener('click', function(e) {
-        if (!menu.contains(e.target) && e.target !== btn) menu.classList.add('hidden');
-      });
-      document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') menu.classList.add('hidden');
-      });
-    })();
-  </script>
 </body>
 </html>

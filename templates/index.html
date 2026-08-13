@@ -13,12 +13,13 @@
         extend: {
           colors: {
             brand: {
-              bg:     '#0b0c10',
-              card:   '#131419',
-              border: '#1e2028',
+              bg:     '#ffffff',
+              card:   '#f6faf8',
+              border: '#e7ebe9',
               green:  '#00dc82',
               gdark:  '#00aa63',
-              muted:  '#94a3b8',
+              muted:  '#64748b',
+              ink:    '#0b0c10',
             }
           }
         }
@@ -37,7 +38,7 @@
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
 
   <style>
-    body  { background-color: #0b0c10; }
+    body  { background-color: #ffffff; }
     /* Chessboard.js sizes itself from this width — do not remove */
     #board { width: 400px; }
     .board-b72b1 { border: 2px solid #00dc82 !important; border-radius: 6px; }
@@ -87,38 +88,23 @@
     }
   </style>
 </head>
-<body class="text-white antialiased" style="font-family: Inter, system-ui, sans-serif;">
+<body class="text-brand-ink antialiased" style="font-family: Inter, system-ui, sans-serif;">
 
   <!-- ─── SiteHeader ────────────────────────────────────────────────────── -->
-  <header class="sticky top-0 z-50 border-b border-brand-border" style="background:#0b0c10;">
+  <header class="sticky top-0 z-50 border-b border-brand-border" style="background:rgba(255,255,255,0.92); backdrop-filter:blur(8px);">
     <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
 
       <!-- Logo -->
-      <a href="#" class="flex items-center gap-2 font-semibold text-white text-sm">
-        <span class="flex items-center justify-center w-7 h-7 rounded-md bg-brand-green text-brand-bg font-bold text-base">♟</span>
+      <a href="/" class="flex items-center gap-2 font-semibold text-brand-ink text-sm">
+        <span class="flex items-center justify-center w-7 h-7 rounded-md bg-brand-green text-brand-ink font-bold text-base">♟</span>
         Synapchess
       </a>
 
       <!-- Center nav -->
-      <nav class="hidden md:flex items-center gap-6 text-sm text-brand-muted">
-        <div class="relative">
-          <button id="nav-learn-btn" type="button"
-                  class="flex items-center gap-1 hover:text-white transition-colors cursor-pointer">
-            Learn
-            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
-            </svg>
-          </button>
-          <div id="nav-learn-menu"
-               class="hidden absolute left-0 top-full mt-3 w-52 rounded-lg border border-brand-border py-1.5 z-50 shadow-2xl"
-               style="background:#131419;">
-            <a href="/curriculum"    class="block px-4 py-2 text-sm text-brand-muted hover:bg-white/5 hover:text-white transition-colors">Curriculum</a>
-            <a href="/basics"        class="block px-4 py-2 text-sm text-brand-muted hover:bg-white/5 hover:text-white transition-colors">Chess Basics</a>
-            <a href="/special-rules" class="block px-4 py-2 text-sm text-brand-muted hover:bg-white/5 hover:text-white transition-colors">Special Rules</a>
-          </div>
-        </div>
-        <a href="/trainer"  class="hover:text-white transition-colors">Solve</a>
-        <a href="/analysis" class="hover:text-white transition-colors">Analyze</a>
+      <nav class="hidden md:flex items-center gap-8 text-sm font-medium">
+        <a href="/learn"  class="text-brand-muted hover:text-brand-ink transition-colors">Learn</a>
+        <a href="/join"   class="text-brand-muted hover:text-brand-ink transition-colors">Join</a>
+        <a href="/donate" class="text-brand-muted hover:text-brand-ink transition-colors">Donate</a>
       </nav>
 
       <!-- Right actions -->
@@ -127,12 +113,11 @@
         <!-- Logged-out state (default) -->
         <div id="auth-logged-out" class="flex items-center gap-3">
           <button id="btn-login"
-                  class="text-brand-muted hover:text-white transition-colors cursor-pointer">
+                  class="text-brand-muted hover:text-brand-ink transition-colors cursor-pointer">
             Student Login
           </button>
           <button id="btn-register"
-                  class="border border-brand-border hover:border-brand-green text-brand-muted hover:text-white px-3 py-1.5 rounded-md transition-colors cursor-pointer"
-                  style="background:#131419;">
+                  class="border border-brand-border hover:border-brand-gdark text-brand-muted hover:text-brand-ink px-3 py-1.5 rounded-md transition-colors cursor-pointer bg-white">
             Register
           </button>
         </div>
@@ -142,81 +127,77 @@
           <span id="nav-welcome" class="text-brand-muted text-xs"></span>
           <button id="btn-telemetry"
                   onclick="toggleTelemetry()"
-                  class="border border-brand-border hover:border-brand-green text-brand-green text-xs font-semibold px-3 py-1.5 rounded-md transition-colors cursor-pointer"
-                  style="background:#131419;">
+                  class="border border-brand-border hover:border-brand-gdark text-brand-gdark text-xs font-semibold px-3 py-1.5 rounded-md transition-colors cursor-pointer bg-white">
             View Telemetry
           </button>
           <span class="text-brand-border text-xs">|</span>
           <button id="btn-logout"
-                  class="text-brand-muted hover:text-white transition-colors cursor-pointer">
+                  class="text-brand-muted hover:text-brand-ink transition-colors cursor-pointer">
             Logout
           </button>
         </div>
 
         <a href="/trainer"
-           class="bg-brand-green hover:bg-brand-gdark text-brand-bg font-semibold px-4 py-2 rounded-md transition-colors">
-          Launch Dashboard
+           class="bg-brand-green hover:bg-brand-gdark text-brand-ink font-semibold px-4 py-2 rounded-md transition-colors">
+          Start Training
         </a>
       </div>
     </div>
   </header>
 
-  <!-- ─── Hero ─────────────────────────────────────────────────────────── -->
-  <section class="py-20 px-6" style="background:#0b0c10;">
-    <div class="max-w-6xl mx-auto grid lg:grid-cols-2 gap-14 items-center">
+  <!-- ─── Hero: full-bleed photo with an overlaid mission card ───────────── -->
+  <section class="relative overflow-hidden" style="min-height: 680px;">
+    <img src="/static/img/photos/hero-library-chess.jpg"
+         alt="A young student moves a chess piece during a game at a public library"
+         class="absolute inset-0 w-full h-full object-cover" loading="eager" />
 
-      <!-- Text -->
-      <div class="text-center lg:text-left space-y-7">
+    <div class="relative max-w-7xl mx-auto px-6 py-16 md:py-24 flex items-center" style="min-height: 680px;">
+      <div class="w-full max-w-md rounded-2xl p-8 md:p-10 space-y-6 shadow-2xl" style="background:#ffffff;">
 
         <!-- Free Forever badge -->
-        <div>
-          <span class="free-forever-badge inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-semibold text-white">
-            <span class="text-brand-green">✓</span> Free Forever — no paywalls, no tiers
-          </span>
-        </div>
+        <span class="free-forever-badge inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-semibold text-brand-ink">
+          <span class="text-brand-gdark">✓</span> Free Forever — no paywalls, no tiers
+        </span>
 
         <!-- Heading -->
-        <h1 class="text-5xl md:text-6xl font-extrabold leading-tight text-white">
-          <span class="gradient-text">Reducing the cognitive equity</span> gap, one move at a time
+        <h1 class="text-4xl font-extrabold leading-tight text-brand-ink">
+          <span class="gradient-text">Our Mission</span>
         </h1>
 
-        <!-- Sub-copy: one sentence, mission not pitch -->
-        <p class="text-brand-muted text-lg max-w-xl mx-auto lg:mx-0 leading-relaxed">
-          Master-level chess instruction for Title I schools — free, forever.
+        <!-- Mission copy -->
+        <p class="text-brand-muted text-base leading-relaxed">
+          <strong class="text-brand-ink">Synapchess</strong> is a nonprofit dedicated to closing the
+          cognitive equity gap for students in Title I schools. Through free chess curriculum, live
+          puzzle training, and volunteer-led chapters, we give kids the tools to think five moves
+          ahead — in chess and in life.
         </p>
 
-        <!-- CTA -->
-        <div class="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-5 pt-2">
-          <a href="/trainer"
-             class="bg-brand-green hover:bg-brand-gdark text-brand-bg font-semibold px-7 py-3.5 rounded-md transition-colors text-sm">
-            Start Training — It's Free &rarr;
+        <!-- CTA pills -->
+        <div class="flex flex-wrap gap-3 pt-1">
+          <a href="/learn"
+             class="inline-flex items-center justify-center rounded-full px-6 py-3 text-xs font-bold tracking-wide uppercase transition-colors border border-brand-green text-brand-gdark hover:bg-brand-green hover:text-brand-ink">
+            Learn More
           </a>
-          <a href="/curriculum"
-             class="text-brand-muted hover:text-white transition-colors text-sm font-medium">
-            See how it works →
+          <a href="/trainer"
+             class="inline-flex items-center justify-center rounded-full px-6 py-3 text-xs font-bold tracking-wide uppercase transition-colors bg-brand-green hover:bg-brand-gdark text-brand-ink">
+            Start Training
+          </a>
+          <a href="/donate"
+             class="inline-flex items-center justify-center rounded-full px-6 py-3 text-xs font-bold tracking-wide uppercase transition-colors bg-brand-green hover:bg-brand-gdark text-brand-ink">
+            Donate
           </a>
         </div>
 
         <!-- Sponsorship note -->
-        <p class="text-brand-muted text-xs pt-4 opacity-70">
+        <p class="text-brand-muted text-xs opacity-70">
           Fiscally sponsored by HCB Foundation
         </p>
       </div>
-
-      <!-- Photo -->
-      <div class="relative">
-        <div class="rounded-3xl overflow-hidden border border-brand-border shadow-2xl">
-          <img src="/static/img/photos/hero-library-chess.jpg"
-               alt="A young student moves a chess piece during a game at a public library"
-               class="w-full h-full object-cover" style="aspect-ratio: 4/5;" loading="eager" />
-        </div>
-      </div>
-
     </div>
   </section>
 
   <!-- ─── Interactive Training Board (hidden on homepage; /trainer is the primary entry point) ── -->
-  <section id="train" class="hidden py-20 px-6" style="background:#0b0c10;">
+  <section id="train" class="hidden py-20 px-6" style="background:#ffffff;">
     <div class="max-w-5xl mx-auto rounded-3xl p-8 md:p-12 shadow-xl" style="background:#131419;">
       <div class="flex flex-col lg:flex-row items-center gap-12">
 
@@ -255,7 +236,7 @@
 
           <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4">
             <button id="train-btn"
-              class="bg-brand-green hover:bg-brand-gdark text-brand-bg font-semibold px-6 py-3 rounded-md transition-colors text-sm cursor-pointer">
+              class="bg-brand-green hover:bg-brand-gdark text-brand-ink font-semibold px-6 py-3 rounded-md transition-colors text-sm cursor-pointer">
               Train New Puzzle
             </button>
             <button id="show-btn"
@@ -273,12 +254,12 @@
   </section>
 
   <!-- ─── The Path ─────────────────────────────────────────────────────── -->
-  <section id="mission" class="py-24 px-6 border-t border-brand-border" style="background:#0b0c10;">
+  <section id="mission" class="py-24 px-6 border-t border-brand-border" style="background:#f6faf8;">
     <div class="max-w-3xl mx-auto">
 
       <div class="mb-12 text-center">
-        <p class="text-brand-green text-xs font-semibold tracking-widest uppercase mb-4">The Path</p>
-        <h2 class="text-4xl font-bold text-white leading-tight">
+        <p class="text-brand-gdark text-xs font-semibold tracking-widest uppercase mb-4">The Path</p>
+        <h2 class="text-4xl font-bold text-brand-ink leading-tight">
           First move to master-level thinking
         </h2>
       </div>
@@ -294,36 +275,32 @@
         <div class="absolute left-5 top-2 bottom-2 w-px bg-brand-border" aria-hidden="true"></div>
 
         <!-- Level 0 -->
-        <a href="/basics" class="group relative block pb-12">
-          <span class="absolute -left-14 top-0 flex items-center justify-center w-10 h-10 rounded-full border-2 border-brand-border group-hover:border-brand-green text-brand-muted group-hover:text-brand-green font-bold text-sm transition-colors" style="background:#0b0c10;">0</span>
-          <p class="text-brand-green text-xs font-semibold tracking-widest uppercase mb-1">The Foundation</p>
-          <h3 class="text-white font-semibold text-lg group-hover:text-brand-green transition-colors">Chess Basics</h3>
+        <a href="/basics" class="group relative block pb-10">
+          <span class="absolute -left-14 top-0 flex items-center justify-center w-10 h-10 rounded-full border-2 border-brand-border group-hover:border-brand-green text-brand-muted group-hover:text-brand-gdark font-bold text-sm transition-colors bg-white">0</span>
+          <h3 class="text-brand-ink font-semibold text-lg group-hover:text-brand-gdark transition-colors">New to Chess</h3>
         </a>
 
         <!-- Level 1 -->
-        <a href="/trainer?level=1" class="group relative block pb-12">
-          <span class="absolute -left-14 top-0 flex items-center justify-center w-10 h-10 rounded-full border-2 border-brand-border group-hover:border-brand-green text-brand-muted group-hover:text-brand-green font-bold text-sm transition-colors" style="background:#0b0c10;">1</span>
-          <p class="text-brand-green text-xs font-semibold tracking-widest uppercase mb-1">Beginner Tactics ⭐</p>
-          <h3 class="text-white font-semibold text-lg group-hover:text-brand-green transition-colors">Pins, Skewers &amp; Double Attacks</h3>
+        <a href="/trainer?level=1" class="group relative block pb-10">
+          <span class="absolute -left-14 top-0 flex items-center justify-center w-10 h-10 rounded-full border-2 border-brand-border group-hover:border-brand-green text-brand-muted group-hover:text-brand-gdark font-bold text-sm transition-colors bg-white">1</span>
+          <h3 class="text-brand-ink font-semibold text-lg group-hover:text-brand-gdark transition-colors">Beginner</h3>
         </a>
 
         <!-- Level 2 -->
-        <a href="/trainer?level=2" class="group relative block pb-12">
-          <span class="absolute -left-14 top-0 flex items-center justify-center w-10 h-10 rounded-full border-2 border-brand-border group-hover:border-brand-green text-brand-muted group-hover:text-brand-green font-bold text-sm transition-colors" style="background:#0b0c10;">2</span>
-          <p class="text-brand-green text-xs font-semibold tracking-widest uppercase mb-1">Intermediate Strategy ⭐⭐</p>
-          <h3 class="text-white font-semibold text-lg group-hover:text-brand-green transition-colors">Overloads &amp; Positional Play</h3>
+        <a href="/trainer?level=2" class="group relative block pb-10">
+          <span class="absolute -left-14 top-0 flex items-center justify-center w-10 h-10 rounded-full border-2 border-brand-border group-hover:border-brand-green text-brand-muted group-hover:text-brand-gdark font-bold text-sm transition-colors bg-white">2</span>
+          <h3 class="text-brand-ink font-semibold text-lg group-hover:text-brand-gdark transition-colors">Intermediate</h3>
         </a>
 
         <!-- Level 3 -->
         <a href="/trainer?level=3" class="group relative block">
-          <span class="absolute -left-14 top-0 flex items-center justify-center w-10 h-10 rounded-full border-2 border-brand-border group-hover:border-brand-green text-brand-muted group-hover:text-brand-green font-bold text-sm transition-colors" style="background:#0b0c10;">3</span>
-          <p class="text-brand-green text-xs font-semibold tracking-widest uppercase mb-1">Advanced Calculation ⭐⭐⭐</p>
-          <h3 class="text-white font-semibold text-lg group-hover:text-brand-green transition-colors">Deep Calculation &amp; Endgames</h3>
+          <span class="absolute -left-14 top-0 flex items-center justify-center w-10 h-10 rounded-full border-2 border-brand-border group-hover:border-brand-green text-brand-muted group-hover:text-brand-gdark font-bold text-sm transition-colors bg-white">3</span>
+          <h3 class="text-brand-ink font-semibold text-lg group-hover:text-brand-gdark transition-colors">Advanced</h3>
         </a>
       </div>
 
       <div class="text-center mt-14">
-        <a href="/curriculum" class="text-brand-green hover:text-brand-gdark font-medium text-sm">
+        <a href="/curriculum" class="text-brand-gdark hover:text-brand-green font-medium text-sm">
           Watch the video curriculum →
         </a>
       </div>
@@ -331,13 +308,12 @@
   </section>
 
   <!-- ─── Outcomes ─────────────────────────────────────────────────────── -->
-  <section id="outcomes" class="py-24 px-6 border-t border-brand-border" style="background:#0b0c10;">
+  <section id="outcomes" class="py-24 px-6 border-t border-brand-border" style="background:#ffffff;">
     <div class="max-w-4xl mx-auto text-center">
 
       <div class="flex items-center justify-center gap-2 flex-wrap mb-8">
-        <p class="text-brand-green text-xs font-semibold tracking-widest uppercase">What we're working toward</p>
-        <span class="demo-badge-pulse inline-flex items-center gap-1 border border-amber-500/40 text-amber-400 text-[10px] font-bold tracking-widest uppercase px-2 py-0.5 rounded-full"
-              style="background:rgba(245,158,11,0.08);">
+        <p class="text-brand-gdark text-xs font-semibold tracking-widest uppercase">What we're working toward</p>
+        <span class="demo-badge-pulse inline-flex items-center gap-1 border border-amber-400 text-amber-600 text-[10px] font-bold tracking-widest uppercase px-2 py-0.5 rounded-full bg-amber-50">
           Demo Data — Not Real
         </span>
       </div>
@@ -345,18 +321,18 @@
       <!-- 3 plain stats, no cards or charts -->
       <div class="grid sm:grid-cols-3 gap-10 sm:gap-6">
         <div class="stat-card">
-          <div class="text-5xl font-extrabold text-white"><span class="stat-num" data-target="34" data-prefix="+" data-suffix="%">0%</span></div>
-          <div class="text-white text-sm font-medium mt-2">Cognitive growth index</div>
+          <div class="text-5xl font-extrabold text-brand-ink"><span class="stat-num" data-target="34" data-prefix="+" data-suffix="%">0%</span></div>
+          <div class="text-brand-ink text-sm font-medium mt-2">Cognitive growth index</div>
           <div class="text-brand-muted text-xs mt-1">vs. district baseline (demo)</div>
         </div>
         <div class="stat-card">
-          <div class="text-5xl font-extrabold text-white"><span class="stat-num" data-target="92.4" data-suffix="%">0%</span></div>
-          <div class="text-white text-sm font-medium mt-2">Problem-solving accuracy</div>
+          <div class="text-5xl font-extrabold text-brand-ink"><span class="stat-num" data-target="92.4" data-suffix="%">0%</span></div>
+          <div class="text-brand-ink text-sm font-medium mt-2">Problem-solving accuracy</div>
           <div class="text-brand-muted text-xs mt-1">standardized assessments (demo)</div>
         </div>
         <div class="stat-card">
-          <div class="text-5xl font-extrabold text-white"><span class="stat-num" data-target="27840">0</span></div>
-          <div class="text-white text-sm font-medium mt-2">Students reached</div>
+          <div class="text-5xl font-extrabold text-brand-ink"><span class="stat-num" data-target="27840">0</span></div>
+          <div class="text-brand-ink text-sm font-medium mt-2">Students reached</div>
           <div class="text-brand-muted text-xs mt-1">across 142 schools (demo)</div>
         </div>
       </div>
@@ -373,23 +349,23 @@
         Join us in closing the gap.
       </h2>
       <a href="/trainer"
-         class="inline-block bg-brand-green hover:bg-brand-gdark text-brand-bg font-semibold px-7 py-3.5 rounded-md transition-colors text-sm">
+         class="inline-block bg-brand-green hover:bg-brand-gdark text-brand-ink font-semibold px-7 py-3.5 rounded-md transition-colors text-sm">
         Start Training &rarr;
       </a>
     </div>
   </section>
 
   <!-- ─── SiteFooter ────────────────────────────────────────────────────── -->
-  <footer class="border-t border-brand-border pt-16 pb-8 px-6" style="background:#0b0c10;">
+  <footer class="border-t border-brand-border pt-16 pb-8 px-6" style="background:#ffffff;">
     <div class="max-w-6xl mx-auto">
 
       <!-- Top row: brand + columns -->
-      <div class="grid grid-cols-2 md:grid-cols-5 gap-10 mb-14">
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-10 mb-14">
 
         <!-- Brand blurb -->
-        <div class="col-span-2 md:col-span-2 space-y-3">
-          <a href="#" class="flex items-center gap-2 font-semibold text-white text-sm">
-            <span class="flex items-center justify-center w-7 h-7 rounded-md bg-brand-green text-brand-bg font-bold text-base">♟</span>
+        <div class="col-span-2 space-y-3">
+          <a href="/" class="flex items-center gap-2 font-semibold text-brand-ink text-sm">
+            <span class="flex items-center justify-center w-7 h-7 rounded-md bg-brand-green text-brand-ink font-bold text-base">♟</span>
             Synapchess
           </a>
           <p class="text-brand-muted text-sm leading-relaxed max-w-xs">
@@ -397,36 +373,22 @@
           </p>
         </div>
 
-        <!-- Column: Program -->
+        <!-- Column: Site -->
         <div class="space-y-3">
-          <h4 class="text-white text-sm font-semibold">Program</h4>
+          <h4 class="text-brand-ink text-sm font-semibold">Site</h4>
           <ul class="space-y-2 text-sm text-brand-muted">
-            <li><a href="/curriculum" class="hover:text-white transition-colors">Curriculum</a></li>
-            <li><a href="#outcomes"   class="hover:text-white transition-colors">Outcomes</a></li>
-            <li><a href="/trainer"    class="hover:text-white transition-colors">For educators</a></li>
-            <li><a href="#mission"    class="hover:text-white transition-colors">Research</a></li>
-          </ul>
-        </div>
-
-        <!-- Column: Foundation -->
-        <div class="space-y-3">
-          <h4 class="text-white text-sm font-semibold">Foundation</h4>
-          <ul class="space-y-2 text-sm text-brand-muted">
-            <li><a href="#" class="hover:text-white transition-colors">Our mission</a></li>
-            <li><a href="#" class="hover:text-white transition-colors">Partners</a></li>
-            <li><a href="#" class="hover:text-white transition-colors">Donate</a></li>
-            <li><a href="#" class="hover:text-white transition-colors">Careers</a></li>
+            <li><a href="/learn"  class="hover:text-brand-ink transition-colors">Learn</a></li>
+            <li><a href="/join"   class="hover:text-brand-ink transition-colors">Join</a></li>
+            <li><a href="/donate" class="hover:text-brand-ink transition-colors">Donate</a></li>
           </ul>
         </div>
 
         <!-- Column: Resources -->
         <div class="space-y-3">
-          <h4 class="text-white text-sm font-semibold">Resources</h4>
+          <h4 class="text-brand-ink text-sm font-semibold">Resources</h4>
           <ul class="space-y-2 text-sm text-brand-muted">
-            <li><a href="/trainer" class="hover:text-white transition-colors">Training dashboard</a></li>
-            <li><a href="#"        class="hover:text-white transition-colors">Documentation</a></li>
-            <li><a href="#"        class="hover:text-white transition-colors">Support</a></li>
-            <li><a href="#"        class="hover:text-white transition-colors">Contact</a></li>
+            <li><a href="/trainer"  class="hover:text-brand-ink transition-colors">Puzzle Trainer</a></li>
+            <li><a href="/analysis" class="hover:text-brand-ink transition-colors">Game Analysis</a></li>
           </ul>
         </div>
 
@@ -436,8 +398,8 @@
       <div class="border-t border-brand-border pt-6 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-brand-muted">
         <span>© 2026 Synapchess. All rights reserved.</span>
         <div class="flex gap-5">
-          <a href="#" class="hover:text-white transition-colors">Privacy</a>
-          <a href="#" class="hover:text-white transition-colors">Terms</a>
+          <a href="#" class="hover:text-brand-ink transition-colors">Privacy</a>
+          <a href="#" class="hover:text-brand-ink transition-colors">Terms</a>
         </div>
       </div>
 
@@ -484,7 +446,7 @@
         <p id="modal-error" class="text-xs hidden" style="color:#ef4444;"></p>
         <button id="modal-submit"
                 onclick="submitModal()"
-                class="w-full bg-brand-green hover:bg-brand-gdark text-brand-bg font-semibold py-3 rounded-lg transition-colors text-sm cursor-pointer">
+                class="w-full bg-brand-green hover:bg-brand-gdark text-brand-ink font-semibold py-3 rounded-lg transition-colors text-sm cursor-pointer">
           Login
         </button>
       </div>

@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Donate — Synapchess</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              bg:     '#ffffff',
+              card:   '#f6faf8',
+              border: '#e7ebe9',
+              green:  '#00dc82',
+              gdark:  '#00aa63',
+              muted:  '#64748b',
+              ink:    '#0b0c10',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body { background-color: #ffffff; }
+  </style>
+</head>
+<body class="text-brand-ink antialiased" style="font-family: Inter, system-ui, sans-serif;">
+
+  <!-- ─── SiteHeader ────────────────────────────────────────────────────── -->
+  <header class="sticky top-0 z-50 border-b border-brand-border" style="background:rgba(255,255,255,0.92); backdrop-filter:blur(8px);">
+    <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+      <a href="/" class="flex items-center gap-2 font-semibold text-brand-ink text-sm">
+        <span class="flex items-center justify-center w-7 h-7 rounded-md bg-brand-green text-white font-bold text-base">♟</span>
+        Synapchess
+      </a>
+      <nav class="hidden md:flex items-center gap-8 text-sm font-medium">
+        <a href="/learn"  class="text-brand-muted hover:text-brand-ink transition-colors">Learn</a>
+        <a href="/join"   class="text-brand-muted hover:text-brand-ink transition-colors">Join</a>
+        <a href="/donate" class="text-brand-ink">Donate</a>
+      </nav>
+      <div class="flex items-center gap-4 text-sm">
+        <div id="auth-logged-out" class="flex items-center gap-3">
+          <button id="btn-login" class="text-brand-muted hover:text-brand-ink transition-colors cursor-pointer">Student Login</button>
+        </div>
+        <div id="auth-logged-in" class="hidden items-center gap-3">
+          <span id="nav-welcome" class="text-brand-muted text-xs"></span>
+          <button id="btn-logout" class="text-brand-muted hover:text-brand-ink transition-colors cursor-pointer text-xs">Logout</button>
+        </div>
+        <a href="/trainer" class="bg-brand-green hover:bg-brand-gdark text-brand-ink font-semibold px-4 py-2 rounded-md transition-colors">
+          Start Training
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- ─── Donate ────────────────────────────────────────────────────────── -->
+  <section class="py-28 px-6 text-center" style="background:#ffffff;">
+    <div class="max-w-xl mx-auto space-y-6">
+      <p class="text-brand-green text-xs font-semibold tracking-widest uppercase">Donate</p>
+      <h1 class="text-4xl md:text-5xl font-extrabold leading-tight">
+        Every dollar keeps this free.
+      </h1>
+      <p class="text-brand-muted text-lg leading-relaxed">
+        Synapchess doesn't charge students or schools — donations are what let us keep it that way.
+        Our donation portal is being set up right now.
+      </p>
+
+      <div class="rounded-2xl border border-brand-border p-8 space-y-3" style="background:#f6faf8;">
+        <span class="inline-flex items-center gap-1.5 rounded-full border border-brand-border px-3 py-1 text-xs font-semibold text-brand-muted" style="background:#ffffff;">
+          Coming soon
+        </span>
+        <p class="text-brand-muted text-sm leading-relaxed">
+          In the meantime, if you'd like to support Synapchess directly, reach out and we'll make it easy.
+        </p>
+        <a href="mailto:hello@synapchess.org?subject=I%27d%20like%20to%20support%20Synapchess"
+           class="inline-block bg-brand-green hover:bg-brand-gdark text-brand-ink font-semibold px-6 py-3 rounded-md transition-colors text-sm">
+          Get in touch &rarr;
+        </a>
+      </div>
+
+      <p class="text-brand-muted text-xs pt-2 opacity-80">
+        Synapchess is fiscally sponsored by HCB Foundation. Donations are tax-deductible where applicable.
+      </p>
+    </div>
+  </section>
+
+  <!-- ─── SiteFooter ────────────────────────────────────────────────────── -->
+  <footer class="border-t border-brand-border pt-16 pb-8 px-6" style="background:#ffffff;">
+    <div class="max-w-6xl mx-auto">
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-10 mb-14">
+        <div class="col-span-2 space-y-3">
+          <a href="/" class="flex items-center gap-2 font-semibold text-brand-ink text-sm">
+            <span class="flex items-center justify-center w-7 h-7 rounded-md bg-brand-green text-white font-bold text-base">♟</span>
+            Synapchess
+          </a>
+          <p class="text-brand-muted text-sm leading-relaxed max-w-xs">
+            Synapchess is fiscally sponsored by HCB Foundation, closing the cognitive equity gap in Title I schools.
+          </p>
+        </div>
+        <div class="space-y-3">
+          <h4 class="text-brand-ink text-sm font-semibold">Site</h4>
+          <ul class="space-y-2 text-sm text-brand-muted">
+            <li><a href="/learn"  class="hover:text-brand-ink transition-colors">Learn</a></li>
+            <li><a href="/join"   class="hover:text-brand-ink transition-colors">Join</a></li>
+            <li><a href="/donate" class="hover:text-brand-ink transition-colors">Donate</a></li>
+          </ul>
+        </div>
+        <div class="space-y-3">
+          <h4 class="text-brand-ink text-sm font-semibold">Resources</h4>
+          <ul class="space-y-2 text-sm text-brand-muted">
+            <li><a href="/trainer" class="hover:text-brand-ink transition-colors">Puzzle Trainer</a></li>
+            <li><a href="/analysis" class="hover:text-brand-ink transition-colors">Game Analysis</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="border-t border-brand-border pt-6 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-brand-muted">
+        <span>© 2026 Synapchess. All rights reserved.</span>
+        <div class="flex gap-5">
+          <a href="#" class="hover:text-brand-ink transition-colors">Privacy</a>
+          <a href="#" class="hover:text-brand-ink transition-colors">Terms</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    (function() {
+      fetch('/me').then(function(r) { return r.json(); }).then(function(d) {
+        if (!d.logged_in) return;
+        document.getElementById('auth-logged-out').classList.add('hidden');
+        var in_ = document.getElementById('auth-logged-in');
+        in_.classList.remove('hidden');
+        in_.classList.add('flex');
+        document.getElementById('nav-welcome').textContent = 'Welcome, ' + d.username + '!';
+      }).catch(function() {});
+
+      var logoutBtn = document.getElementById('btn-logout');
+      if (logoutBtn) logoutBtn.addEventListener('click', function() {
+        fetch('/logout').then(function() { window.location.reload(); });
+      });
+      var loginBtn = document.getElementById('btn-login');
+      if (loginBtn) loginBtn.addEventListener('click', function() { window.location.href = '/#train'; });
+    })();
+  </script>
+
+</body>
+</html>

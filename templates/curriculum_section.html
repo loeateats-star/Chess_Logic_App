@@ -12,12 +12,13 @@
         extend: {
           colors: {
             brand: {
-              bg:     '#0b0c10',
-              card:   '#131419',
-              border: '#1e2028',
+              bg:     '#ffffff',
+              card:   '#f6faf8',
+              border: '#e7ebe9',
               green:  '#00dc82',
               gdark:  '#00aa63',
-              muted:  '#94a3b8',
+              muted:  '#64748b',
+              ink:    '#0b0c10',
             }
           }
         }
@@ -26,77 +27,58 @@
   </script>
 
   <style>
-    body { background-color: #0b0c10; }
+    body { background-color: #ffffff; }
 
     /* Custom slim scrollbar for the video list */
     #video-list::-webkit-scrollbar { width: 8px; }
-    #video-list::-webkit-scrollbar-track { background: #0b0c10; }
-    #video-list::-webkit-scrollbar-thumb { background: #1e2028; border-radius: 8px; }
+    #video-list::-webkit-scrollbar-track { background: #ffffff; }
+    #video-list::-webkit-scrollbar-thumb { background: #d5ddd9; border-radius: 8px; }
     #video-list::-webkit-scrollbar-thumb:hover { background: #00aa63; }
-    #video-list { scrollbar-width: thin; scrollbar-color: #1e2028 #0b0c10; }
+    #video-list { scrollbar-width: thin; scrollbar-color: #d5ddd9 #ffffff; }
 
     .video-row[aria-current="true"] {
       border-color: #00dc82;
-      background: #1a1f1a;
+      background: #e6f9f0;
+    }
+    .video-row:hover {
+      background: #f6faf8;
     }
     .video-row:focus-visible {
       outline: 2px solid #00dc82;
       outline-offset: 2px;
     }
-    .mark-btn:focus-visible {
-      outline: 2px solid #00dc82;
-      outline-offset: 2px;
-    }
   </style>
 </head>
-<body class="text-white antialiased" style="font-family: Inter, system-ui, sans-serif;">
+<body class="text-brand-ink antialiased" style="font-family: Inter, system-ui, sans-serif;">
 
   <!-- ─── SiteHeader ────────────────────────────────────────────────────── -->
-  <header class="sticky top-0 z-50 border-b border-brand-border" style="background:#0b0c10;">
+  <header class="sticky top-0 z-50 border-b border-brand-border" style="background:rgba(255,255,255,0.92); backdrop-filter:blur(8px);">
     <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-
-      <a href="/" class="flex items-center gap-2 font-semibold text-white text-sm">
-        <span class="flex items-center justify-center w-7 h-7 rounded-md bg-brand-green text-brand-bg font-bold text-base">♟</span>
+      <a href="/" class="flex items-center gap-2 font-semibold text-brand-ink text-sm">
+        <span class="flex items-center justify-center w-7 h-7 rounded-md bg-brand-green text-brand-ink font-bold text-base">♟</span>
         Synapchess
       </a>
-
-      <nav class="hidden md:flex items-center gap-6 text-sm text-brand-muted">
-        <div class="relative">
-          <button id="nav-learn-btn" type="button"
-                  class="flex items-center gap-1 text-white font-semibold transition-colors cursor-pointer">
-            Learn
-            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
-            </svg>
-          </button>
-          <div id="nav-learn-menu"
-               class="hidden absolute left-0 top-full mt-3 w-52 rounded-lg border border-brand-border py-1.5 z-50 shadow-2xl"
-               style="background:#131419;">
-            <a href="/curriculum"    class="block px-4 py-2 text-sm text-brand-green font-semibold bg-white/5 transition-colors">Curriculum</a>
-            <a href="/basics"        class="block px-4 py-2 text-sm text-brand-muted hover:bg-white/5 hover:text-white transition-colors">Chess Basics</a>
-            <a href="/special-rules" class="block px-4 py-2 text-sm text-brand-muted hover:bg-white/5 hover:text-white transition-colors">Special Rules</a>
-          </div>
-        </div>
-        <a href="/trainer"  class="hover:text-white transition-colors">Solve</a>
-        <a href="/analysis" class="hover:text-white transition-colors">Analyze</a>
+      <nav class="hidden md:flex items-center gap-8 text-sm font-medium">
+        <a href="/learn"  class="text-brand-ink">Learn</a>
+        <a href="/join"   class="text-brand-muted hover:text-brand-ink transition-colors">Join</a>
+        <a href="/donate" class="text-brand-muted hover:text-brand-ink transition-colors">Donate</a>
       </nav>
-
       <div class="flex items-center gap-4 text-sm">
-        <a href="/#train" class="text-brand-muted hover:text-white transition-colors">Sign in</a>
-        <a href="/#train"
-           class="bg-brand-green hover:bg-brand-gdark text-brand-bg font-semibold px-4 py-2 rounded-md transition-colors">
-          Launch Dashboard
+        <a href="/#train" class="text-brand-muted hover:text-brand-ink transition-colors">Sign in</a>
+        <a href="/trainer"
+           class="bg-brand-green hover:bg-brand-gdark text-brand-ink font-semibold px-4 py-2 rounded-md transition-colors">
+          Start Training
         </a>
       </div>
     </div>
   </header>
 
   <!-- ─── Page Header ───────────────────────────────────────────────────── -->
-  <section class="py-12 px-6 border-b border-brand-border" style="background:#0b0c10;">
+  <section class="py-12 px-6 border-b border-brand-border" style="background:#ffffff;">
     <div class="max-w-6xl mx-auto space-y-6">
 
       <a href="/curriculum"
-         class="inline-flex items-center gap-2 text-brand-muted hover:text-white transition-colors text-sm group">
+         class="inline-flex items-center gap-2 text-brand-muted hover:text-brand-ink transition-colors text-sm group">
         <svg class="w-4 h-4 transition-transform group-hover:-translate-x-1"
              fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
@@ -105,8 +87,8 @@
       </a>
 
       <div>
-        <p class="text-brand-green text-xs font-semibold tracking-widest uppercase">{{ section.tagline }}</p>
-        <h1 class="text-3xl md:text-4xl font-extrabold text-white leading-tight mt-1">
+        <p class="text-brand-gdark text-xs font-semibold tracking-widest uppercase">{{ section.tagline }}</p>
+        <h1 class="text-3xl md:text-4xl font-extrabold text-brand-ink leading-tight mt-1">
           {{ section.label }} Curriculum
         </h1>
         <p class="text-brand-muted text-base max-w-2xl leading-relaxed mt-3">
@@ -121,9 +103,9 @@
            {% if s.slug == section.slug %}aria-current="page"{% endif %}
            class="px-4 py-2 rounded-md text-sm font-semibold border transition-colors
                   {% if s.slug == section.slug %}
-                  bg-brand-green text-brand-bg border-brand-green
+                  bg-brand-green text-brand-ink border-brand-green
                   {% else %}
-                  text-brand-muted border-brand-border hover:text-white hover:border-brand-green/50
+                  text-brand-muted border-brand-border hover:text-brand-ink hover:border-brand-green/50 bg-white
                   {% endif %}">
           {{ s.label }}
         </a>
@@ -136,7 +118,7 @@
           <span id="progress-label">0 of {{ videos|length }} watched</span>
           <span id="progress-pct">0%</span>
         </div>
-        <div class="h-2 rounded-full border border-brand-border overflow-hidden" style="background:#131419;">
+        <div class="h-2 rounded-full border border-brand-border overflow-hidden bg-white">
           <div id="progress-bar" class="h-full bg-brand-green transition-all" style="width:0%;"></div>
         </div>
         <p id="progress-status" class="sr-only" role="status" aria-live="polite"></p>
@@ -146,12 +128,12 @@
   </section>
 
   <!-- ─── Player + Scrollable Playlist ──────────────────────────────────── -->
-  <section class="py-12 px-6" style="background:#0b0c10;">
+  <section class="py-12 px-6" style="background:#f6faf8;">
     <div class="max-w-6xl mx-auto grid lg:grid-cols-3 gap-8 items-start">
 
       <!-- Player (main) -->
       <div class="lg:col-span-2 flex flex-col gap-4">
-        <div class="rounded-2xl border border-brand-border overflow-hidden shadow-lg" style="background:#131419;">
+        <div class="rounded-2xl border border-brand-border overflow-hidden shadow-lg bg-white">
           <div style="aspect-ratio:16/9;">
             <iframe id="player-frame"
                     class="w-full h-full"
@@ -163,22 +145,22 @@
             </iframe>
           </div>
         </div>
-        <div class="rounded-xl border border-brand-border px-5 py-4" style="background:#131419;">
-          <h2 id="player-title" class="font-bold text-white text-base leading-snug">{{ videos[0].title }}</h2>
+        <div class="rounded-xl border border-brand-border px-5 py-4 bg-white">
+          <h2 id="player-title" class="font-bold text-brand-ink text-base leading-snug">{{ videos[0].title }}</h2>
           <p id="player-meta" class="text-brand-muted text-xs mt-1.5">{{ videos[0].channel }} · {{ videos[0].duration_label }}</p>
         </div>
       </div>
 
       <!-- Scrollable playlist (side) -->
-      <div class="rounded-2xl border border-brand-border flex flex-col overflow-hidden" style="background:#131419; max-height: 640px;">
+      <div class="rounded-2xl border border-brand-border flex flex-col overflow-hidden bg-white" style="max-height: 640px;">
         <div class="px-5 py-4 border-b border-brand-border flex items-center justify-between">
-          <h3 class="text-white font-semibold text-sm">Playlist</h3>
+          <h3 class="text-brand-ink font-semibold text-sm">Playlist</h3>
           <span class="text-brand-muted text-xs">{{ videos|length }} videos</span>
         </div>
         <div id="video-list" class="flex-1 overflow-y-auto divide-y divide-brand-border" role="list" aria-label="{{ section.label }} videos">
           {% for v in videos %}
           <button type="button"
-                  class="video-row w-full text-left flex gap-3 px-4 py-3 border-l-2 border-transparent hover:bg-white/5 transition-colors cursor-pointer"
+                  class="video-row w-full text-left flex gap-3 px-4 py-3 border-l-2 border-transparent transition-colors cursor-pointer"
                   role="listitem"
                   data-video-id="{{ v.id }}"
                   data-video-title="{{ v.title|e }}"
@@ -188,10 +170,10 @@
                   aria-label="Play {{ v.title }} ({{ v.duration_label }}), by {{ v.channel }}">
             <span class="relative flex-shrink-0 w-24 h-14 rounded-md overflow-hidden bg-black">
               <img src="https://i.ytimg.com/vi/{{ v.id }}/mqdefault.jpg" alt="" class="w-full h-full object-cover" loading="lazy" />
-              <span class="watched-badge absolute top-1 right-1 hidden w-5 h-5 rounded-full bg-brand-green text-brand-bg items-center justify-center text-xs font-bold">✓</span>
+              <span class="watched-badge absolute top-1 right-1 hidden w-5 h-5 rounded-full bg-brand-green text-brand-ink items-center justify-center text-xs font-bold">✓</span>
             </span>
             <span class="flex-1 min-w-0">
-              <span class="block text-sm text-white font-medium leading-snug line-clamp-2">{{ v.title }}</span>
+              <span class="block text-sm text-brand-ink font-medium leading-snug line-clamp-2">{{ v.title }}</span>
               <span class="block text-xs text-brand-muted mt-1">{{ v.channel }} · {{ v.duration_label }}</span>
             </span>
           </button>
@@ -203,13 +185,13 @@
   </section>
 
   <!-- ─── SiteFooter ────────────────────────────────────────────────────── -->
-  <footer class="border-t border-brand-border pt-16 pb-8 px-6" style="background:#0b0c10;">
+  <footer class="border-t border-brand-border pt-16 pb-8 px-6" style="background:#ffffff;">
     <div class="max-w-6xl mx-auto">
 
-      <div class="grid grid-cols-2 md:grid-cols-5 gap-10 mb-14">
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-10 mb-14">
         <div class="col-span-2 space-y-3">
-          <a href="/" class="flex items-center gap-2 font-semibold text-white text-sm">
-            <span class="flex items-center justify-center w-7 h-7 rounded-md bg-brand-green text-brand-bg font-bold text-base">♟</span>
+          <a href="/" class="flex items-center gap-2 font-semibold text-brand-ink text-sm">
+            <span class="flex items-center justify-center w-7 h-7 rounded-md bg-brand-green text-brand-ink font-bold text-base">♟</span>
             Synapchess
           </a>
           <p class="text-brand-muted text-sm leading-relaxed max-w-xs">
@@ -218,30 +200,19 @@
         </div>
 
         <div class="space-y-3">
-          <h4 class="text-white text-sm font-semibold">Program</h4>
+          <h4 class="text-brand-ink text-sm font-semibold">Site</h4>
           <ul class="space-y-2 text-sm text-brand-muted">
-            <li><a href="/basics"      class="hover:text-white transition-colors">Chess Basics</a></li>
-            <li><a href="/curriculum"  class="text-white">Curriculum</a></li>
-            <li><a href="/#outcomes"   class="hover:text-white transition-colors">Outcomes</a></li>
+            <li><a href="/learn"  class="hover:text-brand-ink transition-colors">Learn</a></li>
+            <li><a href="/join"   class="hover:text-brand-ink transition-colors">Join</a></li>
+            <li><a href="/donate" class="hover:text-brand-ink transition-colors">Donate</a></li>
           </ul>
         </div>
 
         <div class="space-y-3">
-          <h4 class="text-white text-sm font-semibold">Foundation</h4>
+          <h4 class="text-brand-ink text-sm font-semibold">Resources</h4>
           <ul class="space-y-2 text-sm text-brand-muted">
-            <li><a href="#" class="hover:text-white transition-colors">Our mission</a></li>
-            <li><a href="#" class="hover:text-white transition-colors">Partners</a></li>
-            <li><a href="#" class="hover:text-white transition-colors">Donate</a></li>
-            <li><a href="#" class="hover:text-white transition-colors">Careers</a></li>
-          </ul>
-        </div>
-
-        <div class="space-y-3">
-          <h4 class="text-white text-sm font-semibold">Resources</h4>
-          <ul class="space-y-2 text-sm text-brand-muted">
-            <li><a href="/#train"     class="hover:text-white transition-colors">Training dashboard</a></li>
-            <li><a href="#"           class="hover:text-white transition-colors">Support</a></li>
-            <li><a href="#"           class="hover:text-white transition-colors">Contact</a></li>
+            <li><a href="/trainer"  class="hover:text-brand-ink transition-colors">Puzzle Trainer</a></li>
+            <li><a href="/analysis" class="hover:text-brand-ink transition-colors">Game Analysis</a></li>
           </ul>
         </div>
       </div>
@@ -249,32 +220,13 @@
       <div class="border-t border-brand-border pt-6 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-brand-muted">
         <span>© 2026 Synapchess. All rights reserved.</span>
         <div class="flex gap-5">
-          <a href="#" class="hover:text-white transition-colors">Privacy</a>
-          <a href="#" class="hover:text-white transition-colors">Terms</a>
+          <a href="#" class="hover:text-brand-ink transition-colors">Privacy</a>
+          <a href="#" class="hover:text-brand-ink transition-colors">Terms</a>
         </div>
       </div>
 
     </div>
   </footer>
-
-  <!-- ─── Nav dropdown (Learn tab) ──────────────────────────────────────── -->
-  <script>
-    (function() {
-      var btn  = document.getElementById('nav-learn-btn');
-      var menu = document.getElementById('nav-learn-menu');
-      if (!btn || !menu) return;
-      btn.addEventListener('click', function(e) {
-        e.stopPropagation();
-        menu.classList.toggle('hidden');
-      });
-      document.addEventListener('click', function(e) {
-        if (!menu.contains(e.target) && e.target !== btn) menu.classList.add('hidden');
-      });
-      document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') menu.classList.add('hidden');
-      });
-    })();
-  </script>
 
   <!-- ─── Playlist player + watched-progress tracking ────────────────────── -->
   <script>

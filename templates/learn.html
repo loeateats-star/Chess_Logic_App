@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Learn — Synapchess</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              bg:     '#ffffff',
+              card:   '#f6faf8',
+              border: '#e7ebe9',
+              green:  '#00dc82',
+              gdark:  '#00aa63',
+              muted:  '#64748b',
+              ink:    '#0b0c10',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body { background-color: #ffffff; }
+  </style>
+</head>
+<body class="text-brand-ink antialiased" style="font-family: Inter, system-ui, sans-serif;">
+
+  <!-- ─── SiteHeader ────────────────────────────────────────────────────── -->
+  <header class="sticky top-0 z-50 border-b border-brand-border" style="background:rgba(255,255,255,0.92); backdrop-filter:blur(8px);">
+    <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+      <a href="/" class="flex items-center gap-2 font-semibold text-brand-ink text-sm">
+        <span class="flex items-center justify-center w-7 h-7 rounded-md bg-brand-green text-white font-bold text-base">♟</span>
+        Synapchess
+      </a>
+      <nav class="hidden md:flex items-center gap-8 text-sm font-medium">
+        <a href="/learn"  class="text-brand-ink">Learn</a>
+        <a href="/join"   class="text-brand-muted hover:text-brand-ink transition-colors">Join</a>
+        <a href="/donate" class="text-brand-muted hover:text-brand-ink transition-colors">Donate</a>
+      </nav>
+      <div class="flex items-center gap-4 text-sm">
+        <div id="auth-logged-out" class="flex items-center gap-3">
+          <button id="btn-login" class="text-brand-muted hover:text-brand-ink transition-colors cursor-pointer">Student Login</button>
+        </div>
+        <div id="auth-logged-in" class="hidden items-center gap-3">
+          <span id="nav-welcome" class="text-brand-muted text-xs"></span>
+          <button id="btn-logout" class="text-brand-muted hover:text-brand-ink transition-colors cursor-pointer text-xs">Logout</button>
+        </div>
+        <a href="/trainer" class="bg-brand-green hover:bg-brand-gdark text-brand-ink font-semibold px-4 py-2 rounded-md transition-colors">
+          Start Training
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- ─── Page Header ───────────────────────────────────────────────────── -->
+  <section class="py-16 px-6 text-center" style="background:#ffffff;">
+    <div class="max-w-2xl mx-auto space-y-4">
+      <p class="text-brand-green text-xs font-semibold tracking-widest uppercase">Learn</p>
+      <h1 class="text-4xl md:text-5xl font-extrabold leading-tight">
+        Everything you need to<br class="hidden md:block" /> get stronger at chess
+      </h1>
+      <p class="text-brand-muted text-base max-w-xl mx-auto leading-relaxed">
+        Five tools, one path. Start wherever you are.
+      </p>
+    </div>
+  </section>
+
+  <!-- ─── Feature Grid ──────────────────────────────────────────────────── -->
+  <section class="pb-24 px-6" style="background:#ffffff;">
+    <div class="max-w-5xl mx-auto grid md:grid-cols-2 gap-5">
+
+      <a href="/basics" class="group rounded-2xl border border-brand-border p-7 flex flex-col gap-3 hover:border-brand-green/50 hover:shadow-md transition-all" style="background:#f6faf8;">
+        <div class="w-10 h-10 rounded-lg flex items-center justify-center text-brand-green text-lg" style="background:#e6f9f0;">♟</div>
+        <h2 class="font-bold text-lg group-hover:text-brand-gdark transition-colors">Chess Basics</h2>
+        <p class="text-brand-muted text-sm leading-relaxed">
+          How every piece moves, taught through interactive drag-and-drop exercises. Start here if you're new.
+        </p>
+        <span class="text-brand-green text-sm font-medium mt-auto">Explore →</span>
+      </a>
+
+      <a href="/special-rules" class="group rounded-2xl border border-brand-border p-7 flex flex-col gap-3 hover:border-brand-green/50 hover:shadow-md transition-all" style="background:#f6faf8;">
+        <div class="w-10 h-10 rounded-lg flex items-center justify-center text-brand-green text-lg" style="background:#e6f9f0;">♚</div>
+        <h2 class="font-bold text-lg group-hover:text-brand-gdark transition-colors">Special Rules</h2>
+        <p class="text-brand-muted text-sm leading-relaxed">
+          Check, checkmate, castling, en passant — the rules that trip up every beginner at least once.
+        </p>
+        <span class="text-brand-green text-sm font-medium mt-auto">Explore →</span>
+      </a>
+
+      <a href="/curriculum" class="group rounded-2xl border border-brand-border p-7 flex flex-col gap-3 hover:border-brand-green/50 hover:shadow-md transition-all" style="background:#f6faf8;">
+        <div class="w-10 h-10 rounded-lg flex items-center justify-center text-brand-green text-lg" style="background:#e6f9f0;">▶</div>
+        <h2 class="font-bold text-lg group-hover:text-brand-gdark transition-colors">Video Curriculum</h2>
+        <p class="text-brand-muted text-sm leading-relaxed">
+          Four skill-tiered lecture playlists, from "New to Chess" through advanced calculation.
+        </p>
+        <span class="text-brand-green text-sm font-medium mt-auto">Explore →</span>
+      </a>
+
+      <a href="/trainer" class="group rounded-2xl border border-brand-border p-7 flex flex-col gap-3 hover:border-brand-green/50 hover:shadow-md transition-all" style="background:#f6faf8;">
+        <div class="w-10 h-10 rounded-lg flex items-center justify-center text-brand-green text-lg" style="background:#e6f9f0;">⚡</div>
+        <h2 class="font-bold text-lg group-hover:text-brand-gdark transition-colors">Puzzle Trainer</h2>
+        <p class="text-brand-muted text-sm leading-relaxed">
+          4,000+ tactical puzzles, leveled and served automatically as you build a solving streak.
+        </p>
+        <span class="text-brand-green text-sm font-medium mt-auto">Explore →</span>
+      </a>
+
+      <a href="/analysis" class="group rounded-2xl border border-brand-border p-7 flex flex-col gap-3 hover:border-brand-green/50 hover:shadow-md transition-all md:col-span-2" style="background:#f6faf8;">
+        <div class="w-10 h-10 rounded-lg flex items-center justify-center text-brand-green text-lg" style="background:#e6f9f0;">📊</div>
+        <h2 class="font-bold text-lg group-hover:text-brand-gdark transition-colors">Game Analysis</h2>
+        <p class="text-brand-muted text-sm leading-relaxed">
+          Upload your own games and get engine-graded move-by-move feedback — best, inaccuracy, mistake, or blunder.
+        </p>
+        <span class="text-brand-green text-sm font-medium mt-auto">Explore →</span>
+      </a>
+
+    </div>
+  </section>
+
+  <!-- ─── SiteFooter ────────────────────────────────────────────────────── -->
+  <footer class="border-t border-brand-border pt-16 pb-8 px-6" style="background:#ffffff;">
+    <div class="max-w-6xl mx-auto">
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-10 mb-14">
+        <div class="col-span-2 space-y-3">
+          <a href="/" class="flex items-center gap-2 font-semibold text-brand-ink text-sm">
+            <span class="flex items-center justify-center w-7 h-7 rounded-md bg-brand-green text-white font-bold text-base">♟</span>
+            Synapchess
+          </a>
+          <p class="text-brand-muted text-sm leading-relaxed max-w-xs">
+            Synapchess is fiscally sponsored by HCB Foundation, closing the cognitive equity gap in Title I schools.
+          </p>
+        </div>
+        <div class="space-y-3">
+          <h4 class="text-brand-ink text-sm font-semibold">Site</h4>
+          <ul class="space-y-2 text-sm text-brand-muted">
+            <li><a href="/learn"  class="hover:text-brand-ink transition-colors">Learn</a></li>
+            <li><a href="/join"   class="hover:text-brand-ink transition-colors">Join</a></li>
+            <li><a href="/donate" class="hover:text-brand-ink transition-colors">Donate</a></li>
+          </ul>
+        </div>
+        <div class="space-y-3">
+          <h4 class="text-brand-ink text-sm font-semibold">Resources</h4>
+          <ul class="space-y-2 text-sm text-brand-muted">
+            <li><a href="/trainer" class="hover:text-brand-ink transition-colors">Puzzle Trainer</a></li>
+            <li><a href="/analysis" class="hover:text-brand-ink transition-colors">Game Analysis</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="border-t border-brand-border pt-6 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-brand-muted">
+        <span>© 2026 Synapchess. All rights reserved.</span>
+        <div class="flex gap-5">
+          <a href="#" class="hover:text-brand-ink transition-colors">Privacy</a>
+          <a href="#" class="hover:text-brand-ink transition-colors">Terms</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    (function() {
+      fetch('/me').then(function(r) { return r.json(); }).then(function(d) {
+        if (!d.logged_in) return;
+        document.getElementById('auth-logged-out').classList.add('hidden');
+        var in_ = document.getElementById('auth-logged-in');
+        in_.classList.remove('hidden');
+        in_.classList.add('flex');
+        document.getElementById('nav-welcome').textContent = 'Welcome, ' + d.username + '!';
+      }).catch(function() {});
+
+      var logoutBtn = document.getElementById('btn-logout');
+      if (logoutBtn) logoutBtn.addEventListener('click', function() {
+        fetch('/logout').then(function() { window.location.reload(); });
+      });
+      var loginBtn = document.getElementById('btn-login');
+      if (loginBtn) loginBtn.addEventListener('click', function() { window.location.href = '/#train'; });
+    })();
+  </script>
+
+</body>
+</html>

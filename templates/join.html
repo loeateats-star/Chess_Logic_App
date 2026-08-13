@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Join — Synapchess</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              bg:     '#ffffff',
+              card:   '#f6faf8',
+              border: '#e7ebe9',
+              green:  '#00dc82',
+              gdark:  '#00aa63',
+              muted:  '#64748b',
+              ink:    '#0b0c10',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body { background-color: #ffffff; }
+  </style>
+</head>
+<body class="text-brand-ink antialiased" style="font-family: Inter, system-ui, sans-serif;">
+
+  <!-- ─── SiteHeader ────────────────────────────────────────────────────── -->
+  <header class="sticky top-0 z-50 border-b border-brand-border" style="background:rgba(255,255,255,0.92); backdrop-filter:blur(8px);">
+    <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+      <a href="/" class="flex items-center gap-2 font-semibold text-brand-ink text-sm">
+        <span class="flex items-center justify-center w-7 h-7 rounded-md bg-brand-green text-white font-bold text-base">♟</span>
+        Synapchess
+      </a>
+      <nav class="hidden md:flex items-center gap-8 text-sm font-medium">
+        <a href="/learn"  class="text-brand-muted hover:text-brand-ink transition-colors">Learn</a>
+        <a href="/join"   class="text-brand-ink">Join</a>
+        <a href="/donate" class="text-brand-muted hover:text-brand-ink transition-colors">Donate</a>
+      </nav>
+      <div class="flex items-center gap-4 text-sm">
+        <div id="auth-logged-out" class="flex items-center gap-3">
+          <button id="btn-login" class="text-brand-muted hover:text-brand-ink transition-colors cursor-pointer">Student Login</button>
+        </div>
+        <div id="auth-logged-in" class="hidden items-center gap-3">
+          <span id="nav-welcome" class="text-brand-muted text-xs"></span>
+          <button id="btn-logout" class="text-brand-muted hover:text-brand-ink transition-colors cursor-pointer text-xs">Logout</button>
+        </div>
+        <a href="/trainer" class="bg-brand-green hover:bg-brand-gdark text-brand-ink font-semibold px-4 py-2 rounded-md transition-colors">
+          Start Training
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- ─── Hero ──────────────────────────────────────────────────────────── -->
+  <section class="py-20 px-6 text-center" style="background:#ffffff;">
+    <div class="max-w-2xl mx-auto space-y-5">
+      <p class="text-brand-green text-xs font-semibold tracking-widest uppercase">Join</p>
+      <h1 class="text-4xl md:text-5xl font-extrabold leading-tight">
+        Bring this to your community
+      </h1>
+      <p class="text-brand-muted text-lg max-w-xl mx-auto leading-relaxed">
+        Synapchess grows through people, not ad spend — coaches, teachers, and volunteers
+        who believe every kid deserves a shot at learning to think five moves ahead.
+      </p>
+    </div>
+  </section>
+
+  <!-- ─── Ways to get involved ──────────────────────────────────────────── -->
+  <section class="py-16 px-6 border-t border-brand-border" style="background:#f6faf8;">
+    <div class="max-w-5xl mx-auto">
+      <h2 class="text-2xl font-bold text-center mb-12">Three ways to help</h2>
+      <div class="grid md:grid-cols-3 gap-6">
+
+        <div class="rounded-2xl border border-brand-border p-7 space-y-3" style="background:#ffffff;">
+          <div class="w-10 h-10 rounded-lg flex items-center justify-center text-brand-green text-lg" style="background:#e6f9f0;">🧑‍🏫</div>
+          <h3 class="font-bold text-lg">Volunteer as a mentor</h3>
+          <p class="text-brand-muted text-sm leading-relaxed">
+            No coaching license required — just a willingness to sit across the board from a kid
+            for an hour a week. We provide the curriculum.
+          </p>
+        </div>
+
+        <div class="rounded-2xl border border-brand-border p-7 space-y-3" style="background:#ffffff;">
+          <div class="w-10 h-10 rounded-lg flex items-center justify-center text-brand-green text-lg" style="background:#e6f9f0;">🏫</div>
+          <h3 class="font-bold text-lg">Start a chapter</h3>
+          <p class="text-brand-muted text-sm leading-relaxed">
+            Bring the full program — puzzles, video curriculum, and progress tracking — to your
+            school or after-school site.
+          </p>
+        </div>
+
+        <div class="rounded-2xl border border-brand-border p-7 space-y-3" style="background:#ffffff;">
+          <div class="w-10 h-10 rounded-lg flex items-center justify-center text-brand-green text-lg" style="background:#e6f9f0;">📣</div>
+          <h3 class="font-bold text-lg">Spread the word</h3>
+          <p class="text-brand-muted text-sm leading-relaxed">
+            Know a Title I school, a librarian, or an after-school program that would want this?
+            An introduction is worth more than you'd think.
+          </p>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── How to start a chapter ────────────────────────────────────────── -->
+  <section class="py-24 px-6" style="background:#ffffff;">
+    <div class="max-w-3xl mx-auto">
+      <div class="text-center mb-16">
+        <p class="text-brand-green text-xs font-semibold tracking-widest uppercase mb-4">Starting a Chapter</p>
+        <h2 class="text-3xl font-bold leading-tight">Four steps to launch</h2>
+      </div>
+
+      <div class="relative pl-14">
+        <div class="absolute left-5 top-2 bottom-2 w-px bg-brand-border" aria-hidden="true"></div>
+
+        <div class="relative pb-12">
+          <span class="absolute -left-14 top-0 flex items-center justify-center w-10 h-10 rounded-full border-2 border-brand-border text-brand-muted font-bold text-sm" style="background:#ffffff;">1</span>
+          <h3 class="font-semibold text-lg mb-1">Reach out</h3>
+          <p class="text-brand-muted text-sm leading-relaxed max-w-md">
+            Tell us about your school or community — size, age group, and what resources you already have.
+          </p>
+        </div>
+
+        <div class="relative pb-12">
+          <span class="absolute -left-14 top-0 flex items-center justify-center w-10 h-10 rounded-full border-2 border-brand-border text-brand-muted font-bold text-sm" style="background:#ffffff;">2</span>
+          <h3 class="font-semibold text-lg mb-1">Get set up</h3>
+          <p class="text-brand-muted text-sm leading-relaxed max-w-md">
+            We walk you through the curriculum, the puzzle trainer, and how to onboard your first
+            group of students — free, no equipment required beyond a screen.
+          </p>
+        </div>
+
+        <div class="relative pb-12">
+          <span class="absolute -left-14 top-0 flex items-center justify-center w-10 h-10 rounded-full border-2 border-brand-border text-brand-muted font-bold text-sm" style="background:#ffffff;">3</span>
+          <h3 class="font-semibold text-lg mb-1">Launch your first cohort</h3>
+          <p class="text-brand-muted text-sm leading-relaxed max-w-md">
+            Start small — even a handful of students meeting once a week is a chapter.
+          </p>
+        </div>
+
+        <div class="relative">
+          <span class="absolute -left-14 top-0 flex items-center justify-center w-10 h-10 rounded-full border-2 border-brand-border text-brand-muted font-bold text-sm" style="background:#ffffff;">4</span>
+          <h3 class="font-semibold text-lg mb-1">Grow from there</h3>
+          <p class="text-brand-muted text-sm leading-relaxed max-w-md">
+            Track progress on the dashboard, add mentors as you go, and let us know what you need next.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── Contact CTA ───────────────────────────────────────────────────── -->
+  <section class="py-24 px-6 border-t border-brand-border text-center" style="background:#f6faf8;">
+    <div class="max-w-xl mx-auto space-y-6">
+      <h2 class="text-3xl font-bold leading-tight">Ready to get involved?</h2>
+      <p class="text-brand-muted text-base leading-relaxed">
+        Tell us a little about yourself and what you have in mind — we'll follow up personally.
+      </p>
+      <a href="mailto:hello@synapchess.org?subject=Getting%20involved%20with%20Synapchess"
+         class="inline-block bg-brand-green hover:bg-brand-gdark text-brand-ink font-semibold px-7 py-3.5 rounded-md transition-colors text-sm">
+        Get in touch &rarr;
+      </a>
+    </div>
+  </section>
+
+  <!-- ─── SiteFooter ────────────────────────────────────────────────────── -->
+  <footer class="border-t border-brand-border pt-16 pb-8 px-6" style="background:#ffffff;">
+    <div class="max-w-6xl mx-auto">
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-10 mb-14">
+        <div class="col-span-2 space-y-3">
+          <a href="/" class="flex items-center gap-2 font-semibold text-brand-ink text-sm">
+            <span class="flex items-center justify-center w-7 h-7 rounded-md bg-brand-green text-white font-bold text-base">♟</span>
+            Synapchess
+          </a>
+          <p class="text-brand-muted text-sm leading-relaxed max-w-xs">
+            Synapchess is fiscally sponsored by HCB Foundation, closing the cognitive equity gap in Title I schools.
+          </p>
+        </div>
+        <div class="space-y-3">
+          <h4 class="text-brand-ink text-sm font-semibold">Site</h4>
+          <ul class="space-y-2 text-sm text-brand-muted">
+            <li><a href="/learn"  class="hover:text-brand-ink transition-colors">Learn</a></li>
+            <li><a href="/join"   class="hover:text-brand-ink transition-colors">Join</a></li>
+            <li><a href="/donate" class="hover:text-brand-ink transition-colors">Donate</a></li>
+          </ul>
+        </div>
+        <div class="space-y-3">
+          <h4 class="text-brand-ink text-sm font-semibold">Resources</h4>
+          <ul class="space-y-2 text-sm text-brand-muted">
+            <li><a href="/trainer" class="hover:text-brand-ink transition-colors">Puzzle Trainer</a></li>
+            <li><a href="/analysis" class="hover:text-brand-ink transition-colors">Game Analysis</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="border-t border-brand-border pt-6 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-brand-muted">
+        <span>© 2026 Synapchess. All rights reserved.</span>
+        <div class="flex gap-5">
+          <a href="#" class="hover:text-brand-ink transition-colors">Privacy</a>
+          <a href="#" class="hover:text-brand-ink transition-colors">Terms</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    (function() {
+      fetch('/me').then(function(r) { return r.json(); }).then(function(d) {
+        if (!d.logged_in) return;
+        document.getElementById('auth-logged-out').classList.add('hidden');
+        var in_ = document.getElementById('auth-logged-in');
+        in_.classList.remove('hidden');
+        in_.classList.add('flex');
+        document.getElementById('nav-welcome').textContent = 'Welcome, ' + d.username + '!';
+      }).catch(function() {});
+
+      var logoutBtn = document.getElementById('btn-logout');
+      if (logoutBtn) logoutBtn.addEventListener('click', function() {
+        fetch('/logout').then(function() { window.location.reload(); });
+      });
+      var loginBtn = document.getElementById('btn-login');
+      if (loginBtn) loginBtn.addEventListener('click', function() { window.location.href = '/#train'; });
+    })();
+  </script>
+
+</body>
+</html>

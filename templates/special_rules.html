@@ -12,12 +12,13 @@
         extend: {
           colors: {
             brand: {
-              bg:     '#0b0c10',
-              card:   '#131419',
-              border: '#1e2028',
+              bg:     '#ffffff',
+              card:   '#f6faf8',
+              border: '#e7ebe9',
               green:  '#00dc82',
               gdark:  '#00aa63',
-              muted:  '#94a3b8',
+              muted:  '#64748b',
+              ink:    '#0b0c10',
             }
           }
         }
@@ -30,7 +31,7 @@
   <script src="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.js"></script>
 
   <style>
-    body { background-color: #0b0c10; }
+    body { background-color: #ffffff; }
     .mini-board { width: 280px; }
     .board-b72b1 { border: 2px solid #00dc82 !important; border-radius: 6px; }
     .black-3c85d { background-color: #66b38c !important; }
@@ -45,67 +46,52 @@
     }
 
     /* Rule section alternating separators */
-    .rule-section { border-top: 1px solid #1e2028; }
+    .rule-section { border-top: 1px solid #e7ebe9; }
   </style>
 </head>
-<body class="text-white antialiased" style="font-family: Inter, system-ui, sans-serif;">
+<body class="text-brand-ink antialiased" style="font-family: Inter, system-ui, sans-serif;">
 
   <!-- ─── SiteHeader ────────────────────────────────────────────────────── -->
-  <header class="sticky top-0 z-50 border-b border-brand-border" style="background:#0b0c10;">
+  <header class="sticky top-0 z-50 border-b border-brand-border" style="background:rgba(255,255,255,0.92); backdrop-filter:blur(8px);">
     <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
 
-      <a href="/" class="flex items-center gap-2 font-semibold text-white text-sm">
-        <span class="flex items-center justify-center w-7 h-7 rounded-md bg-brand-green text-brand-bg font-bold text-base">♟</span>
+      <a href="/" class="flex items-center gap-2 font-semibold text-brand-ink text-sm">
+        <span class="flex items-center justify-center w-7 h-7 rounded-md bg-brand-green text-brand-ink font-bold text-base">♟</span>
         Synapchess
       </a>
 
-      <nav class="hidden md:flex items-center gap-6 text-sm text-brand-muted">
-        <div class="relative">
-          <button id="nav-learn-btn" type="button"
-                  class="flex items-center gap-1 text-white font-semibold transition-colors cursor-pointer">
-            Learn
-            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
-            </svg>
-          </button>
-          <div id="nav-learn-menu"
-               class="hidden absolute left-0 top-full mt-3 w-52 rounded-lg border border-brand-border py-1.5 z-50 shadow-2xl"
-               style="background:#131419;">
-            <a href="/curriculum"    class="block px-4 py-2 text-sm text-brand-muted hover:bg-white/5 hover:text-white transition-colors">Curriculum</a>
-            <a href="/basics"        class="block px-4 py-2 text-sm text-brand-muted hover:bg-white/5 hover:text-white transition-colors">Chess Basics</a>
-            <a href="/special-rules" class="block px-4 py-2 text-sm text-brand-green font-semibold bg-white/5 transition-colors">Special Rules</a>
-          </div>
-        </div>
-        <a href="/trainer"  class="hover:text-white transition-colors">Solve</a>
-        <a href="/analysis" class="hover:text-white transition-colors">Analyze</a>
+      <nav class="hidden md:flex items-center gap-8 text-sm font-medium">
+        <a href="/learn"  class="text-brand-ink">Learn</a>
+        <a href="/join"   class="text-brand-muted hover:text-brand-ink transition-colors">Join</a>
+        <a href="/donate" class="text-brand-muted hover:text-brand-ink transition-colors">Donate</a>
       </nav>
 
       <div class="flex items-center gap-4 text-sm">
-        <a href="/#train" class="text-brand-muted hover:text-white transition-colors">Sign in</a>
-        <a href="/#train"
-           class="bg-brand-green hover:bg-brand-gdark text-brand-bg font-semibold px-4 py-2 rounded-md transition-colors">
-          Launch Dashboard
+        <a href="/#train" class="text-brand-muted hover:text-brand-ink transition-colors">Sign in</a>
+        <a href="/trainer"
+           class="bg-brand-green hover:bg-brand-gdark text-brand-ink font-semibold px-4 py-2 rounded-md transition-colors">
+          Start Training
         </a>
       </div>
     </div>
   </header>
 
   <!-- ─── Page Header ───────────────────────────────────────────────────── -->
-  <section class="py-12 px-6 border-b border-brand-border" style="background:#0b0c10;">
+  <section class="py-12 px-6 border-b border-brand-border" style="background:#ffffff;">
     <div class="max-w-6xl mx-auto space-y-4">
 
       <!-- Breadcrumb -->
       <div class="flex items-center gap-2 text-sm text-brand-muted">
-        <a href="/basics" class="hover:text-white transition-colors">Chess Basics</a>
+        <a href="/basics" class="hover:text-brand-ink transition-colors">Chess Basics</a>
         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
         </svg>
-        <span class="text-white">Special Rules</span>
+        <span class="text-brand-ink">Special Rules</span>
       </div>
 
-      <p class="text-brand-green text-xs font-semibold tracking-widest uppercase">Level 0.5 · Special Rules</p>
+      <p class="text-brand-gdark text-xs font-semibold tracking-widest uppercase">Level 0.5 · Special Rules</p>
 
-      <h1 class="text-4xl md:text-5xl font-extrabold text-white leading-tight">
+      <h1 class="text-4xl md:text-5xl font-extrabold text-brand-ink leading-tight">
         Special Rules of Chess
       </h1>
 
@@ -117,11 +103,11 @@
 
       <!-- Quick-jump pills -->
       <div class="flex flex-wrap gap-2 pt-2">
-        <a href="#check"       class="px-3 py-1 rounded-full border border-brand-border text-brand-muted hover:border-brand-green hover:text-white text-xs transition-colors" style="background:#131419;">Check</a>
-        <a href="#checkmate"   class="px-3 py-1 rounded-full border border-brand-border text-brand-muted hover:border-brand-green hover:text-white text-xs transition-colors" style="background:#131419;">Checkmate</a>
-        <a href="#stalemate"   class="px-3 py-1 rounded-full border border-brand-border text-brand-muted hover:border-brand-green hover:text-white text-xs transition-colors" style="background:#131419;">Stalemate</a>
-        <a href="#en-passant"  class="px-3 py-1 rounded-full border border-brand-border text-brand-muted hover:border-brand-green hover:text-white text-xs transition-colors" style="background:#131419;">En Passant</a>
-        <a href="#castling"    class="px-3 py-1 rounded-full border border-brand-border text-brand-muted hover:border-brand-green hover:text-white text-xs transition-colors" style="background:#131419;">Castling</a>
+        <a href="#check"       class="px-3 py-1 rounded-full border border-brand-border text-brand-muted hover:border-brand-green hover:text-brand-ink text-xs transition-colors bg-white">Check</a>
+        <a href="#checkmate"   class="px-3 py-1 rounded-full border border-brand-border text-brand-muted hover:border-brand-green hover:text-brand-ink text-xs transition-colors bg-white">Checkmate</a>
+        <a href="#stalemate"   class="px-3 py-1 rounded-full border border-brand-border text-brand-muted hover:border-brand-green hover:text-brand-ink text-xs transition-colors bg-white">Stalemate</a>
+        <a href="#en-passant"  class="px-3 py-1 rounded-full border border-brand-border text-brand-muted hover:border-brand-green hover:text-brand-ink text-xs transition-colors bg-white">En Passant</a>
+        <a href="#castling"    class="px-3 py-1 rounded-full border border-brand-border text-brand-muted hover:border-brand-green hover:text-brand-ink text-xs transition-colors bg-white">Castling</a>
       </div>
     </div>
   </section>
@@ -129,7 +115,7 @@
   <!-- ═══════════════════════════════════════════════════════════════════ -->
   <!-- RULE 1 · CHECK                                                      -->
   <!-- ═══════════════════════════════════════════════════════════════════ -->
-  <section id="check" class="py-20 px-6 rule-section" style="background:#0b0c10;">
+  <section id="check" class="py-20 px-6 rule-section" style="background:#ffffff;">
     <div class="max-w-6xl mx-auto flex flex-col lg:flex-row items-center gap-14">
 
       <!-- Board: Rook on d1 giving check to king on d8 -->
@@ -147,34 +133,34 @@
       <div class="flex-1 space-y-5 max-w-lg">
         <div class="space-y-1">
           <p class="text-brand-green text-xs font-semibold tracking-widest uppercase">Rule 1</p>
-          <h2 class="text-3xl font-extrabold text-white">Check</h2>
+          <h2 class="text-3xl font-extrabold text-brand-ink">Check</h2>
         </div>
         <p class="text-brand-muted text-base leading-relaxed">
-          A King is <strong class="text-white">in check</strong> when it is directly attacked by an
+          A King is <strong class="text-brand-ink">in check</strong> when it is directly attacked by an
           enemy piece. Check is not instant defeat — but you <em>must</em> resolve it immediately.
           You cannot make any other move while your King is in check.
         </p>
         <div class="space-y-3">
-          <p class="text-white text-sm font-semibold">Three ways to escape check:</p>
+          <p class="text-brand-ink text-sm font-semibold">Three ways to escape check:</p>
           <div class="space-y-2.5">
-            <div class="flex items-start gap-3 rounded-xl border border-brand-border p-4" style="background:#131419;">
+            <div class="flex items-start gap-3 rounded-xl border border-brand-border p-4" style="background:#f6faf8;">
               <span class="text-brand-green font-bold text-base flex-shrink-0">1</span>
               <div>
-                <p class="text-white text-sm font-semibold">Move the King</p>
+                <p class="text-brand-ink text-sm font-semibold">Move the King</p>
                 <p class="text-brand-muted text-xs leading-relaxed">Slide the King to any safe adjacent square not attacked by the opponent.</p>
               </div>
             </div>
-            <div class="flex items-start gap-3 rounded-xl border border-brand-border p-4" style="background:#131419;">
+            <div class="flex items-start gap-3 rounded-xl border border-brand-border p-4" style="background:#f6faf8;">
               <span class="text-brand-green font-bold text-base flex-shrink-0">2</span>
               <div>
-                <p class="text-white text-sm font-semibold">Block the Attack</p>
+                <p class="text-brand-ink text-sm font-semibold">Block the Attack</p>
                 <p class="text-brand-muted text-xs leading-relaxed">Place a friendly piece between the King and the attacking piece. Only works against Rooks, Bishops, and Queens — not Knights or Pawns.</p>
               </div>
             </div>
-            <div class="flex items-start gap-3 rounded-xl border border-brand-border p-4" style="background:#131419;">
+            <div class="flex items-start gap-3 rounded-xl border border-brand-border p-4" style="background:#f6faf8;">
               <span class="text-brand-green font-bold text-base flex-shrink-0">3</span>
               <div>
-                <p class="text-white text-sm font-semibold">Capture the Attacker</p>
+                <p class="text-brand-ink text-sm font-semibold">Capture the Attacker</p>
                 <p class="text-brand-muted text-xs leading-relaxed">Take the piece giving check with the King itself or another piece.</p>
               </div>
             </div>
@@ -187,17 +173,17 @@
   <!-- ═══════════════════════════════════════════════════════════════════ -->
   <!-- RULE 2 · CHECKMATE                                                  -->
   <!-- ═══════════════════════════════════════════════════════════════════ -->
-  <section id="checkmate" class="py-20 px-6 rule-section" style="background:#0b0c10;">
+  <section id="checkmate" class="py-20 px-6 rule-section" style="background:#ffffff;">
     <div class="max-w-6xl mx-auto flex flex-col-reverse lg:flex-row items-center gap-14">
 
       <!-- Text -->
       <div class="flex-1 space-y-5 max-w-lg">
         <div class="space-y-1">
           <p class="text-brand-green text-xs font-semibold tracking-widest uppercase">Rule 2</p>
-          <h2 class="text-3xl font-extrabold text-white">Checkmate</h2>
+          <h2 class="text-3xl font-extrabold text-brand-ink">Checkmate</h2>
         </div>
         <p class="text-brand-muted text-base leading-relaxed">
-          <strong class="text-white">Checkmate</strong> ends the game. It occurs when a King is in
+          <strong class="text-brand-ink">Checkmate</strong> ends the game. It occurs when a King is in
           check <em>and</em> there is no legal move to escape. The checkmated player loses
           immediately — the King is never actually captured.
         </p>
@@ -205,8 +191,8 @@
           In the diagram, both White Rooks form a mating net: the Rook on the 8th rank gives check,
           the second Rook covers the entire 7th rank, and the Black King has no escape square.
         </p>
-        <div class="rounded-xl border border-brand-border p-5 space-y-3" style="background:#131419;">
-          <p class="text-white text-sm font-semibold">Key facts about checkmate:</p>
+        <div class="rounded-xl border border-brand-border p-5 space-y-3" style="background:#f6faf8;">
+          <p class="text-brand-ink text-sm font-semibold">Key facts about checkmate:</p>
           <ul class="space-y-2 text-brand-muted text-xs leading-relaxed">
             <li class="flex items-start gap-2"><span class="text-brand-green mt-0.5">•</span><span>The game ends <em>instantly</em> — no moves can be made after checkmate.</span></li>
             <li class="flex items-start gap-2"><span class="text-brand-green mt-0.5">•</span><span>All three escape routes — move, block, and capture — must be impossible simultaneously.</span></li>
@@ -232,7 +218,7 @@
   <!-- ═══════════════════════════════════════════════════════════════════ -->
   <!-- RULE 3 · STALEMATE                                                  -->
   <!-- ═══════════════════════════════════════════════════════════════════ -->
-  <section id="stalemate" class="py-20 px-6 rule-section" style="background:#0b0c10;">
+  <section id="stalemate" class="py-20 px-6 rule-section" style="background:#ffffff;">
     <div class="max-w-6xl mx-auto flex flex-col lg:flex-row items-center gap-14">
 
       <!-- Board: Black king h8, queen f7 — stalemate (king not in check, no legal moves) -->
@@ -250,17 +236,17 @@
       <div class="flex-1 space-y-5 max-w-lg">
         <div class="space-y-1">
           <p class="text-brand-green text-xs font-semibold tracking-widest uppercase">Rule 3</p>
-          <h2 class="text-3xl font-extrabold text-white">Stalemate</h2>
+          <h2 class="text-3xl font-extrabold text-brand-ink">Stalemate</h2>
         </div>
         <p class="text-brand-muted text-base leading-relaxed">
-          <strong class="text-white">Stalemate</strong> is a draw. It happens when a player has
+          <strong class="text-brand-ink">Stalemate</strong> is a draw. It happens when a player has
           no legal move on their turn <em>but their King is not in check</em>. Unlike checkmate,
           the King is perfectly safe — there are simply no moves available to anyone.
         </p>
-        <div class="rounded-xl border p-5 space-y-2" style="background:#131419; border-color:rgba(245,158,11,0.4);">
+        <div class="rounded-xl border p-5 space-y-2" style="background:#f6faf8; border-color:rgba(245,158,11,0.4);">
           <div class="flex items-center gap-2">
-            <span class="text-yellow-400 text-base">⚠</span>
-            <p class="text-yellow-400 text-sm font-semibold">Critical for winning players</p>
+            <span class="text-amber-600 text-base">⚠</span>
+            <p class="text-amber-600 text-sm font-semibold">Critical for winning players</p>
           </div>
           <p class="text-brand-muted text-xs leading-relaxed">
             Stalemate is a common trap that turns a winning position into a draw.
@@ -268,16 +254,16 @@
             one legal move before delivering what you think is checkmate.
           </p>
         </div>
-        <div class="rounded-xl border border-brand-border p-5 space-y-2" style="background:#131419;">
-          <p class="text-white text-sm font-semibold">How stalemate differs from checkmate:</p>
+        <div class="rounded-xl border border-brand-border p-5 space-y-2" style="background:#f6faf8;">
+          <p class="text-brand-ink text-sm font-semibold">How stalemate differs from checkmate:</p>
           <div class="grid grid-cols-2 gap-3 text-xs">
             <div class="space-y-1">
               <p class="text-brand-green font-semibold">Checkmate</p>
-              <p class="text-brand-muted leading-relaxed">King is in check. No escape. <strong class="text-white">→ Loss</strong></p>
+              <p class="text-brand-muted leading-relaxed">King is in check. No escape. <strong class="text-brand-ink">→ Loss</strong></p>
             </div>
             <div class="space-y-1">
-              <p class="text-yellow-400 font-semibold">Stalemate</p>
-              <p class="text-brand-muted leading-relaxed">King is safe. No moves. <strong class="text-white">→ Draw</strong></p>
+              <p class="text-amber-600 font-semibold">Stalemate</p>
+              <p class="text-brand-muted leading-relaxed">King is safe. No moves. <strong class="text-brand-ink">→ Draw</strong></p>
             </div>
           </div>
         </div>
@@ -288,41 +274,41 @@
   <!-- ═══════════════════════════════════════════════════════════════════ -->
   <!-- RULE 4 · EN PASSANT                                                 -->
   <!-- ═══════════════════════════════════════════════════════════════════ -->
-  <section id="en-passant" class="py-20 px-6 rule-section" style="background:#0b0c10;">
+  <section id="en-passant" class="py-20 px-6 rule-section" style="background:#ffffff;">
     <div class="max-w-6xl mx-auto flex flex-col-reverse lg:flex-row items-center gap-14">
 
       <!-- Text -->
       <div class="flex-1 space-y-5 max-w-lg">
         <div class="space-y-1">
           <p class="text-brand-green text-xs font-semibold tracking-widest uppercase">Rule 4</p>
-          <h2 class="text-3xl font-extrabold text-white">En Passant</h2>
+          <h2 class="text-3xl font-extrabold text-brand-ink">En Passant</h2>
           <p class="text-brand-muted text-xs italic">"In passing" — French</p>
         </div>
         <p class="text-brand-muted text-base leading-relaxed">
-          En passant is a special pawn capture that can only happen <strong class="text-white">immediately</strong>
+          En passant is a special pawn capture that can only happen <strong class="text-brand-ink">immediately</strong>
           after an opponent moves a pawn two squares forward from its starting rank, landing it
           beside your own pawn. You may capture it as if it had only moved one square.
         </p>
         <div class="space-y-3">
-          <p class="text-white text-sm font-semibold">Step by step:</p>
+          <p class="text-brand-ink text-sm font-semibold">Step by step:</p>
           <ol class="space-y-2.5">
-            <li class="flex items-start gap-3 rounded-xl border border-brand-border p-4" style="background:#131419;">
+            <li class="flex items-start gap-3 rounded-xl border border-brand-border p-4" style="background:#f6faf8;">
               <span class="text-brand-green font-bold text-sm flex-shrink-0 mt-0.5">1</span>
-              <p class="text-brand-muted text-xs leading-relaxed">Your pawn is on the <strong class="text-white">5th rank</strong>. The opponent's pawn is on its starting square (7th rank from their side).</p>
+              <p class="text-brand-muted text-xs leading-relaxed">Your pawn is on the <strong class="text-brand-ink">5th rank</strong>. The opponent's pawn is on its starting square (7th rank from their side).</p>
             </li>
-            <li class="flex items-start gap-3 rounded-xl border border-brand-border p-4" style="background:#131419;">
+            <li class="flex items-start gap-3 rounded-xl border border-brand-border p-4" style="background:#f6faf8;">
               <span class="text-brand-green font-bold text-sm flex-shrink-0 mt-0.5">2</span>
-              <p class="text-brand-muted text-xs leading-relaxed">The opponent plays their pawn <strong class="text-white">two squares forward</strong>, landing immediately beside yours on the 5th rank.</p>
+              <p class="text-brand-muted text-xs leading-relaxed">The opponent plays their pawn <strong class="text-brand-ink">two squares forward</strong>, landing immediately beside yours on the 5th rank.</p>
             </li>
-            <li class="flex items-start gap-3 rounded-xl border border-brand-border p-4" style="background:#131419;">
+            <li class="flex items-start gap-3 rounded-xl border border-brand-border p-4" style="background:#f6faf8;">
               <span class="text-brand-green font-bold text-sm flex-shrink-0 mt-0.5">3</span>
-              <p class="text-brand-muted text-xs leading-relaxed">On your <strong class="text-white">very next move only</strong>, you may capture diagonally into the square the enemy pawn skipped. The captured pawn is removed from the board.</p>
+              <p class="text-brand-muted text-xs leading-relaxed">On your <strong class="text-brand-ink">very next move only</strong>, you may capture diagonally into the square the enemy pawn skipped. The captured pawn is removed from the board.</p>
             </li>
           </ol>
         </div>
-        <div class="rounded-xl border p-4" style="background:#131419; border-color:rgba(239,68,68,0.3);">
+        <div class="rounded-xl border p-4" style="background:#f6faf8; border-color:rgba(239,68,68,0.3);">
           <p class="text-xs text-brand-muted leading-relaxed">
-            <span class="text-red-400 font-semibold">Miss the moment:</span> If you don't capture en passant on the very next move, the opportunity disappears permanently.
+            <span class="text-red-600 font-semibold">Miss the moment:</span> If you don't capture en passant on the very next move, the opportunity disappears permanently.
           </p>
         </div>
       </div>
@@ -362,30 +348,30 @@
   <!-- ═══════════════════════════════════════════════════════════════════ -->
   <!-- RULE 5 · CASTLING                                                   -->
   <!-- ═══════════════════════════════════════════════════════════════════ -->
-  <section id="castling" class="py-20 px-6 rule-section" style="background:#0b0c10;">
+  <section id="castling" class="py-20 px-6 rule-section" style="background:#ffffff;">
     <div class="max-w-6xl mx-auto space-y-14">
 
       <!-- Section header -->
       <div class="space-y-2 max-w-2xl">
         <p class="text-brand-green text-xs font-semibold tracking-widest uppercase">Rule 5</p>
-        <h2 class="text-3xl font-extrabold text-white">Castling</h2>
+        <h2 class="text-3xl font-extrabold text-brand-ink">Castling</h2>
         <p class="text-brand-muted text-base leading-relaxed">
-          Castling is the only move in chess where <strong class="text-white">two pieces move simultaneously</strong>: the
+          Castling is the only move in chess where <strong class="text-brand-ink">two pieces move simultaneously</strong>: the
           King slides two squares toward a Rook, and that Rook jumps to the square the King crossed.
           It is the fastest way to tuck your King into safety while connecting your Rooks.
         </p>
       </div>
 
       <!-- Prerequisites card -->
-      <div class="rounded-2xl border border-brand-border p-6" style="background:#131419;">
-        <p class="text-white text-sm font-semibold mb-4">Castling is only legal when ALL of these are true:</p>
+      <div class="rounded-2xl border border-brand-border p-6" style="background:#f6faf8;">
+        <p class="text-brand-ink text-sm font-semibold mb-4">Castling is only legal when ALL of these are true:</p>
         <div class="grid sm:grid-cols-2 gap-3 text-xs text-brand-muted">
-          <div class="flex items-start gap-2"><span class="text-brand-green mt-0.5">•</span><span>The <strong class="text-white">King has never moved</strong> before in the game.</span></div>
-          <div class="flex items-start gap-2"><span class="text-brand-green mt-0.5">•</span><span>The <strong class="text-white">Rook on that side has never moved</strong> before in the game.</span></div>
-          <div class="flex items-start gap-2"><span class="text-brand-green mt-0.5">•</span><span><strong class="text-white">No pieces stand between</strong> the King and the Rook.</span></div>
-          <div class="flex items-start gap-2"><span class="text-brand-green mt-0.5">•</span><span>The King is <strong class="text-white">not currently in check</strong>.</span></div>
-          <div class="flex items-start gap-2"><span class="text-brand-green mt-0.5">•</span><span>The King does <strong class="text-white">not pass through</strong> a square attacked by the opponent.</span></div>
-          <div class="flex items-start gap-2"><span class="text-brand-green mt-0.5">•</span><span>The King does <strong class="text-white">not land on</strong> a square attacked by the opponent.</span></div>
+          <div class="flex items-start gap-2"><span class="text-brand-green mt-0.5">•</span><span>The <strong class="text-brand-ink">King has never moved</strong> before in the game.</span></div>
+          <div class="flex items-start gap-2"><span class="text-brand-green mt-0.5">•</span><span>The <strong class="text-brand-ink">Rook on that side has never moved</strong> before in the game.</span></div>
+          <div class="flex items-start gap-2"><span class="text-brand-green mt-0.5">•</span><span><strong class="text-brand-ink">No pieces stand between</strong> the King and the Rook.</span></div>
+          <div class="flex items-start gap-2"><span class="text-brand-green mt-0.5">•</span><span>The King is <strong class="text-brand-ink">not currently in check</strong>.</span></div>
+          <div class="flex items-start gap-2"><span class="text-brand-green mt-0.5">•</span><span>The King does <strong class="text-brand-ink">not pass through</strong> a square attacked by the opponent.</span></div>
+          <div class="flex items-start gap-2"><span class="text-brand-green mt-0.5">•</span><span>The King does <strong class="text-brand-ink">not land on</strong> a square attacked by the opponent.</span></div>
         </div>
       </div>
 
@@ -393,10 +379,10 @@
       <div class="space-y-6">
         <div class="space-y-1">
           <p class="text-brand-green text-xs font-semibold tracking-widest uppercase">Short Castling</p>
-          <h3 class="text-xl font-bold text-white">Kingside Castling (0-0)</h3>
+          <h3 class="text-xl font-bold text-brand-ink">Kingside Castling (0-0)</h3>
           <p class="text-brand-muted text-sm leading-relaxed max-w-xl">
             The King moves two squares toward the Kingside Rook (h-file). The Rook hops
-            over to f1. Notation: <strong class="text-white">0-0</strong>. This is the more common of the two —
+            over to f1. Notation: <strong class="text-brand-ink">0-0</strong>. This is the more common of the two —
             fewer squares to clear and the King reaches safety faster.
           </p>
         </div>
@@ -431,10 +417,10 @@
       <div class="space-y-6">
         <div class="space-y-1">
           <p class="text-brand-green text-xs font-semibold tracking-widest uppercase">Long Castling</p>
-          <h3 class="text-xl font-bold text-white">Queenside Castling (0-0-0)</h3>
+          <h3 class="text-xl font-bold text-brand-ink">Queenside Castling (0-0-0)</h3>
           <p class="text-brand-muted text-sm leading-relaxed max-w-xl">
             The King moves two squares toward the Queenside Rook (a-file). The Rook jumps
-            to d1. Notation: <strong class="text-white">0-0-0</strong>. This requires clearing three squares instead of
+            to d1. Notation: <strong class="text-brand-ink">0-0-0</strong>. This requires clearing three squares instead of
             two, so it is slightly harder to achieve — but it can activate the Rook powerfully
             toward the center.
           </p>
@@ -467,10 +453,10 @@
   </section>
 
   <!-- ─── Continue CTA ──────────────────────────────────────────────────── -->
-  <section class="py-20 px-6 border-t border-brand-border" style="background:#131419;">
+  <section class="py-20 px-6 border-t border-brand-border" style="background:#f6faf8;">
     <div class="max-w-4xl mx-auto text-center space-y-6">
       <p class="text-brand-green text-xs font-semibold tracking-widest uppercase">You're ready</p>
-      <h2 class="text-3xl md:text-4xl font-extrabold text-white leading-tight">
+      <h2 class="text-3xl md:text-4xl font-extrabold text-brand-ink leading-tight">
         You know how pieces move.<br/>You know the special rules.<br/>
         <span class="text-brand-green">Now it's time to play.</span>
       </h2>
@@ -480,12 +466,12 @@
       </p>
       <div class="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
         <a href="/trainer?level=1"
-           class="inline-flex items-center gap-2 bg-brand-green hover:bg-brand-gdark text-brand-bg font-semibold px-7 py-3 rounded-md transition-colors text-sm">
+           class="inline-flex items-center gap-2 bg-brand-green hover:bg-brand-gdark text-brand-ink font-semibold px-7 py-3 rounded-md transition-colors text-sm">
           Start Level 1 Training &rarr;
         </a>
         <a href="/basics"
-           class="inline-flex items-center gap-2 border border-brand-border hover:border-brand-green text-brand-muted hover:text-white px-7 py-3 rounded-md transition-colors text-sm"
-           style="background:#0b0c10;">
+           class="inline-flex items-center gap-2 border border-brand-border hover:border-brand-green text-brand-muted hover:text-brand-ink px-7 py-3 rounded-md transition-colors text-sm"
+           style="background:#ffffff;">
           &larr; Back to Chess Basics
         </a>
       </div>
@@ -493,13 +479,13 @@
   </section>
 
   <!-- ─── SiteFooter ────────────────────────────────────────────────────── -->
-  <footer class="border-t border-brand-border pt-16 pb-8 px-6" style="background:#0b0c10;">
+  <footer class="border-t border-brand-border pt-16 pb-8 px-6" style="background:#ffffff;">
     <div class="max-w-6xl mx-auto">
 
       <div class="grid grid-cols-2 md:grid-cols-5 gap-10 mb-14">
         <div class="col-span-2 space-y-3">
-          <a href="/" class="flex items-center gap-2 font-semibold text-white text-sm">
-            <span class="flex items-center justify-center w-7 h-7 rounded-md bg-brand-green text-brand-bg font-bold text-base">♟</span>
+          <a href="/" class="flex items-center gap-2 font-semibold text-brand-ink text-sm">
+            <span class="flex items-center justify-center w-7 h-7 rounded-md bg-brand-green text-brand-ink font-bold text-base">♟</span>
             Synapchess
           </a>
           <p class="text-brand-muted text-sm leading-relaxed max-w-xs">
@@ -508,29 +494,29 @@
         </div>
 
         <div class="space-y-3">
-          <h4 class="text-white text-sm font-semibold">Level 0</h4>
+          <h4 class="text-brand-ink text-sm font-semibold">Level 0</h4>
           <ul class="space-y-2 text-sm text-brand-muted">
-            <li><a href="/basics"         class="hover:text-white transition-colors">Chess Basics</a></li>
-            <li><a href="/special-rules"  class="text-white">Special Rules</a></li>
-            <li><a href="/curriculum"     class="hover:text-white transition-colors">Curriculum</a></li>
+            <li><a href="/basics"         class="hover:text-brand-ink transition-colors">Chess Basics</a></li>
+            <li><a href="/special-rules"  class="text-brand-ink">Special Rules</a></li>
+            <li><a href="/curriculum"     class="hover:text-brand-ink transition-colors">Curriculum</a></li>
           </ul>
         </div>
 
         <div class="space-y-3">
-          <h4 class="text-white text-sm font-semibold">Trainer Levels</h4>
+          <h4 class="text-brand-ink text-sm font-semibold">Trainer Levels</h4>
           <ul class="space-y-2 text-sm text-brand-muted">
-            <li><a href="/trainer?level=1" class="hover:text-white transition-colors">Level 1 — Beginner ⭐</a></li>
-            <li><a href="/trainer?level=2" class="hover:text-white transition-colors">Level 2 — Intermediate ⭐⭐</a></li>
-            <li><a href="/trainer?level=3" class="hover:text-white transition-colors">Level 3 — Advanced ⭐⭐⭐</a></li>
+            <li><a href="/trainer?level=1" class="hover:text-brand-ink transition-colors">Level 1 — Beginner ⭐</a></li>
+            <li><a href="/trainer?level=2" class="hover:text-brand-ink transition-colors">Level 2 — Intermediate ⭐⭐</a></li>
+            <li><a href="/trainer?level=3" class="hover:text-brand-ink transition-colors">Level 3 — Advanced ⭐⭐⭐</a></li>
           </ul>
         </div>
 
         <div class="space-y-3">
-          <h4 class="text-white text-sm font-semibold">Foundation</h4>
+          <h4 class="text-brand-ink text-sm font-semibold">Foundation</h4>
           <ul class="space-y-2 text-sm text-brand-muted">
-            <li><a href="#" class="hover:text-white transition-colors">Our mission</a></li>
-            <li><a href="#" class="hover:text-white transition-colors">Partners</a></li>
-            <li><a href="#" class="hover:text-white transition-colors">Contact</a></li>
+            <li><a href="#" class="hover:text-brand-ink transition-colors">Our mission</a></li>
+            <li><a href="#" class="hover:text-brand-ink transition-colors">Partners</a></li>
+            <li><a href="#" class="hover:text-brand-ink transition-colors">Contact</a></li>
           </ul>
         </div>
       </div>
@@ -538,8 +524,8 @@
       <div class="border-t border-brand-border pt-6 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-brand-muted">
         <span>© 2026 Synapchess. All rights reserved.</span>
         <div class="flex gap-5">
-          <a href="#" class="hover:text-white transition-colors">Privacy</a>
-          <a href="#" class="hover:text-white transition-colors">Terms</a>
+          <a href="#" class="hover:text-brand-ink transition-colors">Privacy</a>
+          <a href="#" class="hover:text-brand-ink transition-colors">Terms</a>
         </div>
       </div>
     </div>
@@ -610,24 +596,6 @@
     });
   </script>
 
-  <!-- ─── Nav dropdown (Learn tab) ──────────────────────────────────────── -->
-  <script>
-    (function() {
-      var btn  = document.getElementById('nav-learn-btn');
-      var menu = document.getElementById('nav-learn-menu');
-      if (!btn || !menu) return;
-      btn.addEventListener('click', function(e) {
-        e.stopPropagation();
-        menu.classList.toggle('hidden');
-      });
-      document.addEventListener('click', function(e) {
-        if (!menu.contains(e.target) && e.target !== btn) menu.classList.add('hidden');
-      });
-      document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') menu.classList.add('hidden');
-      });
-    })();
-  </script>
 
 </body>
 </html>
