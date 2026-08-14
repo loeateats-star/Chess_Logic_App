@@ -9,15 +9,9 @@ from datetime import datetime
 
 from flask import Blueprint, jsonify, request, session
 
-from engine_service import (
-    DEFAULT_ANALYSIS_DEPTH,
-    DEFAULT_LIVE_DEPTH,
-    analyze_game_moves,
-    classify_cpl,
-    evaluate_fen,
-)
-
 from db import DB_PATH
+
+DEFAULT_ANALYSIS_DEPTH = 20  # matches EngineClient's ANALYSIS_DEPTH in analysis.html
 
 games_bp = Blueprint("games", __name__, url_prefix="/api")
 
@@ -258,36 +252,25 @@ def delete_game(game_id):
         conn.close()
 
 
-# ── Engine ──────────────────────────────────────────────────────────────────
-
-@games_bp.route("/engine/evaluate", methods=["POST"])
-def engine_evaluate():
-    """Requirement 3: on-demand evaluation + PV for the position on the board right now."""
-    data  = request.get_json(force=True) or {}
-    fen   = (data.get("fen") or "").strip()
-    depth = data.get("depth", DEFAULT_LIVE_DEPTH)
-    multipv = data.get("multipv", 1)
-
-    if not fen:
-        return jsonify({"error": "fen is required."}), 400
-
-    try:
-        result = evaluate_fen(fen, depth=depth, multipv=multipv)
-    except ValueError as exc:
-        return jsonify({"error": f"Invalid FEN: {exc}"}), 400
-
-    return jsonify(result)
-
+# ── Analysis storage ──────────────────────────────────────────────────────
+# Stockfish itself now runs client-side (in-browser, WASM — see
+# static/js/engine-client.js), not as a server subprocess. This route only
+# persists the rows the browser already computed, so a signed-in user's
+# analysis survives across sessions/devices.
 
 @games_bp.route("/games/<int:game_id>/analyze", methods=["POST"])
-def analyze_game(game_id):
-    """Requirement 3 + 4: run Stockfish over every ply of a saved game and store per-move results."""
+def save_analysis(game_id):
+    """Requirement 3 + 4: store per-move analysis rows computed client-side."""
     user_id = _require_user()
     if user_id is None:
         return jsonify({"error": "Not authenticated."}), 401
 
-    data  = request.get_json(force=True) or {}
-    depth = data.get("depth", DEFAULT_ANALYSIS_DEPTH)
+    data     = request.get_json(force=True) or {}
+    analysis = data.get("analysis")
+    depth    = data.get("depth", DEFAULT_ANALYSIS_DEPTH)
+
+    if not isinstance(analysis, list) or not analysis:
+        return jsonify({"error": "analysis (a non-empty list of per-move rows) is required."}), 400
 
     conn = get_db()
     try:
@@ -295,34 +278,25 @@ def analyze_game(game_id):
         if game is None:
             return jsonify({"error": "Game not found."}), 404
 
-        moves = conn.execute(
-            "SELECT uci FROM game_moves WHERE game_id = ? ORDER BY ply ASC",
-            (game_id,),
-        ).fetchall()
-        if not moves:
-            return jsonify({"error": "This game has no moves to analyze."}), 400
-
-        uci_moves = [m["uci"] for m in moves]
-        analysis  = analyze_game_moves(game["starting_fen"], uci_moves, depth=depth)
-
         conn.execute("DELETE FROM game_analysis WHERE game_id = ?", (game_id,))
         for row in analysis:
+            pv = row.get("pv_uci")
             conn.execute(
                 '''INSERT INTO game_analysis
                        (game_id, ply, mover, cp_before, cp_after, mate_before, mate_after,
                         cpl, classification, best_move_uci, best_move_san, pv, depth)
                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''',
                 (
-                    game_id, row["ply"], row["mover"], row["cp_before"], row["cp_after"],
-                    row["mate_before"], row["mate_after"], row["cpl"], row["classification"],
-                    row["best_move_uci"], row["best_move_san"],
-                    " ".join(row["pv_uci"]), depth,
+                    game_id, row.get("ply"), row.get("mover"), row.get("cp_before"), row.get("cp_after"),
+                    row.get("mate_before"), row.get("mate_after"), row.get("cpl"), row.get("classification"),
+                    row.get("best_move_uci"), row.get("best_move_san"),
+                    " ".join(pv) if pv else None, depth,
                 ),
             )
         conn.commit()
 
         summary = _summarize(analysis)
-        return jsonify({"game_id": game_id, "depth": depth, "analysis": analysis, "summary": summary})
+        return jsonify({"game_id": game_id, "depth": depth, "summary": summary})
     finally:
         conn.close()
 

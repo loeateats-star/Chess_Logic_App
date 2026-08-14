@@ -1,4 +1,3 @@
-import atexit
 import sqlite3
 import os
 from datetime import datetime, timedelta, timezone
@@ -10,6 +9,22 @@ from curriculum_data import get_section, ordered_sections, format_duration
 
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'dev-secret-change-before-deploying')
+
+# Cross-origin isolation (needed for SharedArrayBuffer, which the in-browser
+# WASM Stockfish engine in static/js/engine-client.js requires). Scoped to
+# the analysis page and everything under static/js/ (the worker shim, the
+# self-hosted stockfish-wasm/ bundle, and the nested pthread worker it
+# spawns all need a matching COEP header or the browser refuses to start
+# them). 'credentialless' (vs. 'require-corp') avoids having to add
+# Cross-Origin-Resource-Policy headers to every CDN asset these pages load —
+# cdn.tailwindcss.com in particular doesn't send one. Left off every other
+# route so it doesn't affect the YouTube embeds on the curriculum pages.
+@app.after_request
+def _cross_origin_isolation_headers(response):
+    if request.path == '/analysis' or request.path.startswith('/static/js/'):
+        response.headers['Cross-Origin-Opener-Policy'] = 'same-origin'
+        response.headers['Cross-Origin-Embedder-Policy'] = 'credentialless'
+    return response
 
 # ── Space-count expression reused across tier queries ─────────────────────────
 # N UCI moves separated by spaces → N-1 spaces in the string.
@@ -82,13 +97,14 @@ def init_db():
 
 init_db()
 
-# ── Game analysis feature (Requirements: move tracking, save/rename, engine) ──
+# ── Game analysis feature (Requirements: move tracking, save/rename) ──────────
+# Stockfish itself runs client-side now (in-browser WASM — see
+# static/js/engine-client.js); this blueprint only stores games and the
+# analysis rows the browser computes, no server-side engine subprocess.
 from game_analysis import games_bp, init_games_db  # noqa: E402
-from engine_service import shutdown_engine  # noqa: E402
 
 init_games_db()
 app.register_blueprint(games_bp)
-atexit.register(shutdown_engine)
 
 
 # ── SM-2 spaced-repetition ────────────────────────────────────────────────────

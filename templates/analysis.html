@@ -30,6 +30,8 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
   <link rel="stylesheet" href="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.css" />
   <script src="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.js"></script>
+  <!-- In-browser Stockfish (WASM, falls back to JS) — replaces the old server-side engine subprocess -->
+  <script src="/static/js/engine-client.js"></script>
 
   <style>
     body { background-color: #ffffff; }
@@ -228,6 +230,8 @@
 
     var STARTING_FEN = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
     var LOCAL_KEY = 'algogambit_local_games';
+    var LIVE_DEPTH = 18;      // single-position live eval
+    var ANALYSIS_DEPTH = 20;  // full-game move-by-move analysis
 
     // ── State ──────────────────────────────────────────────────────────────
     var board = null, game = null;
@@ -396,46 +400,43 @@
     }
 
     // ── Live engine (Requirement 3: evaluate current position + PV) ────────
+    // Runs in-browser via EngineClient (WASM Stockfish Worker) instead of
+    // calling out to a server-side engine subprocess.
     function evaluateCurrentPosition() {
       if (!game) return;
       var fen = game.fen();
       document.getElementById('live-eval').textContent = '…';
       document.getElementById('live-pv').textContent = 'Thinking…';
 
-      fetch('/api/engine/evaluate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ fen: fen, depth: 14, multipv: 1 })
-      })
-      .then(function(r) { return r.json(); })
-      .then(function(data) {
-        if (data.error || !data.lines || !data.lines.length) {
-          document.getElementById('live-eval').textContent = '—';
-          document.getElementById('live-pv').textContent = data.error || 'No line available.';
-          return;
-        }
-        var line = data.lines[0];
-        var sideToMove = data.turn; // 'w' | 'b'
-        var evalEl = document.getElementById('live-eval');
+      EngineClient.evaluateFen(fen, { depth: LIVE_DEPTH, multipv: 1 })
+        .then(function(data) {
+          if (!data.lines || !data.lines.length) {
+            document.getElementById('live-eval').textContent = '—';
+            document.getElementById('live-pv').textContent = 'No line available.';
+            return;
+          }
+          var line = data.lines[0];
+          var sideToMove = data.turn; // 'w' | 'b'
+          var evalEl = document.getElementById('live-eval');
 
-        if (line.mate !== null) {
-          var mateSide = (line.mate > 0) === (sideToMove === 'w') ? 'White' : 'Black';
-          evalEl.textContent = 'M' + Math.abs(line.mate) + ' (' + mateSide + ')';
-          evalEl.style.color = mateSide === 'White' ? '#00dc82' : '#ef4444';
-        } else if (line.cp !== null) {
-          var whitePov = sideToMove === 'w' ? line.cp : -line.cp;
-          var pawns = (whitePov / 100).toFixed(2);
-          evalEl.textContent = (whitePov >= 0 ? '+' : '') + pawns;
-          evalEl.style.color = whitePov >= 0 ? '#00dc82' : '#c4b5fd';
-        }
-        document.getElementById('live-pv').textContent = line.pv_san.length
-          ? 'Best line: ' + line.pv_san.slice(0, 6).join(' ')
-          : 'No line available.';
-      })
-      .catch(function() {
-        document.getElementById('live-eval').textContent = '—';
-        document.getElementById('live-pv').textContent = 'Engine unavailable.';
-      });
+          if (line.mate !== null) {
+            var mateSide = (line.mate > 0) === (sideToMove === 'w') ? 'White' : 'Black';
+            evalEl.textContent = 'M' + Math.abs(line.mate) + ' (' + mateSide + ')';
+            evalEl.style.color = mateSide === 'White' ? '#00dc82' : '#ef4444';
+          } else if (line.cp !== null) {
+            var whitePov = sideToMove === 'w' ? line.cp : -line.cp;
+            var pawns = (whitePov / 100).toFixed(2);
+            evalEl.textContent = (whitePov >= 0 ? '+' : '') + pawns;
+            evalEl.style.color = whitePov >= 0 ? '#00dc82' : '#c4b5fd';
+          }
+          document.getElementById('live-pv').textContent = line.pv_san.length
+            ? 'Best line: ' + line.pv_san.slice(0, 6).join(' ')
+            : 'No line available.';
+        })
+        .catch(function(err) {
+          document.getElementById('live-eval').textContent = '—';
+          document.getElementById('live-pv').textContent = 'Engine unavailable: ' + err.message;
+        });
     }
 
     // ── Save / rename (Requirement 2) ───────────────────────────────────────
@@ -610,81 +611,85 @@
     }
 
     // ── Full-game analysis (Requirement 3 + 4) ──────────────────────────────
+    // Runs entirely in-browser via EngineClient now. For signed-in users the
+    // computed rows are POSTed to the server afterward purely for storage —
+    // the server no longer runs Stockfish itself.
     function analyzeGame() {
       if (!moveLog.length) { setStatus('Nothing to analyze yet — play or load a game first.', '#ef4444'); return; }
       if (!currentGameId) { setStatus('Save the game first, then analyze it.', '#ef4444'); return; }
 
-      setStatus('Running Stockfish over the full game… this can take a moment.', '#f59e0b');
+      setStatus('Running Stockfish (in-browser) over the full game… this can take a moment.', '#f59e0b');
 
-      if (currentGameSource === 'server') {
-        fetch('/api/games/' + currentGameId + '/analyze', {
-          method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ depth: 14 })
-        })
-        .then(function(r) { return r.json().then(function(d) { return { ok: r.ok, data: d }; }); })
-        .then(function(res) {
-          if (!res.ok) { setStatus(res.data.error || 'Analysis failed.', '#ef4444'); return; }
-          renderAnalysis(res.data.analysis, res.data.summary, res.data.depth);
+      runClientAnalysis(STARTING_FEN, moveLog, ANALYSIS_DEPTH)
+        .then(function(result) {
+          renderAnalysis(result.analysis, result.summary, ANALYSIS_DEPTH);
           setStatus('Analysis complete.', '#00dc82');
-          loadSavedGames();
+
+          if (currentGameSource === 'server') {
+            fetch('/api/games/' + currentGameId + '/analyze', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ analysis: result.analysis, depth: ANALYSIS_DEPTH })
+            })
+            .then(function() { loadSavedGames(); })
+            .catch(function() { setStatus('Analysis complete, but saving it to your account failed.', '#f59e0b'); });
+          }
         })
-        .catch(function() { setStatus('Network error during analysis.', '#ef4444'); });
-      } else {
-        analyzeLocalGame(STARTING_FEN, moveLog);
-      }
+        .catch(function(err) {
+          setStatus('Analysis failed: ' + err.message, '#ef4444');
+        });
     }
 
-    function analyzeLocalGame(startingFen, moves) {
-      var walker = new Chess(startingFen);
-      var results = [];
-      var idx = 0;
-      var depth = 12; // lighter depth client-side: sequential calls, not the backend's N+1 batching
+    function runClientAnalysis(startingFen, moves, depth) {
+      return new Promise(function(resolve, reject) {
+        var walker = new Chess(startingFen);
+        var results = [];
+        var idx = 0;
 
-      function evalAt(fen) {
-        return fetch('/api/engine/evaluate', {
-          method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ fen: fen, depth: depth })
-        }).then(function(r) { return r.json(); });
-      }
-
-      function step() {
-        if (idx >= moves.length) {
-          renderAnalysis(results, summarize(results), depth);
-          setStatus('Analysis complete.', '#00dc82');
-          return;
+        function evalAt(fen) {
+          return EngineClient.evaluateFen(fen, { depth: depth });
         }
-        var moverWhite = walker.turn() === 'w';
-        evalAt(walker.fen()).then(function(before) {
-          var line0 = (before.lines || [])[0] || {};
-          var mv = moves[idx];
-          var moveObj = walker.move({ from: mv.uci.slice(0, 2), to: mv.uci.slice(2, 4), promotion: mv.uci.slice(4) || 'q' });
 
-          evalAt(walker.fen()).then(function(after) {
-            var line1 = (after.lines || [])[0] || {};
-            var cpBefore = line0.cp !== undefined ? line0.cp : null;
-            var mateBefore = line0.mate !== undefined ? line0.mate : null;
-            var cpAfterRaw = line1.cp !== undefined ? line1.cp : null;
-            var mateAfterRaw = line1.mate !== undefined ? line1.mate : null;
-            // after's score is from the new side-to-move's POV — flip back to the mover's POV
-            var cpAfter = cpAfterRaw === null ? null : -cpAfterRaw;
-            var mateAfter = mateAfterRaw === null ? null : -mateAfterRaw;
+        function step() {
+          if (idx >= moves.length) {
+            resolve({ analysis: results, summary: summarize(results) });
+            return;
+          }
+          var moverWhite = walker.turn() === 'w';
+          evalAt(walker.fen()).then(function(before) {
+            var line0 = (before.lines || [])[0] || {};
+            var mv = moves[idx];
+            var moveObj = walker.move({ from: mv.uci.slice(0, 2), to: mv.uci.slice(2, 4), promotion: mv.uci.slice(4) || 'q' });
 
-            var cpl = null;
-            if (cpBefore !== null && cpAfter !== null) cpl = Math.max(0, cpBefore - cpAfter);
-            else if (mateBefore !== null && mateBefore > 0 && mateAfter === null) cpl = 1000;
+            evalAt(walker.fen()).then(function(after) {
+              var line1 = (after.lines || [])[0] || {};
+              var cpBefore = line0.cp !== undefined ? line0.cp : null;
+              var mateBefore = line0.mate !== undefined ? line0.mate : null;
+              var cpAfterRaw = line1.cp !== undefined ? line1.cp : null;
+              var mateAfterRaw = line1.mate !== undefined ? line1.mate : null;
+              // after's score is from the new side-to-move's POV — flip back to the mover's POV
+              var cpAfter = cpAfterRaw === null ? null : -cpAfterRaw;
+              var mateAfter = mateAfterRaw === null ? null : -mateAfterRaw;
 
-            var classification = (line0.best_move_uci === mv.uci) ? 'best' : classifyCpl(cpl);
+              var cpl = null;
+              if (cpBefore !== null && cpAfter !== null) cpl = Math.max(0, cpBefore - cpAfter);
+              else if (mateBefore !== null && mateBefore > 0 && mateAfter === null) cpl = 1000;
 
-            results.push({
-              ply: idx + 1, uci: mv.uci, san: moveObj ? moveObj.san : mv.san, mover: moverWhite ? 'w' : 'b',
-              cp_before: cpBefore, cp_after: cpAfter, mate_before: mateBefore, mate_after: mateAfter,
-              cpl: cpl, classification: classification,
-              best_move_uci: line0.best_move_uci || null, best_move_san: line0.best_move_san || null
-            });
-            idx++;
-            step();
-          });
-        });
-      }
-      step();
+              var classification = (line0.best_move_uci === mv.uci) ? 'best' : classifyCpl(cpl);
+
+              results.push({
+                ply: idx + 1, uci: mv.uci, san: moveObj ? moveObj.san : mv.san, mover: moverWhite ? 'w' : 'b',
+                cp_before: cpBefore, cp_after: cpAfter, mate_before: mateBefore, mate_after: mateAfter,
+                cpl: cpl, classification: classification,
+                best_move_uci: line0.best_move_uci || null, best_move_san: line0.best_move_san || null
+              });
+              idx++;
+              step();
+            }).catch(reject);
+          }).catch(reject);
+        }
+        step();
+      });
     }
 
     // ── Analysis summary + rendering ─────────────────────────────────────────
