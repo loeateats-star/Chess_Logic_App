@@ -1,22 +1,22 @@
 """
 import_puzzles.py
 Reads every puzzle from a PGN file and bulk-inserts them into the
-personal_blunders table of chess_data.db.
+personal_blunders table of the PostgreSQL database at DATABASE_URL.
 
 Usage:
-    python import_puzzles.py
+    DATABASE_URL=postgres://... python import_puzzles.py
 
 Requires: python-chess  (pip install chess)
 """
 
 import os
-import sqlite3
 import chess.pgn
+
+import db
 
 # ── Paths ─────────────────────────────────────────────────────────────────────
 BASE_DIR  = os.path.dirname(os.path.abspath(__file__))
 PGN_PATH  = os.path.join(BASE_DIR, 'puzzles.pgn')
-DB_PATH   = os.path.join(BASE_DIR, 'chess_data.db')
 LOG_EVERY = 1000
 
 
@@ -62,11 +62,10 @@ def parse_puzzles(pgn_path: str) -> list[tuple[str, str]]:
 
 def insert_puzzles(rows: list[tuple[str, str]]) -> None:
     """Clear old data and bulk-insert all rows in a single transaction."""
-    conn = sqlite3.connect(DB_PATH)
+    conn = db.connect()
     try:
-        cursor = conn.cursor()
-        cursor.execute('DELETE FROM personal_blunders')
-        cursor.executemany(
+        conn.execute('DELETE FROM personal_blunders')
+        conn.executemany(
             'INSERT INTO personal_blunders (fen, engine_best_move) VALUES (?, ?)',
             rows
         )
@@ -89,7 +88,7 @@ def main() -> None:
         print('No valid puzzles found — nothing was written to the database.')
         return
 
-    print(f'Writing {len(rows):,} puzzles to: {DB_PATH}')
+    print(f'Writing {len(rows):,} puzzles to the database at DATABASE_URL')
     insert_puzzles(rows)
     print(f'Done. {len(rows):,} puzzles inserted into personal_blunders.')
 

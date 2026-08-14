@@ -1,10 +1,9 @@
-import sqlite3
 import os
 from datetime import datetime, timedelta, timezone
 from flask import Flask, render_template, jsonify, request, session
 from werkzeug.security import generate_password_hash, check_password_hash
 
-from db import DB_PATH
+import db
 from curriculum_data import get_section, ordered_sections, format_duration
 
 app = Flask(__name__)
@@ -34,9 +33,7 @@ _SPACES = "LENGTH(engine_best_move) - LENGTH(REPLACE(engine_best_move, ' ', ''))
 # ── Database helpers ──────────────────────────────────────────────────────────
 
 def get_db():
-    conn = sqlite3.connect(DB_PATH)
-    conn.row_factory = sqlite3.Row
-    return conn
+    return db.connect()
 
 
 def init_db():
@@ -45,57 +42,93 @@ def init_db():
     try:
         conn.executescript('''
             CREATE TABLE IF NOT EXISTS users (
-                id             INTEGER PRIMARY KEY,
+                id             SERIAL  PRIMARY KEY,
                 username       TEXT    UNIQUE NOT NULL,
                 password_hash  TEXT    NOT NULL,
                 current_streak INTEGER DEFAULT 0
             );
 
             CREATE TABLE IF NOT EXISTS student_analytics (
-                id            INTEGER  PRIMARY KEY,
-                user_id       INTEGER  NOT NULL,
-                puzzle_id     INTEGER  NOT NULL,
+                id            SERIAL    PRIMARY KEY,
+                user_id       INTEGER   NOT NULL,
+                puzzle_id     INTEGER   NOT NULL,
                 time_spent_ms INTEGER,
                 is_correct    INTEGER,
-                timestamp     DATETIME DEFAULT CURRENT_TIMESTAMP
+                timestamp     TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
 
             CREATE TABLE IF NOT EXISTS user_puzzles_state (
-                user_id     INTEGER NOT NULL,
-                puzzle_id   INTEGER NOT NULL,
-                ease_factor REAL    DEFAULT 2.5,
-                interval    INTEGER DEFAULT 0,
-                repetitions INTEGER DEFAULT 0,
-                next_review DATETIME DEFAULT CURRENT_TIMESTAMP,
+                user_id     INTEGER   NOT NULL,
+                puzzle_id   INTEGER   NOT NULL,
+                ease_factor REAL      DEFAULT 2.5,
+                interval    INTEGER   DEFAULT 0,
+                repetitions INTEGER   DEFAULT 0,
+                next_review TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 PRIMARY KEY (user_id, puzzle_id)
             );
 
             CREATE TABLE IF NOT EXISTS user_video_progress (
-                user_id      INTEGER  NOT NULL,
-                section      TEXT     NOT NULL,
-                video_id     TEXT     NOT NULL,
-                completed_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                user_id      INTEGER   NOT NULL,
+                section      TEXT      NOT NULL,
+                video_id     TEXT      NOT NULL,
+                completed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 PRIMARY KEY (user_id, video_id)
+            );
+
+            CREATE TABLE IF NOT EXISTS personal_blunders (
+                id               SERIAL    PRIMARY KEY,
+                fen              TEXT,
+                engine_best_move TEXT,
+                timestamp        TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
         ''')
         conn.commit()
-        # Backwards-compatible schema migrations
+        # Backwards-compatible schema migrations. `IF NOT EXISTS` (not
+        # try/except) because a failed statement aborts the whole Postgres
+        # transaction — every statement after the first failure would
+        # otherwise be silently skipped too.
         for stmt in [
-            'ALTER TABLE users ADD COLUMN experience_level  TEXT',
-            'ALTER TABLE users ADD COLUMN daily_time_budget INTEGER DEFAULT 30',
-            'ALTER TABLE users ADD COLUMN training_goal     TEXT',
-            'ALTER TABLE users ADD COLUMN diagnostic_done   INTEGER DEFAULT 0',
+            'ALTER TABLE users ADD COLUMN IF NOT EXISTS experience_level  TEXT',
+            'ALTER TABLE users ADD COLUMN IF NOT EXISTS daily_time_budget INTEGER DEFAULT 30',
+            'ALTER TABLE users ADD COLUMN IF NOT EXISTS training_goal     TEXT',
+            'ALTER TABLE users ADD COLUMN IF NOT EXISTS diagnostic_done   INTEGER DEFAULT 0',
         ]:
-            try:
-                conn.execute(stmt)
-            except Exception:
-                pass
+            conn.execute(stmt)
         conn.commit()
     finally:
         conn.close()
 
 
+def seed_puzzles_if_empty():
+    """Populate personal_blunders from puzzles.pgn on first boot.
+
+    chess_data.db is gitignored (it also holds user password hashes), so a
+    fresh deploy starts with an empty database. puzzles.pgn IS tracked in
+    git, so we rebuild the puzzle table from it here instead of relying on
+    a database file that never leaves this machine.
+    """
+    conn = get_db()
+    try:
+        count = conn.execute('SELECT COUNT(*) AS count FROM personal_blunders').fetchone()['count']
+        if count > 0:
+            return
+        pgn_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'puzzles.pgn')
+        if not os.path.exists(pgn_path):
+            return
+        from import_puzzles import parse_puzzles
+        rows = parse_puzzles(pgn_path)
+        if rows:
+            conn.executemany(
+                'INSERT INTO personal_blunders (fen, engine_best_move) VALUES (?, ?)',
+                rows
+            )
+            conn.commit()
+    finally:
+        conn.close()
+
+
 init_db()
+seed_puzzles_if_empty()
 
 # ── Game analysis feature (Requirements: move tracking, save/rename) ──────────
 # Stockfish itself runs client-side now (in-browser WASM — see
@@ -291,7 +324,7 @@ def register():
         )
         conn.commit()
         return jsonify({'message': f'User "{username}" registered successfully.'})
-    except sqlite3.IntegrityError:
+    except db.IntegrityError:
         return jsonify({'error': 'Username already taken.'}), 409
     finally:
         conn.close()
@@ -371,8 +404,8 @@ def get_analytics():
         row = conn.execute(
             '''SELECT
                 COUNT(*)                                    AS total_attempts,
-                COALESCE(AVG(CAST(is_correct AS REAL)), 0)  AS accuracy_raw,
-                COALESCE(AVG(time_spent_ms), 0)             AS avg_time_ms
+                COALESCE(AVG(CAST(is_correct AS REAL)), 0)     AS accuracy_raw,
+                COALESCE(AVG(CAST(time_spent_ms AS REAL)), 0)  AS avg_time_ms
                FROM student_analytics
                WHERE user_id = ?''',
             (user_id,)
@@ -570,7 +603,7 @@ def get_puzzle():
                 FROM personal_blunders pb
                 JOIN user_puzzles_state ups
                   ON ups.puzzle_id = pb.id AND ups.user_id = ?
-                WHERE ups.next_review <= datetime('now')
+                WHERE ups.next_review <= (NOW() AT TIME ZONE 'UTC')
                   AND {where}
                 ORDER BY ups.next_review ASC
                 LIMIT 1''',
@@ -598,7 +631,7 @@ def get_puzzle():
                    FROM personal_blunders pb
                    JOIN user_puzzles_state ups
                      ON ups.puzzle_id = pb.id AND ups.user_id = ?
-                   WHERE ups.next_review <= datetime('now')
+                   WHERE ups.next_review <= (NOW() AT TIME ZONE 'UTC')
                    ORDER BY ups.next_review ASC
                    LIMIT 1''',
                 (user_id,)
@@ -637,4 +670,6 @@ def get_puzzle():
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    port = int(os.environ.get('PORT', 5000))
+    debug = os.environ.get('FLASK_DEBUG') == '1'
+    app.run(host='0.0.0.0', port=port, debug=debug)

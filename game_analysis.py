@@ -4,12 +4,11 @@ Registered as a blueprint from app.py. Kept in its own module (own DB
 bootstrap, own routes) rather than folded into app.py so the puzzle-trainer
 code and the full-game-analysis code don't tangle.
 """
-import sqlite3
 from datetime import datetime
 
 from flask import Blueprint, jsonify, request, session
 
-from db import DB_PATH
+import db
 
 DEFAULT_ANALYSIS_DEPTH = 20  # matches EngineClient's ANALYSIS_DEPTH in analysis.html
 
@@ -19,10 +18,8 @@ STARTING_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
 
 
 def get_db():
-    conn = sqlite3.connect(DB_PATH)
-    conn.row_factory = sqlite3.Row
-    conn.execute("PRAGMA foreign_keys = ON")
-    return conn
+    # Postgres enforces foreign keys by default — no PRAGMA equivalent needed.
+    return db.connect()
 
 
 def init_games_db():
@@ -30,31 +27,31 @@ def init_games_db():
     try:
         conn.executescript('''
             CREATE TABLE IF NOT EXISTS games (
-                id            INTEGER PRIMARY KEY,
-                user_id       INTEGER NOT NULL,
-                title         TEXT    NOT NULL,
-                starting_fen  TEXT    NOT NULL DEFAULT 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
-                result        TEXT    DEFAULT '*',
-                created_at    DATETIME DEFAULT CURRENT_TIMESTAMP,
-                updated_at    DATETIME DEFAULT CURRENT_TIMESTAMP,
+                id            SERIAL    PRIMARY KEY,
+                user_id       INTEGER   NOT NULL,
+                title         TEXT      NOT NULL,
+                starting_fen  TEXT      NOT NULL DEFAULT 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+                result        TEXT      DEFAULT '*',
+                created_at    TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at    TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 FOREIGN KEY (user_id) REFERENCES users(id)
             );
 
             CREATE TABLE IF NOT EXISTS game_moves (
-                id           INTEGER PRIMARY KEY,
-                game_id      INTEGER NOT NULL,
-                ply          INTEGER NOT NULL,
-                san          TEXT    NOT NULL,
-                uci          TEXT    NOT NULL,
-                fen_after    TEXT    NOT NULL,
+                id           SERIAL    PRIMARY KEY,
+                game_id      INTEGER   NOT NULL,
+                ply          INTEGER   NOT NULL,
+                san          TEXT      NOT NULL,
+                uci          TEXT      NOT NULL,
+                fen_after    TEXT      NOT NULL,
                 move_time_ms INTEGER,
-                played_at    DATETIME DEFAULT CURRENT_TIMESTAMP,
+                played_at    TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 UNIQUE (game_id, ply),
                 FOREIGN KEY (game_id) REFERENCES games(id) ON DELETE CASCADE
             );
 
             CREATE TABLE IF NOT EXISTS game_analysis (
-                id             INTEGER PRIMARY KEY,
+                id             SERIAL  PRIMARY KEY,
                 game_id        INTEGER NOT NULL,
                 ply            INTEGER NOT NULL,
                 mover          TEXT,
@@ -119,7 +116,7 @@ def save_game():
     conn = get_db()
     try:
         cur = conn.execute(
-            "INSERT INTO games (user_id, title, starting_fen, result) VALUES (?, ?, ?, ?)",
+            "INSERT INTO games (user_id, title, starting_fen, result) VALUES (?, ?, ?, ?) RETURNING id",
             (user_id, title, starting_fen, result),
         )
         game_id = cur.lastrowid

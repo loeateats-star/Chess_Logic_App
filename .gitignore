@@ -11,3 +11,7 @@ games.pgn
 
 # Python virtual environment
 .venv/
+
+# Bytecode cache
+__pycache__/
+*.pyc
