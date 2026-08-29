@@ -147,6 +147,11 @@
             <span id="difficulty-stars" class="text-base"></span>
             <span id="difficulty-label" class="text-brand-muted text-xs"></span>
           </div>
+          <div class="flex items-center gap-1.5 pt-1 min-h-5">
+            <span id="puzzle-theme"
+                  class="inline-flex items-center text-[10px] font-semibold uppercase tracking-wide text-brand-gdark border border-brand-border rounded-full px-2 py-0.5"
+                  style="background:#ffffff;"></span>
+          </div>
         </div>
 
         <!-- Session streak -->
@@ -262,6 +267,10 @@
             <div class="flex items-center justify-between rounded-lg px-3 py-2 border border-brand-border bg-white">
               <span class="text-brand-muted text-xs">Avg Time</span>
               <span id="stat-velocity" class="text-brand-ink text-xs font-bold">—</span>
+            </div>
+            <div class="border-t border-brand-border pt-2 mt-1 space-y-1">
+              <p class="text-brand-muted text-[10px] uppercase tracking-wide">By theme</p>
+              <div id="stat-themes" class="space-y-1"></div>
             </div>
           </div>
         </div>
@@ -397,11 +406,24 @@
     var LEVEL = {{ level }};
 
     var LEVEL_INFO = {
-      1: { label: 'Level 1 · Beginner Tactics',       title: 'Beginner Tactics Trainer',       stars: '⭐',     desc: 'Short tactical combinations: absolute pins, skewers, and double attacks.', range: '1–2 moves per puzzle', unlock: 'Streak 0–4'  },
-      2: { label: 'Level 2 · Intermediate Strategy',  title: 'Intermediate Strategy Trainer',  stars: '⭐⭐',   desc: 'Multi-move combinations: piece overloads, decoy sacrifices, and positional play.', range: '3–4 moves per puzzle', unlock: 'Streak 5–9'  },
-      3: { label: 'Level 3 · Advanced Calculation',   title: 'Advanced Calculation Trainer',   stars: '⭐⭐⭐', desc: 'Deep calculation: horizon effects, endgame logic, and master-level sequences.', range: '5+ moves per puzzle', unlock: 'Streak 10+' }
+      1: { label: 'Level 1 · Beginner Tactics',       title: 'Beginner Tactics Trainer',       stars: '⭐',     desc: 'Short tactical combinations: absolute pins, skewers, and double attacks.', range: 'Rating below 1000', unlock: 'Streak 0–4'  },
+      2: { label: 'Level 2 · Intermediate Strategy',  title: 'Intermediate Strategy Trainer',  stars: '⭐⭐',   desc: 'Multi-move combinations: piece overloads, decoy sacrifices, and positional play.', range: 'Rating 1000–1600', unlock: 'Streak 5–9'  },
+      3: { label: 'Level 3 · Advanced Calculation',   title: 'Advanced Calculation Trainer',   stars: '⭐⭐⭐', desc: 'Deep calculation: horizon effects, endgame logic, and master-level sequences.', range: 'Rating above 1600', unlock: 'Streak 10+' }
     };
     var cfg = LEVEL_INFO[LEVEL] || LEVEL_INFO[1];
+
+    // ── Rating-based difficulty + theme display helpers ─────────────────────
+    function difficultyFromRating(rating) {
+      if (typeof rating !== 'number') return { stars: '', label: '' };
+      if (rating < 1000)  return { stars: '⭐',   label: 'Beginner' };
+      if (rating <= 1600) return { stars: '⭐⭐',  label: 'Intermediate' };
+      return                     { stars: '⭐⭐⭐', label: 'Advanced' };
+    }
+
+    function prettyTheme(token) {
+      if (!token) return '';
+      return token.replace(/([A-Z])/g, ' $1').replace(/^./, function(c) { return c.toUpperCase(); });
+    }
 
     // ── State ──────────────────────────────────────────────────────────────
     var board              = null;
@@ -413,6 +435,8 @@
     var isReplaying        = false;
     var replayTimeout      = null;
     var currentPuzzleId    = null;
+    var currentRating      = null;
+    var currentTheme       = null;
     var puzzleStartTime    = null;
     var currentUser        = null;
     var activeModalTab     = 'login';
@@ -519,10 +543,12 @@
       sessionCount++;
 
       // Capture snapshot so the click handler can replay this exact puzzle
-      var savedFen   = currentFen;
-      var savedMoves = solutionMoves.slice();
-      var savedId    = currentPuzzleId;
-      var savedNum   = sessionCount;
+      var savedFen    = currentFen;
+      var savedMoves  = solutionMoves.slice();
+      var savedId     = currentPuzzleId;
+      var savedRating = currentRating;
+      var savedTheme  = currentTheme;
+      var savedNum    = sessionCount;
 
       var empty = document.getElementById('history-empty');
       if (empty) empty.style.display = 'none';
@@ -551,7 +577,7 @@
       el.textContent = sym;
       el.addEventListener('mouseenter', function() { el.style.opacity = '0.75'; });
       el.addEventListener('mouseleave', function() { el.style.opacity = '1'; });
-      el.addEventListener('click', function() { reviewPuzzle(savedFen, savedMoves, savedId); });
+      el.addEventListener('click', function() { reviewPuzzle(savedFen, savedMoves, savedId, savedRating, savedTheme); });
       container.insertBefore(el, container.firstChild);
       document.getElementById('puzzle-count').textContent = sessionCount;
     }
@@ -571,13 +597,15 @@
     }
 
     // ── Practice mode: replay a history puzzle without scoring ─────────────
-    function reviewPuzzle(fen, moves, puzzleId) {
+    function reviewPuzzle(fen, moves, puzzleId, rating, theme) {
       clearTimeout(replayTimeout);
       isReplaying        = false;
       practiceMode       = true;
       currentFen         = fen;
       solutionMoves      = moves.slice();
       currentPuzzleId    = puzzleId;
+      currentRating      = rating;
+      currentTheme       = theme;
       currentMoveIndex   = 0;
       waitingForComputer = false;
       wrongAttempts      = 0;
@@ -587,11 +615,10 @@
       document.getElementById('practice-banner').classList.remove('hidden');
       setBoardTheme('practice');
 
-      var len   = solutionMoves.length;
-      var stars = len <= 2 ? '⭐' : len <= 4 ? '⭐⭐' : '⭐⭐⭐';
-      var lbl   = len <= 2 ? 'Beginner' : len <= 4 ? 'Intermediate' : 'Advanced';
-      document.getElementById('difficulty-stars').textContent = stars;
-      document.getElementById('difficulty-label').textContent = lbl;
+      var d = difficultyFromRating(currentRating);
+      document.getElementById('difficulty-stars').textContent = d.stars;
+      document.getElementById('difficulty-label').textContent = d.label;
+      document.getElementById('puzzle-theme').textContent = prettyTheme(currentTheme);
 
       game = new Chess(currentFen);
 
@@ -639,6 +666,7 @@
       setStatus('Loading puzzle…');
       document.getElementById('difficulty-stars').textContent = '';
       document.getElementById('difficulty-label').textContent = '';
+      document.getElementById('puzzle-theme').textContent = '';
 
       fetch('/get-puzzle?level=' + LEVEL)
         .then(function(r) {
@@ -648,17 +676,18 @@
         .then(function(data) {
           currentFen       = data.fen;
           currentPuzzleId  = data.puzzle_id;
+          currentRating    = data.rating;
+          currentTheme     = data.theme;
           solutionMoves    = data.engine_best_move.split(' ').filter(Boolean);
           currentMoveIndex = 0;
           waitingForComputer = false;
           puzzleStartTime  = performance.now();
           budgetCheckpoint = performance.now();
 
-          var len    = solutionMoves.length;
-          var stars  = len <= 2 ? '⭐' : len <= 4 ? '⭐⭐' : '⭐⭐⭐';
-          var lbl    = len <= 2 ? 'Beginner' : len <= 4 ? 'Intermediate' : 'Advanced';
-          document.getElementById('difficulty-stars').textContent = stars;
-          document.getElementById('difficulty-label').textContent = lbl;
+          var d = difficultyFromRating(currentRating);
+          document.getElementById('difficulty-stars').textContent = d.stars;
+          document.getElementById('difficulty-label').textContent = d.label;
+          document.getElementById('puzzle-theme').textContent = prettyTheme(currentTheme);
 
           game = new Chess(currentFen);
 
@@ -811,6 +840,13 @@
           document.getElementById('stat-accuracy').textContent = pct;
           var secs = d.avg_time_ms > 0 ? (d.avg_time_ms / 1000).toFixed(1) + 's' : '—';
           document.getElementById('stat-velocity').textContent = secs;
+
+          var wrap = document.getElementById('stat-themes');
+          wrap.innerHTML = (d.by_theme || []).slice(0, 5).map(function(t) {
+            return '<div class="flex items-center justify-between text-[11px]">' +
+              '<span class="text-brand-muted">' + prettyTheme(t.theme) + '</span>' +
+              '<span class="text-brand-ink font-semibold">' + t.accuracy + '%</span></div>';
+          }).join('');
         })
         .catch(function() {});
     }

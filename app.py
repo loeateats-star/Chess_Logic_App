@@ -125,6 +125,9 @@ def init_db():
                 fen              TEXT,
                 engine_best_move TEXT,
                 solution_len     INTEGER,
+                rating           INTEGER,
+                themes           TEXT,
+                primary_theme    TEXT,
                 timestamp        TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
         ''')
@@ -138,7 +141,11 @@ def init_db():
             'ALTER TABLE users ADD COLUMN IF NOT EXISTS daily_time_budget INTEGER DEFAULT 30',
             'ALTER TABLE users ADD COLUMN IF NOT EXISTS training_goal     TEXT',
             'ALTER TABLE users ADD COLUMN IF NOT EXISTS diagnostic_done   INTEGER DEFAULT 0',
-            'ALTER TABLE personal_blunders ADD COLUMN IF NOT EXISTS solution_len INTEGER',
+            'ALTER TABLE personal_blunders ADD COLUMN IF NOT EXISTS solution_len  INTEGER',
+            'ALTER TABLE personal_blunders ADD COLUMN IF NOT EXISTS rating        INTEGER',
+            'ALTER TABLE personal_blunders ADD COLUMN IF NOT EXISTS themes        TEXT',
+            'ALTER TABLE personal_blunders ADD COLUMN IF NOT EXISTS primary_theme TEXT',
+            'ALTER TABLE student_analytics ADD COLUMN IF NOT EXISTS theme TEXT',
         ]:
             conn.execute(stmt)
         conn.commit()
@@ -153,6 +160,10 @@ def init_db():
         conn.execute('''
             CREATE INDEX IF NOT EXISTS idx_personal_blunders_solution_len
             ON personal_blunders (solution_len)
+        ''')
+        conn.execute('''
+            CREATE INDEX IF NOT EXISTS idx_personal_blunders_rating
+            ON personal_blunders (rating)
         ''')
         conn.commit()
     finally:
@@ -254,26 +265,28 @@ def _quality_from_attempt(is_correct: bool, time_ms) -> int:
 
 
 # ── Tier helper ───────────────────────────────────────────────────────────────
-# solution_len is precomputed at insert time and indexed, so these filters
-# stay index-range-scans instead of a per-row LENGTH()/REPLACE() computation
-# over the whole table (matters once personal_blunders has millions of rows).
+# rating is the puzzle's real Lichess community rating, precomputed at
+# backfill time and indexed, so these filters stay index-range-scans
+# (matters once personal_blunders has millions of rows). Beginner has no
+# floor (a sub-400 puzzle still counts), Intermediate/Advanced split at
+# the boundaries below.
 
 def _tier_filter(streak: int) -> str:
     """Return a SQL WHERE fragment that matches puzzles for the given streak."""
     if streak < 5:
-        return 'solution_len BETWEEN 1 AND 2'   # 1–2-move  (⭐)
+        return 'rating < 1000'                  # Beginner   (⭐)
     if streak < 10:
-        return 'solution_len BETWEEN 3 AND 4'   # 3–4-move  (⭐⭐)
-    return 'solution_len >= 5'                   # 5+-move   (⭐⭐⭐)
+        return 'rating BETWEEN 1000 AND 1600'    # Intermediate (⭐⭐)
+    return 'rating > 1600'                       # Advanced   (⭐⭐⭐)
 
 
 def _level_filter(level: int) -> str:
     """Return a SQL WHERE fragment for an explicit level (1, 2, or 3)."""
     if level == 2:
-        return 'solution_len BETWEEN 3 AND 4'
+        return 'rating BETWEEN 1000 AND 1600'
     if level == 3:
-        return 'solution_len >= 5'
-    return 'solution_len BETWEEN 1 AND 2'   # level 1 (default)
+        return 'rating > 1600'
+    return 'rating < 1000'   # level 1 (default)
 
 
 def _random_row(conn, where: str, params: tuple = ()):
@@ -285,10 +298,10 @@ def _random_row(conn, where: str, params: tuple = ()):
     lands past the last match, wraps around to the first matching row.
     Assumes matches are reasonably spread across the id space, which holds
     here since import order (Lichess PuzzleId) isn't correlated with
-    solution length.
+    rating or theme.
     """
     row = conn.execute(
-        f'''SELECT id, fen, engine_best_move FROM personal_blunders
+        f'''SELECT id, fen, engine_best_move, rating, primary_theme FROM personal_blunders
             WHERE {where} AND id >= (
                 SELECT floor(RANDOM() * (SELECT COALESCE(MAX(id), 0) FROM personal_blunders))::bigint
             )
@@ -297,7 +310,7 @@ def _random_row(conn, where: str, params: tuple = ()):
     ).fetchone()
     if row is None:
         row = conn.execute(
-            f'SELECT id, fen, engine_best_move FROM personal_blunders WHERE {where} ORDER BY id LIMIT 1',
+            f'SELECT id, fen, engine_best_move, rating, primary_theme FROM personal_blunders WHERE {where} ORDER BY id LIMIT 1',
             params
         ).fetchone()
     return row
@@ -518,6 +531,18 @@ def get_analytics():
                WHERE user_id = ?''',
             (user_id,)
         ).fetchone()
+
+        theme_rows = conn.execute(
+            '''SELECT theme,
+                      COUNT(*)                                AS attempts,
+                      COALESCE(AVG(CAST(is_correct AS REAL)), 0) AS accuracy_raw
+               FROM student_analytics
+               WHERE user_id = ? AND theme IS NOT NULL
+               GROUP BY theme
+               ORDER BY attempts DESC
+               LIMIT 8''',
+            (user_id,)
+        ).fetchall()
     finally:
         conn.close()
 
@@ -525,10 +550,20 @@ def get_analytics():
     accuracy = round(row['accuracy_raw'] * 100, 1) if total > 0 else 0
     avg_time = round(row['avg_time_ms'])            if total > 0 else 0
 
+    by_theme = [
+        {
+            'theme':    r['theme'],
+            'attempts': r['attempts'],
+            'accuracy': round(r['accuracy_raw'] * 100, 1),
+        }
+        for r in theme_rows
+    ]
+
     return jsonify({
         'total_attempts': total,
         'accuracy':       accuracy,
         'avg_time_ms':    avg_time,
+        'by_theme':       by_theme,
         'history':        []
     })
 
@@ -552,10 +587,13 @@ def log_attempt():
     conn = get_db()
     try:
         # ── 1. Raw attempt log ────────────────────────────────────────────
+        # theme is looked up server-side from personal_blunders (not
+        # trusted from the client) so a bad client value can't corrupt
+        # per-theme proficiency stats.
         conn.execute(
-            'INSERT INTO student_analytics (user_id, puzzle_id, time_spent_ms, is_correct) '
-            'VALUES (?, ?, ?, ?)',
-            (user_id, puzzle_id, time_spent_ms, is_correct)
+            '''INSERT INTO student_analytics (user_id, puzzle_id, time_spent_ms, is_correct, theme)
+               VALUES (?, ?, ?, ?, (SELECT primary_theme FROM personal_blunders WHERE id = ?))''',
+            (user_id, puzzle_id, time_spent_ms, is_correct, puzzle_id)
         )
 
         # ── 2. Streak bookkeeping ─────────────────────────────────────────
@@ -686,6 +724,8 @@ def get_puzzle():
                 'puzzle_id':        row['id'],
                 'fen':              row['fen'],
                 'engine_best_move': row['engine_best_move'],
+                'rating':           row['rating'],
+                'theme':            row['primary_theme'],
             })
         finally:
             conn.close()
@@ -701,7 +741,7 @@ def get_puzzle():
 
         # P1 — overdue SRS review, matching the current difficulty tier
         row = conn.execute(
-            f'''SELECT pb.id, pb.fen, pb.engine_best_move
+            f'''SELECT pb.id, pb.fen, pb.engine_best_move, pb.rating, pb.primary_theme
                 FROM personal_blunders pb
                 JOIN user_puzzles_state ups
                   ON ups.puzzle_id = pb.id AND ups.user_id = ?
@@ -722,7 +762,7 @@ def get_puzzle():
         # P3 — any overdue SRS review (tier-agnostic)
         if row is None:
             row = conn.execute(
-                '''SELECT pb.id, pb.fen, pb.engine_best_move
+                '''SELECT pb.id, pb.fen, pb.engine_best_move, pb.rating, pb.primary_theme
                    FROM personal_blunders pb
                    JOIN user_puzzles_state ups
                      ON ups.puzzle_id = pb.id AND ups.user_id = ?
@@ -751,6 +791,8 @@ def get_puzzle():
             'puzzle_id':        row['id'],
             'fen':              row['fen'],
             'engine_best_move': row['engine_best_move'],
+            'rating':           row['rating'],
+            'theme':            row['primary_theme'],
         })
     finally:
         conn.close()

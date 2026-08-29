@@ -154,10 +154,15 @@
     <div class="relative max-w-7xl mx-auto px-6 py-16 md:py-24 flex items-center" style="min-height: 680px;">
       <div class="w-full max-w-md rounded-2xl p-8 md:p-10 space-y-6 shadow-2xl" style="background:#ffffff;">
 
-        <!-- Free Forever badge -->
-        <span class="free-forever-badge inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-semibold text-brand-ink">
-          <span class="text-brand-gdark">✓</span> Free Forever: no paywalls, no tiers
-        </span>
+        <!-- Free Forever + puzzle-count badges -->
+        <div class="flex flex-wrap items-center gap-2">
+          <span class="free-forever-badge inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-semibold text-brand-ink">
+            <span class="text-brand-gdark">✓</span> Free Forever: no paywalls, no tiers
+          </span>
+          <span class="free-forever-badge inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-semibold text-brand-ink">
+            <span class="text-brand-gdark">♟</span> 6.1M+ Lichess puzzles
+          </span>
+        </div>
 
         <!-- Heading -->
         <h1 class="text-4xl font-extrabold leading-tight text-brand-ink">
@@ -217,7 +222,7 @@
             See how it feels to<br /> think five moves ahead
           </h2>
           <p class="text-brand-muted text-base leading-relaxed max-w-md">
-            Every position is drawn from our database of 4,000+ puzzles. Find the engine's best move.
+            Every position is drawn from our database of 6.1 million real Lichess puzzles. Find the engine's best move.
             If you're wrong the piece snaps back and you try again.
           </p>
 
@@ -303,6 +308,18 @@
         <a href="/curriculum" class="text-brand-gdark hover:text-brand-green font-medium text-sm">
           Watch the video curriculum →
         </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── Real Puzzle Bank (not demo) ─────────────────────────────────── -->
+  <section class="py-14 px-6 border-t border-brand-border text-center" style="background:#f6faf8;">
+    <div class="max-w-4xl mx-auto">
+      <p class="text-brand-gdark text-xs font-semibold tracking-widest uppercase mb-6">Our Puzzle Bank</p>
+      <div class="stat-card inline-block">
+        <div class="text-6xl font-extrabold text-brand-ink"><span class="stat-num" data-target="6.1" data-suffix="M+">0</span></div>
+        <div class="text-brand-ink text-base font-medium mt-2">Real tactical puzzles, sourced from Lichess</div>
+        <div class="text-brand-muted text-xs mt-1">No synthetic data — every position is from a real game</div>
       </div>
     </div>
   </section>
@@ -485,6 +502,10 @@
           <span class="text-brand-muted text-xs">Avg Solving Velocity</span>
           <span id="stat-velocity" class="text-white text-sm font-bold">—</span>
         </div>
+        <div class="pt-2 mt-1 border-t border-brand-border/60 space-y-1.5" id="theme-stats-wrap">
+          <p class="text-brand-muted text-[10px] uppercase tracking-wide px-1">By Theme</p>
+          <div id="theme-stats-rows" class="space-y-1.5"></div>
+        </div>
       </div>
 
       <p id="stat-loading" class="text-brand-muted text-xs text-center mt-3 hidden">Refreshing…</p>
@@ -647,6 +668,18 @@
     let dailyBudgetMs         = 0;      // user's daily time limit in ms (0 = no limit)
     let sessionTrainingMs     = 0;      // accumulated active puzzle time this session
 
+    function difficultyFromRating(rating) {
+      if (typeof rating !== 'number') return '';
+      if (rating < 1000)  return '⭐';
+      if (rating <= 1600) return '⭐⭐';
+      return '⭐⭐⭐';
+    }
+
+    function prettyTheme(token) {
+      if (!token) return '';
+      return token.replace(/([A-Z])/g, ' $1').replace(/^./, function(c) { return c.toUpperCase(); });
+    }
+
     function updateStreakDisplay() {
       const level = puzzlesSolvedInStreak < 5 ? 1 : puzzlesSolvedInStreak < 10 ? 2 : 3;
       document.getElementById('streak-count').textContent = puzzlesSolvedInStreak;
@@ -764,10 +797,8 @@
           waitingForComputer = false;
           puzzleStartTime    = performance.now();
 
-          // Difficulty: 1 move → ⭐, 2-5 moves → ⭐⭐, 6+ moves → ⭐⭐⭐
-          const len   = solutionMoves.length;
-          const stars = len <= 2 ? '⭐' : len <= 4 ? '⭐⭐' : '⭐⭐⭐';
-          document.getElementById('difficulty-stars').textContent = stars;
+          // Difficulty is the puzzle's real Lichess rating: <1000 ⭐, 1000-1600 ⭐⭐, >1600 ⭐⭐⭐
+          document.getElementById('difficulty-stars').textContent = difficultyFromRating(data.rating);
 
           game = new Chess(currentFen);
 
@@ -960,6 +991,13 @@
           document.getElementById('stat-accuracy').textContent = pct;
           const secs = d.avg_time_ms > 0 ? (d.avg_time_ms / 1000).toFixed(1) + 's' : '—';
           document.getElementById('stat-velocity').textContent = secs;
+
+          const themeRows = document.getElementById('theme-stats-rows');
+          themeRows.innerHTML = (d.by_theme || []).slice(0, 5).map(function(t) {
+            return '<div class="flex items-center justify-between text-[11px] px-1">' +
+              '<span class="text-brand-muted">' + prettyTheme(t.theme) + '</span>' +
+              '<span class="text-brand-green font-semibold">' + t.accuracy + '%</span></div>';
+          }).join('');
         })
         .catch(function() { loading.classList.add('hidden'); });
     }
