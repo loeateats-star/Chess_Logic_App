@@ -66,8 +66,8 @@ def insert_puzzles(rows: list[tuple[str, str]]) -> None:
     try:
         conn.execute('DELETE FROM personal_blunders')
         conn.executemany(
-            'INSERT INTO personal_blunders (fen, engine_best_move) VALUES (?, ?)',
-            rows
+            'INSERT INTO personal_blunders (fen, engine_best_move, solution_len) VALUES (?, ?, ?)',
+            [(fen, moves, moves.count(' ') + 1) for fen, moves in rows]
         )
         conn.commit()
     finally:

@@ -6,6 +6,10 @@ Stockfish.exe.exe
 # Database
 chess_data.db
 
+# Raw puzzle export (300MB+, too large for git — import once via
+# import_puzzles_csv.py against DATABASE_URL instead of committing it)
+*.csv.zst
+
 # PGN files
 games.pgn
 

@@ -73,9 +73,6 @@ def _security_headers(response):
         response.headers['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains'
     return response
 
-# ── Space-count expression reused across tier queries ─────────────────────────
-# N UCI moves separated by spaces → N-1 spaces in the string.
-_SPACES = "LENGTH(engine_best_move) - LENGTH(REPLACE(engine_best_move, ' ', ''))"
 
 
 # ── Database helpers ──────────────────────────────────────────────────────────
@@ -127,6 +124,7 @@ def init_db():
                 id               SERIAL    PRIMARY KEY,
                 fen              TEXT,
                 engine_best_move TEXT,
+                solution_len     INTEGER,
                 timestamp        TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
         ''')
@@ -140,8 +138,22 @@ def init_db():
             'ALTER TABLE users ADD COLUMN IF NOT EXISTS daily_time_budget INTEGER DEFAULT 30',
             'ALTER TABLE users ADD COLUMN IF NOT EXISTS training_goal     TEXT',
             'ALTER TABLE users ADD COLUMN IF NOT EXISTS diagnostic_done   INTEGER DEFAULT 0',
+            'ALTER TABLE personal_blunders ADD COLUMN IF NOT EXISTS solution_len INTEGER',
         ]:
             conn.execute(stmt)
+        conn.commit()
+        # solution_len backfill for rows inserted before the column existed
+        # (cheap no-op once every row has it set).
+        conn.execute('''
+            UPDATE personal_blunders
+            SET solution_len = LENGTH(engine_best_move)
+                              - LENGTH(REPLACE(engine_best_move, ' ', '')) + 1
+            WHERE solution_len IS NULL
+        ''')
+        conn.execute('''
+            CREATE INDEX IF NOT EXISTS idx_personal_blunders_solution_len
+            ON personal_blunders (solution_len)
+        ''')
         conn.commit()
     finally:
         conn.close()
@@ -167,8 +179,8 @@ def seed_puzzles_if_empty():
         rows = parse_puzzles(pgn_path)
         if rows:
             conn.executemany(
-                'INSERT INTO personal_blunders (fen, engine_best_move) VALUES (?, ?)',
-                rows
+                'INSERT INTO personal_blunders (fen, engine_best_move, solution_len) VALUES (?, ?, ?)',
+                [(fen, moves, moves.count(' ') + 1) for fen, moves in rows]
             )
             conn.commit()
     finally:
@@ -242,23 +254,53 @@ def _quality_from_attempt(is_correct: bool, time_ms) -> int:
 
 
 # ── Tier helper ───────────────────────────────────────────────────────────────
+# solution_len is precomputed at insert time and indexed, so these filters
+# stay index-range-scans instead of a per-row LENGTH()/REPLACE() computation
+# over the whole table (matters once personal_blunders has millions of rows).
 
 def _tier_filter(streak: int) -> str:
     """Return a SQL WHERE fragment that matches puzzles for the given streak."""
     if streak < 5:
-        return f'{_SPACES} BETWEEN 0 AND 1'   # 1–2-move  (⭐)
+        return 'solution_len BETWEEN 1 AND 2'   # 1–2-move  (⭐)
     if streak < 10:
-        return f'{_SPACES} BETWEEN 2 AND 3'   # 3–4-move  (⭐⭐)
-    return f'{_SPACES} >= 4'                   # 5+-move   (⭐⭐⭐)
+        return 'solution_len BETWEEN 3 AND 4'   # 3–4-move  (⭐⭐)
+    return 'solution_len >= 5'                   # 5+-move   (⭐⭐⭐)
 
 
 def _level_filter(level: int) -> str:
     """Return a SQL WHERE fragment for an explicit level (1, 2, or 3)."""
     if level == 2:
-        return f'{_SPACES} BETWEEN 2 AND 3'
+        return 'solution_len BETWEEN 3 AND 4'
     if level == 3:
-        return f'{_SPACES} >= 4'
-    return f'{_SPACES} BETWEEN 0 AND 1'   # level 1 (default)
+        return 'solution_len >= 5'
+    return 'solution_len BETWEEN 1 AND 2'   # level 1 (default)
+
+
+def _random_row(conn, where: str, params: tuple = ()):
+    """Pick a pseudo-random row matching `where` in O(log n) via an indexed
+    id-range scan instead of ORDER BY RANDOM(), which forces a full-table
+    scan + sort — untenable once personal_blunders has millions of rows.
+
+    Jumps to a random id and takes the next matching row by id; if that
+    lands past the last match, wraps around to the first matching row.
+    Assumes matches are reasonably spread across the id space, which holds
+    here since import order (Lichess PuzzleId) isn't correlated with
+    solution length.
+    """
+    row = conn.execute(
+        f'''SELECT id, fen, engine_best_move FROM personal_blunders
+            WHERE {where} AND id >= (
+                SELECT floor(RANDOM() * (SELECT COALESCE(MAX(id), 0) FROM personal_blunders))::bigint
+            )
+            ORDER BY id LIMIT 1''',
+        params
+    ).fetchone()
+    if row is None:
+        row = conn.execute(
+            f'SELECT id, fen, engine_best_move FROM personal_blunders WHERE {where} ORDER BY id LIMIT 1',
+            params
+        ).fetchone()
+    return row
 
 
 # ── Page routes ───────────────────────────────────────────────────────────────
@@ -637,13 +679,7 @@ def get_puzzle():
         where  = _level_filter(level_param) if level_param in (1, 2, 3) else _tier_filter(streak)
         conn   = get_db()
         try:
-            row = conn.execute(
-                f'SELECT id, fen, engine_best_move FROM personal_blunders '
-                f'WHERE {where} ORDER BY RANDOM() LIMIT 1'
-            ).fetchone() or conn.execute(
-                'SELECT id, fen, engine_best_move FROM personal_blunders '
-                'ORDER BY RANDOM() LIMIT 1'
-            ).fetchone()
+            row = _random_row(conn, where) or _random_row(conn, 'TRUE')
             if row is None:
                 return jsonify({'error': 'No puzzles found.'}), 404
             return jsonify({
@@ -678,17 +714,10 @@ def get_puzzle():
 
         # P2 — new (never-seen) puzzle in the current difficulty tier
         if row is None:
-            row = conn.execute(
-                f'''SELECT id, fen, engine_best_move
-                    FROM personal_blunders
-                    WHERE {where}
-                      AND id NOT IN (
-                          SELECT puzzle_id FROM user_puzzles_state WHERE user_id = ?
-                      )
-                    ORDER BY RANDOM()
-                    LIMIT 1''',
-                (user_id,)
-            ).fetchone()
+            unseen_where = (
+                f'{where} AND id NOT IN (SELECT puzzle_id FROM user_puzzles_state WHERE user_id = ?)'
+            )
+            row = _random_row(conn, unseen_where, (user_id,))
 
         # P3 — any overdue SRS review (tier-agnostic)
         if row is None:
@@ -705,23 +734,15 @@ def get_puzzle():
 
         # P4 — any unseen puzzle (tier-agnostic)
         if row is None:
-            row = conn.execute(
-                '''SELECT id, fen, engine_best_move
-                   FROM personal_blunders
-                   WHERE id NOT IN (
-                       SELECT puzzle_id FROM user_puzzles_state WHERE user_id = ?
-                   )
-                   ORDER BY RANDOM()
-                   LIMIT 1''',
+            row = _random_row(
+                conn,
+                'id NOT IN (SELECT puzzle_id FROM user_puzzles_state WHERE user_id = ?)',
                 (user_id,)
-            ).fetchone()
+            )
 
         # P5 — absolute fallback: any puzzle at all
         if row is None:
-            row = conn.execute(
-                'SELECT id, fen, engine_best_move FROM personal_blunders '
-                'ORDER BY RANDOM() LIMIT 1'
-            ).fetchone()
+            row = _random_row(conn, 'TRUE')
 
         if row is None:
             return jsonify({'error': 'No puzzles found.'}), 404
