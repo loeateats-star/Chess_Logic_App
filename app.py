@@ -1,13 +1,50 @@
 import os
 from datetime import datetime, timedelta, timezone
-from flask import Flask, render_template, jsonify, request, session
+from flask import Flask, render_template, jsonify, request, session, redirect
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 from werkzeug.security import generate_password_hash, check_password_hash
 
 import db
 from curriculum_data import get_section, ordered_sections, format_duration
 
+# Same debug switch app.run() uses below — also drives cookie/HTTPS
+# hardening, so it's computed once up top instead of duplicated inline.
+DEBUG = os.environ.get('FLASK_DEBUG') == '1'
+
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'dev-secret-change-before-deploying')
+
+# Secure session cookies: JS can't read them, they're never sent over plain
+# HTTP in production, and they aren't attached to cross-site requests.
+app.config['SESSION_COOKIE_HTTPONLY']   = True
+app.config['SESSION_COOKIE_SAMESITE']   = 'Lax'
+app.config['SESSION_COOKIE_SECURE']     = not DEBUG
+app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=30)
+
+# Caps request bodies (game/analysis payloads are the largest legitimate
+# ones — a full game plus per-move analysis is well under this) so an
+# oversized POST can't be used to exhaust memory. No file uploads exist in
+# this app, so this is the only body-size control needed.
+app.config['MAX_CONTENT_LENGTH'] = 2 * 1024 * 1024  # 2 MB
+
+limiter = Limiter(get_remote_address, app=app, default_limits=[])
+
+
+# Render (and most PaaS hosts) terminate TLS at the edge and forward the
+# original scheme via X-Forwarded-Proto — the app process itself only ever
+# sees plain HTTP, so this is what actually enforces HTTPS in production.
+# Render already redirects at the edge; this is defense-in-depth in case
+# that ever changes. Redirect (not block) so a stray plain-HTTP hit still
+# resolves for the user instead of dead-ending on an error.
+@app.before_request
+def _force_https():
+    if DEBUG:
+        return None
+    if request.headers.get('X-Forwarded-Proto', 'https') == 'http':
+        https_url = request.url.replace('http://', 'https://', 1)
+        return redirect(https_url, code=308)
+
 
 # Cross-origin isolation (needed for SharedArrayBuffer, which the in-browser
 # WASM Stockfish engine in static/js/engine-client.js requires). Scoped to
@@ -23,6 +60,17 @@ def _cross_origin_isolation_headers(response):
     if request.path == '/analysis' or request.path.startswith('/static/js/'):
         response.headers['Cross-Origin-Opener-Policy'] = 'same-origin'
         response.headers['Cross-Origin-Embedder-Policy'] = 'credentialless'
+    return response
+
+
+# Baseline security headers on every response.
+@app.after_request
+def _security_headers(response):
+    response.headers['X-Content-Type-Options'] = 'nosniff'
+    response.headers['X-Frame-Options']         = 'DENY'
+    response.headers['Referrer-Policy']         = 'strict-origin-when-cross-origin'
+    if not DEBUG:
+        response.headers['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains'
     return response
 
 # ── Space-count expression reused across tier queries ─────────────────────────
@@ -307,7 +355,13 @@ def me():
 
 # ── Auth routes ───────────────────────────────────────────────────────────────
 
+MAX_USERNAME_LEN = 64
+MIN_PASSWORD_LEN = 8
+MAX_PASSWORD_LEN = 128
+
+
 @app.route('/register', methods=['POST'])
+@limiter.limit('10 per hour')
 def register():
     data     = request.get_json(force=True) or {}
     username = (data.get('username') or '').strip()
@@ -315,6 +369,10 @@ def register():
 
     if not username or not password:
         return jsonify({'error': 'Username and password are required.'}), 400
+    if len(username) > MAX_USERNAME_LEN:
+        return jsonify({'error': f'Username must be {MAX_USERNAME_LEN} characters or fewer.'}), 400
+    if not (MIN_PASSWORD_LEN <= len(password) <= MAX_PASSWORD_LEN):
+        return jsonify({'error': f'Password must be {MIN_PASSWORD_LEN}-{MAX_PASSWORD_LEN} characters.'}), 400
 
     conn = get_db()
     try:
@@ -331,10 +389,14 @@ def register():
 
 
 @app.route('/login', methods=['POST'])
+@limiter.limit('10 per minute')
 def login():
     data     = request.get_json(force=True) or {}
     username = (data.get('username') or '').strip()
     password = data.get('password') or ''
+
+    if not username or not password or len(username) > MAX_USERNAME_LEN or len(password) > MAX_PASSWORD_LEN:
+        return jsonify({'error': 'Invalid username or password.'}), 401
 
     conn = get_db()
     try:
@@ -371,10 +433,14 @@ def save_diagnostic():
     if user_id is None:
         return jsonify({'error': 'Not authenticated.'}), 401
 
-    data              = request.get_json(force=True) or {}
-    experience_level  = (data.get('experience_level') or '').strip()
-    daily_time_budget = int(data.get('daily_time_budget') or 30)
-    training_goal     = (data.get('training_goal') or '').strip()
+    data             = request.get_json(force=True) or {}
+    experience_level = (data.get('experience_level') or '').strip()
+    training_goal    = (data.get('training_goal') or '').strip()
+    try:
+        daily_time_budget = int(data.get('daily_time_budget') or 30)
+    except (TypeError, ValueError):
+        return jsonify({'error': 'daily_time_budget must be a number.'}), 400
+    daily_time_budget = max(5, min(480, daily_time_budget))
 
     conn = get_db()
     try:

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Chess Basics — Synapchess</title>
+  <title>Chess Basics: Synapchess</title>
 
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
@@ -108,8 +108,8 @@
       </h1>
 
       <p class="text-brand-muted text-base max-w-xl leading-relaxed">
-        New to chess? Start here. Each interactive module teaches how a specific piece moves —
-        drag it on the board yourself so it actually sticks.
+        New to chess? Start here. Each interactive module teaches how a specific piece moves.
+        Drag it on the board yourself so it actually sticks.
       </p>
     </div>
   </section>
@@ -359,7 +359,7 @@
         id:          'rook',
         label:       'Lesson 1 · Straight Lines',
         title:       'How the Rook Moves',
-        instruction: 'Rooks move any number of squares horizontally or vertically — they are the straight-line powerhouses of chess.',
+        instruction: 'Rooks move any number of squares horizontally or vertically. They are the straight-line powerhouses of chess.',
         task:        'Drag your white Rook straight up the a-file to capture the black pawn on a6!',
         position:    { a1: 'wR', a6: 'bP' },
         movingPiece: 'wR',
@@ -371,12 +371,12 @@
         id:          'bishop',
         label:       'Lesson 2 · Diagonal Sweep',
         title:       'How the Bishop Moves',
-        instruction: 'Bishops slide diagonally — any number of squares along a diagonal. Each Bishop is permanently locked to one colour square for the entire game.',
+        instruction: 'Bishops slide diagonally, any number of squares along a diagonal. Each Bishop is permanently locked to one colour square for the entire game.',
         task:        'Drag your white Bishop diagonally from c1 to capture the black pawn on f4!',
         position:    { c1: 'wB', f4: 'bP' },
         movingPiece: 'wB',
         target:      'f4',
-        successText: 'The Bishop slid across the diagonal and captured the pawn! Notice how it stayed on dark squares the entire way — it always will.',
+        successText: 'The Bishop slid across the diagonal and captured the pawn! Notice how it stayed on dark squares the entire way, and it always will.',
         nextId:      'knight'
       },
       {
@@ -384,7 +384,7 @@
         label:       'Lesson 3 · The L-Shape Leap',
         title:       'How the Knight Moves',
         instruction: "Knights move in an 'L' shape: two squares in one direction, then one square perpendicular. They are the only pieces that can jump over other pieces.",
-        task:        'Drag your white Knight from e4 — two squares up, one square right — to capture the black pawn on f6!',
+        task:        'Drag your white Knight from e4 (two squares up, one square right) to capture the black pawn on f6!',
         position:    { e4: 'wN', f6: 'bP' },
         movingPiece: 'wN',
         target:      'f6',
@@ -395,36 +395,36 @@
         id:          'king',
         label:       'Lesson 4 · The Royal Step',
         title:       'How the King Moves',
-        instruction: 'The King is the most important piece — if it is checkmated, the game is over. It moves exactly one square in any direction: horizontally, vertically, or diagonally.',
+        instruction: 'The King is the most important piece: if it is checkmated, the game is over. It moves exactly one square in any direction: horizontally, vertically, or diagonally.',
         task:        'Drag your white King one square diagonally from e4 to capture the black pawn on f5!',
         position:    { e4: 'wK', f5: 'bP' },
         movingPiece: 'wK',
         target:      'f5',
-        successText: 'The King stepped one square diagonally and captured the pawn! Remember: the King can move in any direction — but only ever one square at a time.',
+        successText: 'The King stepped one square diagonally and captured the pawn! Remember: the King can move in any direction, but only ever one square at a time.',
         nextId:      'queen'
       },
       {
         id:          'queen',
         label:       'Lesson 5 · The Supreme Commander',
         title:       'How the Queen Moves',
-        instruction: 'The Queen is the most powerful piece on the board. She combines the Rook and Bishop — sliding any number of squares horizontally, vertically, or diagonally in a single move.',
+        instruction: 'The Queen is the most powerful piece on the board. She combines the Rook and Bishop, sliding any number of squares horizontally, vertically, or diagonally in a single move.',
         task:        'Drag your white Queen from a1 all the way diagonally across the board to capture the black pawn on h8!',
         position:    { a1: 'wQ', h8: 'bP' },
         movingPiece: 'wQ',
         target:      'h8',
-        successText: 'The Queen swept the entire diagonal in one move — corner to corner! She can cover that distance in any of eight directions, making her the ultimate attacking weapon.',
+        successText: 'The Queen swept the entire diagonal in one move: corner to corner! She can cover that distance in any of eight directions, making her the ultimate attacking weapon.',
         nextId:      'pawn'
       },
       {
         id:          'pawn',
         label:       'Lesson 6 · The Forward Soldier',
         title:       'How the Pawn Moves',
-        instruction: 'Pawns march straight forward but capture diagonally — one square left or right. This is the most surprising rule for beginners: pawns cannot capture directly in front of them!',
+        instruction: 'Pawns march straight forward but capture diagonally, one square left or right. This is the most surprising rule for beginners: pawns cannot capture directly in front of them!',
         task:        'Drag your white Pawn diagonally from e4 to capture the black pawn on f5!',
         position:    { e4: 'wP', f5: 'bP' },
         movingPiece: 'wP',
         target:      'f5',
-        successText: 'The Pawn captured diagonally — not straight ahead! Pawns are the only pieces that move one way but capture a different way. Reach the far rank and it promotes to any piece you choose.',
+        successText: 'The Pawn captured diagonally, not straight ahead! Pawns are the only pieces that move one way but capture a different way. Reach the far rank and it promotes to any piece you choose.',
         nextId:      null
       }
     ];
@@ -501,7 +501,7 @@
       if (target === 'offboard') return 'snapback';
 
       if (target !== currentLesson.target) {
-        setStatus('✗ Not quite — that\'s not how the ' + getPieceName() + ' moves. Try again!', '#ef4444');
+        setStatus('✗ Not quite, that\'s not how the ' + getPieceName() + ' moves. Try again!', '#ef4444');
         triggerShake();
         return 'snapback';
       }

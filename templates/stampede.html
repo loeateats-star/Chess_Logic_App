@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Stampede — AlgoGambit</title>
+  <title>Stampede: AlgoGambit</title>
 
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
@@ -245,7 +245,7 @@
           </li>
           <li class="flex items-start gap-2.5">
             <span style="color:#fbbf24;" class="mt-px flex-shrink-0 text-base">★</span>
-            <span>Finish strong — your accuracy rating appears at the end.</span>
+            <span>Finish strong. Your accuracy rating appears at the end.</span>
           </li>
         </ul>
       </div>
@@ -515,7 +515,7 @@
           });
 
           var whose = game.turn() === 'w' ? 'White' : 'Black';
-          setStatus(whose + ' to move — find the best move!');
+          setStatus(whose + ' to move, find the best move!');
           puzzleActive = true;
           startCountdown();
         })
@@ -543,7 +543,7 @@
         }
       } else {
         game.undo();
-        setStatus('✗ Wrong move — keep trying!', '#ef4444');
+        setStatus('✗ Wrong move. Keep trying!', '#ef4444');
         flashBoardWrap('#ef4444', 0.5);
         return 'snapback';
       }
@@ -570,7 +570,7 @@
           setTimeout(onCorrect, 540);
         } else {
           var whose = game.turn() === 'w' ? 'White' : 'Black';
-          setStatus(whose + ' to move — ' + Math.ceil((solutionMoves.length - currentMoveIndex) / 2) + ' move(s) left.');
+          setStatus(whose + ' to move, ' + Math.ceil((solutionMoves.length - currentMoveIndex) / 2) + ' move(s) left.');
         }
       }, 350);
     }

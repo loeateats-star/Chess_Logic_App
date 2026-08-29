@@ -14,7 +14,8 @@ DEFAULT_ANALYSIS_DEPTH = 20  # matches EngineClient's ANALYSIS_DEPTH in analysis
 
 games_bp = Blueprint("games", __name__, url_prefix="/api")
 
-STARTING_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+STARTING_FEN  = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+MAX_TITLE_LEN = 200
 
 
 def get_db():
@@ -105,13 +106,15 @@ def save_game():
         return jsonify({"error": "Not authenticated."}), 401
 
     data         = request.get_json(force=True) or {}
-    title        = (data.get("title") or "").strip() or _default_title()
+    title        = (data.get("title") or "").strip()[:MAX_TITLE_LEN] or _default_title()
     starting_fen = (data.get("starting_fen") or "").strip() or STARTING_FEN
     result       = data.get("result") or "*"
     moves        = data.get("moves") or []
 
     if not isinstance(moves, list) or not moves:
         return jsonify({"error": "At least one move is required to save a game."}), 400
+    if not all(isinstance(mv, dict) for mv in moves):
+        return jsonify({"error": "Each move must be an object."}), 400
 
     conn = get_db()
     try:
@@ -207,8 +210,8 @@ def rename_game(game_id):
     if user_id is None:
         return jsonify({"error": "Not authenticated."}), 401
 
-    data     = request.get_json(force=True) or {}
-    new_title = (data.get("title") or "").strip()
+    data      = request.get_json(force=True) or {}
+    new_title = (data.get("title") or "").strip()[:MAX_TITLE_LEN]
     if not new_title:
         return jsonify({"error": "Title cannot be empty."}), 400
 

@@ -156,7 +156,7 @@
 
         <!-- Free Forever badge -->
         <span class="free-forever-badge inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-semibold text-brand-ink">
-          <span class="text-brand-gdark">✓</span> Free Forever — no paywalls, no tiers
+          <span class="text-brand-gdark">✓</span> Free Forever: no paywalls, no tiers
         </span>
 
         <!-- Heading -->
@@ -169,7 +169,7 @@
           <strong class="text-brand-ink">Synapchess</strong> is a nonprofit dedicated to closing the
           cognitive equity gap for students in Title I schools. Through free chess curriculum, live
           puzzle training, and volunteer-led chapters, we give kids the tools to think five moves
-          ahead — in chess and in life.
+          ahead, in chess and in life.
         </p>
 
         <!-- CTA pills -->
@@ -217,8 +217,8 @@
             See how it feels to<br /> think five moves ahead
           </h2>
           <p class="text-brand-muted text-base leading-relaxed max-w-md">
-            Every position is drawn from our database of 4,000+ puzzles. Find the engine's best move —
-            if you're wrong the piece snaps back and you try again.
+            Every position is drawn from our database of 4,000+ puzzles. Find the engine's best move.
+            If you're wrong the piece snaps back and you try again.
           </p>
 
           <!-- Difficulty rating — updated by JS on each puzzle load -->
@@ -314,7 +314,7 @@
       <div class="flex items-center justify-center gap-2 flex-wrap mb-8">
         <p class="text-brand-gdark text-xs font-semibold tracking-widest uppercase">What we're working toward</p>
         <span class="demo-badge-pulse inline-flex items-center gap-1 border border-amber-400 text-amber-600 text-[10px] font-bold tracking-widest uppercase px-2 py-0.5 rounded-full bg-amber-50">
-          Demo Data — Not Real
+          Demo Data: Not Real
         </span>
       </div>
 
@@ -505,8 +505,8 @@
           Daily Synapchess Training Block Complete!
         </h2>
         <p class="text-brand-muted text-sm leading-relaxed">
-          You've hit your daily goal. Consistency is the key to mastery —
-          your brain is growing even when you're not at the board.
+          You've hit your daily goal. Consistency is the key to mastery.
+          Your brain is growing even when you're not at the board.
         </p>
         <p class="text-brand-green text-sm font-semibold pt-1">See you tomorrow.</p>
       </div>
@@ -695,7 +695,7 @@
         } else {
           const whose = game.turn() === 'w' ? 'White' : 'Black';
           const left  = Math.ceil((solutionMoves.length - currentMoveIndex) / 2);
-          setStatus(whose + ' to move — ' + left + ' move' + (left > 1 ? 's' : '') + ' left.', '#94a3b8');
+          setStatus(whose + ' to move, ' + left + ' move' + (left > 1 ? 's' : '') + ' left.', '#94a3b8');
         }
       }, 450);
     }
@@ -789,7 +789,7 @@
 
           const whose = game.turn() === 'w' ? 'White' : 'Black';
           const total = Math.ceil(solutionMoves.length / 2);
-          setStatus(whose + ' to move — solve ' + total + '-move puzzle.');
+          setStatus(whose + ' to move, solve ' + total + '-move puzzle.');
         })
         .catch(function(err) {
           setStatus('Error: ' + err.message, '#ef4444');
@@ -940,7 +940,7 @@
       })
       .catch(function() {
         errorEl.style.color = '#ef4444';
-        errorEl.textContent = 'Network error — please try again.';
+        errorEl.textContent = 'Network error. Please try again.';
         errorEl.classList.remove('hidden');
         submitBtn.textContent = activeModalTab === 'login' ? 'Login' : 'Create Account';
       });

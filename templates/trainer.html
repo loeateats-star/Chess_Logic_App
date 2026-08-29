@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Level {{ level }} Puzzle Trainer — Synapchess</title>
+  <title>Level {{ level }} Puzzle Trainer: Synapchess</title>
 
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
@@ -204,7 +204,7 @@
         <div id="practice-banner"
              class="hidden w-full max-w-sm text-center py-2 px-4 rounded-lg text-xs font-semibold"
              style="background:rgba(139,92,246,0.08); border:1px solid rgba(139,92,246,0.3); color:#7c3aed;">
-          ♻ Practice Mode — reviewing a previous puzzle. Attempts won't count toward your score.
+          ♻ Practice Mode: reviewing a previous puzzle. Attempts won't count toward your score.
         </div>
 
         <p id="status"
@@ -397,9 +397,9 @@
     var LEVEL = {{ level }};
 
     var LEVEL_INFO = {
-      1: { label: 'Level 1 · Beginner Tactics',       title: 'Beginner Tactics Trainer',       stars: '⭐',     desc: 'Short tactical combinations — absolute pins, skewers, and double attacks.', range: '1–2 moves per puzzle', unlock: 'Streak 0–4'  },
-      2: { label: 'Level 2 · Intermediate Strategy',  title: 'Intermediate Strategy Trainer',  stars: '⭐⭐',   desc: 'Multi-move combinations — piece overloads, decoy sacrifices, and positional play.', range: '3–4 moves per puzzle', unlock: 'Streak 5–9'  },
-      3: { label: 'Level 3 · Advanced Calculation',   title: 'Advanced Calculation Trainer',   stars: '⭐⭐⭐', desc: 'Deep calculation — horizon effects, endgame logic, and master-level sequences.', range: '5+ moves per puzzle', unlock: 'Streak 10+' }
+      1: { label: 'Level 1 · Beginner Tactics',       title: 'Beginner Tactics Trainer',       stars: '⭐',     desc: 'Short tactical combinations: absolute pins, skewers, and double attacks.', range: '1–2 moves per puzzle', unlock: 'Streak 0–4'  },
+      2: { label: 'Level 2 · Intermediate Strategy',  title: 'Intermediate Strategy Trainer',  stars: '⭐⭐',   desc: 'Multi-move combinations: piece overloads, decoy sacrifices, and positional play.', range: '3–4 moves per puzzle', unlock: 'Streak 5–9'  },
+      3: { label: 'Level 3 · Advanced Calculation',   title: 'Advanced Calculation Trainer',   stars: '⭐⭐⭐', desc: 'Deep calculation: horizon effects, endgame logic, and master-level sequences.', range: '5+ moves per puzzle', unlock: 'Streak 10+' }
     };
     var cfg = LEVEL_INFO[LEVEL] || LEVEL_INFO[1];
 
@@ -540,7 +540,7 @@
       var container = document.getElementById('history-checks');
       var el        = document.createElement('div');
       el.className  = 'check-pop';
-      el.title      = 'Puzzle #' + savedNum + ' — ' + label + ' · Click to review in Practice Mode';
+      el.title      = 'Puzzle #' + savedNum + ': ' + label + ' · Click to review in Practice Mode';
       el.style.cssText = [
         'width:34px', 'height:34px', 'border-radius:50%',
         'background:' + bg, 'color:' + fg,
@@ -611,7 +611,7 @@
 
       var whose = game.turn() === 'w' ? 'White' : 'Black';
       var total = Math.ceil(solutionMoves.length / 2);
-      setStatus(whose + ' to move — practice this ' + total + '-move puzzle.');
+      setStatus(whose + ' to move, practice this ' + total + '-move puzzle.');
     }
 
     // ── Status ─────────────────────────────────────────────────────────────
@@ -678,7 +678,7 @@
 
           var whose = game.turn() === 'w' ? 'White' : 'Black';
           var total = Math.ceil(solutionMoves.length / 2);
-          setStatus(whose + ' to move — solve ' + total + '-move puzzle.');
+          setStatus(whose + ' to move, solve ' + total + '-move puzzle.');
         })
         .catch(function(err) {
           setStatus('Error: ' + err.message, '#ef4444');
@@ -726,7 +726,7 @@
         if (wrongAttempts >= 3) {
           if (!practiceMode) {
             addHistoryEntry('red');
-            setStatus('✗ No more attempts — loading next puzzle…', '#ef4444');
+            setStatus('✗ No more attempts. Loading next puzzle…', '#ef4444');
             setTimeout(loadPuzzle, 1800);
           } else {
             setStatus('✗ All attempts used. Click "New Puzzle" for a fresh puzzle.', '#ef4444');
@@ -735,7 +735,7 @@
         }
 
         var left = 3 - wrongAttempts;
-        setStatus('✗ Incorrect — ' + left + ' attempt' + (left === 1 ? '' : 's') + ' remaining.', '#ef4444');
+        setStatus('✗ Incorrect. ' + left + ' attempt' + (left === 1 ? '' : 's') + ' remaining.', '#ef4444');
         return 'snapback';
       }
     }
@@ -767,7 +767,7 @@
         } else {
           var whose = game.turn() === 'w' ? 'White' : 'Black';
           var left  = Math.ceil((solutionMoves.length - currentMoveIndex) / 2);
-          setStatus(whose + ' to move — ' + left + ' move' + (left > 1 ? 's' : '') + ' left.');
+          setStatus(whose + ' to move, ' + left + ' move' + (left > 1 ? 's' : '') + ' left.');
         }
       }, 450);
     }
@@ -907,7 +907,7 @@
       })
       .catch(function() {
         errorEl.style.color = '#ef4444';
-        errorEl.textContent = 'Network error — please try again.';
+        errorEl.textContent = 'Network error. Please try again.';
         errorEl.classList.remove('hidden');
         submitBtn.textContent = activeModalTab === 'login' ? 'Login' : 'Create Account';
       });

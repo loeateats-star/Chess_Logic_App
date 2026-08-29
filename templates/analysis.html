@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Game Analysis — Synapchess</title>
+  <title>Game Analysis: Synapchess</title>
 
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
@@ -85,7 +85,7 @@
         Play a game, save it, then run it through Stockfish to see evaluations, best moves, and where each side lost centipawns.
       </p>
       <p id="save-mode-note" class="text-xs text-slate-500">
-        Signed out — games save to this browser (localStorage). <button onclick="openModal('login')" class="text-brand-gdark hover:text-brand-green cursor-pointer">Sign in</button> to save them to your account instead.
+        Signed out: games save to this browser (localStorage). <button onclick="openModal('login')" class="text-brand-gdark hover:text-brand-green cursor-pointer">Sign in</button> to save them to your account instead.
       </p>
     </div>
   </section>
@@ -286,11 +286,11 @@
         out.classList.add('hidden');
         inn.classList.remove('hidden'); inn.classList.add('flex');
         document.getElementById('nav-welcome').textContent = 'Welcome, ' + currentUser.username + '!';
-        note.innerHTML = 'Signed in as <strong>' + currentUser.username + '</strong> — games save to your account.';
+        note.innerHTML = 'Signed in as <strong>' + escapeHtml(currentUser.username) + '</strong>: games save to your account.';
       } else {
         out.classList.remove('hidden');
         inn.classList.add('hidden'); inn.classList.remove('flex');
-        note.innerHTML = 'Signed out — games save to this browser (localStorage). ' +
+        note.innerHTML = 'Signed out: games save to this browser (localStorage). ' +
           '<button onclick="openModal(\'login\')" class="text-brand-green hover:text-brand-gdark cursor-pointer">Sign in</button> to save them to your account instead.';
       }
     }
@@ -362,11 +362,11 @@
     function updateGameStatus() {
       if (game.game_over()) {
         var result = gameResult();
-        setStatus('Game over — ' + result + '. Save it to run a full analysis.', '#00dc82');
+        setStatus('Game over: ' + result + '. Save it to run a full analysis.', '#00dc82');
         return;
       }
       var whose = game.turn() === 'w' ? 'White' : 'Black';
-      setStatus(whose + ' to move — ply ' + (moveLog.length + 1) + '.');
+      setStatus(whose + ' to move, ply ' + (moveLog.length + 1) + '.');
     }
 
     function gameResult() {
@@ -615,7 +615,7 @@
     // computed rows are POSTed to the server afterward purely for storage —
     // the server no longer runs Stockfish itself.
     function analyzeGame() {
-      if (!moveLog.length) { setStatus('Nothing to analyze yet — play or load a game first.', '#ef4444'); return; }
+      if (!moveLog.length) { setStatus('Nothing to analyze yet. Play or load a game first.', '#ef4444'); return; }
       if (!currentGameId) { setStatus('Save the game first, then analyze it.', '#ef4444'); return; }
 
       setStatus('Running Stockfish (in-browser) over the full game… this can take a moment.', '#f59e0b');
@@ -899,7 +899,7 @@
         loadSavedGames();
       })
       .catch(function() {
-        errorEl.style.color = '#ef4444'; errorEl.textContent = 'Network error — please try again.'; errorEl.classList.remove('hidden');
+        errorEl.style.color = '#ef4444'; errorEl.textContent = 'Network error. Please try again.'; errorEl.classList.remove('hidden');
         submitBtn.textContent = activeModalTab === 'login' ? 'Login' : 'Create Account';
       });
     }
