@@ -10,7 +10,7 @@ puzzles instead of the ones it was scheduled against.
 Lichess CSV columns: PuzzleId,FEN,Moves,Rating,RatingDeviation,Popularity,
 NbPlays,Themes,GameUrl,OpeningTags,DailyDate
 
-FEN is the position BEFORE the first move in Moves — that first move is the
+FEN is the position BEFORE the first move in Moves, and that first move is the
 blunder/setup move, not part of the solution. So each row is transformed:
     board = Board(FEN); board.push(Moves[0])
     fen              = board.fen()          # position the solver sees
@@ -18,7 +18,7 @@ blunder/setup move, not part of the solution. So each row is transformed:
 to match what the rest of the app expects (personal_blunders.fen is always
 a position where it's the solver's turn to make the first solution move).
 
-Loads via COPY (psycopg2 copy_expert) instead of executemany/INSERT — at a
+Loads via COPY (psycopg2 copy_expert) instead of executemany/INSERT: at a
 few million rows, row-at-a-time INSERTs would take hours; COPY takes minutes.
 
 Usage:
@@ -62,7 +62,7 @@ def transform_rows(csv_path: str):
                     skipped += 1
                     continue
                 # Lichess data is pre-vetted, so push() (no legality check)
-                # instead of push_uci() (which does) — meaningfully faster
+                # instead of push_uci() (which does) is meaningfully faster
                 # at millions of rows.
                 board = chess.Board(fen)
                 board.push(chess.Move.from_uci(uci_moves[0]))
@@ -96,7 +96,7 @@ def load(csv_path: str) -> None:
         cur = pg_conn.cursor()
 
         # Self-sufficient against a brand-new, empty database (e.g. a fresh
-        # Neon project) — doesn't assume app.py's init_db() has run yet.
+        # Neon project); doesn't assume app.py's init_db() has run yet.
         print('Ensuring schema...')
         cur.execute('''
             CREATE TABLE IF NOT EXISTS personal_blunders (

@@ -2,7 +2,7 @@
 backfill_puzzle_rating_theme.py
 Backfills `rating`, `themes`, and `primary_theme` onto the existing
 personal_blunders table from the same Lichess CSV export that was already
-imported. Additive only — this script never truncates or deletes rows,
+imported. Additive only: this script never truncates or deletes rows,
 unlike import_puzzles_csv.py (which is a full-reload tool).
 
 Why a backfill instead of a full reload: the original import ran with
@@ -33,7 +33,7 @@ import zstandard as zstd
 LOG_EVERY = 200_000
 BATCH = 50_000
 
-# Phase/evaluation/length/audience tags — real Lichess metadata, but not
+# Phase/evaluation/length/audience tags: real Lichess metadata, but not
 # instructive as "the" theme of a puzzle, so never picked as primary_theme.
 GENERIC_THEMES = {
     'opening', 'middlegame', 'endgame', 'rookEndgame', 'pawnEndgame', 'bishopEndgame',
@@ -77,7 +77,7 @@ def pick_primary_theme(themes_raw: str) -> str:
 
 def stream_meta(csv_path: str):
     """Yield (id, rating, themes_raw, primary_theme), id assigned by
-    enumeration order — must replicate import_puzzles_csv.py's row-skip
+    enumeration order. Must replicate import_puzzles_csv.py's row-skip
     condition exactly so the id sequence stays aligned with what's already
     in the table. A parse failure here is fatal (not skipped): silently
     skipping would desync every id after it."""
@@ -129,10 +129,10 @@ def run(csv_path: str) -> None:
         row_count, max_id = cur.fetchone()
         if row_count != max_id:
             raise RuntimeError(
-                f'personal_blunders has {row_count:,} rows but MAX(id)={max_id:,} — '
+                f'personal_blunders has {row_count:,} rows but MAX(id)={max_id:,}. '
                 'id sequence has gaps, so row-number-as-id backfill is NOT safe. Aborting.'
             )
-        print(f'  {row_count:,} rows, ids 1..{max_id:,} with no gaps — safe to proceed.')
+        print(f'  {row_count:,} rows, ids 1..{max_id:,} with no gaps, safe to proceed.')
 
         cur.execute('CREATE TEMP TABLE puzzle_meta_staging (id INTEGER PRIMARY KEY, rating INTEGER, themes TEXT, primary_theme TEXT)')
 
@@ -158,8 +158,8 @@ def run(csv_path: str) -> None:
 
         if total_streamed != row_count:
             raise RuntimeError(
-                f'Streamed {total_streamed:,} CSV rows but personal_blunders has {row_count:,} rows — '
-                'counts do not match. Aborting before touching personal_blunders.'
+                f'Streamed {total_streamed:,} CSV rows but personal_blunders has {row_count:,} rows. '
+                'Counts do not match. Aborting before touching personal_blunders.'
             )
 
         print('Applying bulk UPDATE...')
