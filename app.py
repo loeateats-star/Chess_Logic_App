@@ -146,6 +146,7 @@ def init_db():
             'ALTER TABLE personal_blunders ADD COLUMN IF NOT EXISTS themes        TEXT',
             'ALTER TABLE personal_blunders ADD COLUMN IF NOT EXISTS primary_theme TEXT',
             'ALTER TABLE student_analytics ADD COLUMN IF NOT EXISTS theme TEXT',
+            'ALTER TABLE student_analytics ADD COLUMN IF NOT EXISTS mode  TEXT',
         ]:
             conn.execute(stmt)
         conn.commit()
@@ -287,6 +288,23 @@ def _level_filter(level: int) -> str:
     if level == 3:
         return 'rating > 1600'
     return 'rating < 1000'   # level 1 (default)
+
+
+def _theme_filter(themes: list) -> tuple:
+    """Return (where_fragment, params) matching any of the given primary_theme values.
+
+    Used by Improve Mode (theme-only) and Assessment Mode (theme + rating
+    band). Parameterized so caller-supplied theme names can't be used for
+    SQL injection.
+    """
+    placeholders = ', '.join(['?'] * len(themes))
+    return f'primary_theme IN ({placeholders})', tuple(themes)
+
+
+def _rating_range_filter(min_rating: int, max_rating: int) -> tuple:
+    """Return (where_fragment, params) for an explicit rating band, used by
+    Assessment Mode's adaptive difficulty."""
+    return 'rating BETWEEN ? AND ?', (min_rating, max_rating)
 
 
 def _random_row(conn, where: str, params: tuple = ()):
@@ -580,6 +598,7 @@ def log_attempt():
     puzzle_id     = data.get('puzzle_id')
     time_spent_ms = data.get('time_spent_ms')
     is_correct    = int(bool(data.get('is_correct')))
+    mode          = data.get('mode') if data.get('mode') in ('improve', 'assessment') else None
 
     if puzzle_id is None:
         return jsonify({'error': 'puzzle_id is required.'}), 400
@@ -591,22 +610,26 @@ def log_attempt():
         # trusted from the client) so a bad client value can't corrupt
         # per-theme proficiency stats.
         conn.execute(
-            '''INSERT INTO student_analytics (user_id, puzzle_id, time_spent_ms, is_correct, theme)
-               VALUES (?, ?, ?, ?, (SELECT primary_theme FROM personal_blunders WHERE id = ?))''',
-            (user_id, puzzle_id, time_spent_ms, is_correct, puzzle_id)
+            '''INSERT INTO student_analytics (user_id, puzzle_id, time_spent_ms, is_correct, theme, mode)
+               VALUES (?, ?, ?, ?, (SELECT primary_theme FROM personal_blunders WHERE id = ?), ?)''',
+            (user_id, puzzle_id, time_spent_ms, is_correct, puzzle_id, mode)
         )
 
         # ── 2. Streak bookkeeping ─────────────────────────────────────────
-        if is_correct:
-            conn.execute(
-                'UPDATE users SET current_streak = current_streak + 1 WHERE id = ?',
-                (user_id,)
-            )
-        else:
-            conn.execute(
-                'UPDATE users SET current_streak = 0 WHERE id = ?',
-                (user_id,)
-            )
+        # Assessment Mode is a diagnostic run at a deliberately adaptive
+        # (often unfamiliar) difficulty — it shouldn't perturb the
+        # streak-based tier the user returns to in Standard Mode.
+        if mode != 'assessment':
+            if is_correct:
+                conn.execute(
+                    'UPDATE users SET current_streak = current_streak + 1 WHERE id = ?',
+                    (user_id,)
+                )
+            else:
+                conn.execute(
+                    'UPDATE users SET current_streak = 0 WHERE id = ?',
+                    (user_id,)
+                )
 
         # ── 3. SM-2 update ────────────────────────────────────────────────
         state = conn.execute(
@@ -705,19 +728,79 @@ def set_video_progress():
 
 # ── Puzzle serving ────────────────────────────────────────────────────────────
 
+@app.route('/get-common-themes')
+def get_common_themes():
+    """Top puzzle themes by volume — the pool Assessment Mode cycles through."""
+    conn = get_db()
+    try:
+        rows = conn.execute(
+            '''SELECT primary_theme, COUNT(*) AS cnt FROM personal_blunders
+               WHERE primary_theme IS NOT NULL
+               GROUP BY primary_theme
+               ORDER BY cnt DESC
+               LIMIT 8'''
+        ).fetchall()
+    finally:
+        conn.close()
+    return jsonify({'themes': [{'theme': r['primary_theme'], 'count': r['cnt']} for r in rows]})
+
+
 @app.route('/get-puzzle', methods=['GET'])
 def get_puzzle():
     user_id = session.get('user_id')
 
-    level_param = request.args.get('level', type=int)   # explicit level override
+    level_param  = request.args.get('level', type=int)   # explicit level override
+    themes_param = request.args.get('themes', type=str)  # comma-separated primary_theme list
+    min_rating   = request.args.get('min_rating', type=int)
+    max_rating   = request.args.get('max_rating', type=int)
+
+    themes_list = [t.strip() for t in themes_param.split(',') if t.strip()] if themes_param else []
+
+    # ── Assessment Mode: explicit rating band, fresh (non-SRS) delivery ───────
+    # Adaptive difficulty needs a puzzle matching *this* band right now, not
+    # whatever spaced repetition would surface next, so this path bypasses
+    # the SRS cascade below and degrades gracefully (drop rating band, then
+    # theme) instead of 404ing when a narrow combo is sparse.
+    if min_rating is not None or max_rating is not None:
+        conn = get_db()
+        try:
+            lo = min_rating if min_rating is not None else 0
+            hi = max_rating if max_rating is not None else 4000
+            where, params = _rating_range_filter(lo, hi)
+            if themes_list:
+                theme_where, theme_params = _theme_filter(themes_list)
+                where, params = f'{where} AND {theme_where}', params + theme_params
+
+            row = _random_row(conn, where, params)
+            if row is None and themes_list:
+                where, params = _rating_range_filter(lo, hi)
+                row = _random_row(conn, where, params)
+            if row is None:
+                row = _random_row(conn, 'TRUE')
+            if row is None:
+                return jsonify({'error': 'No puzzles found.'}), 404
+            return jsonify({
+                'puzzle_id':        row['id'],
+                'fen':              row['fen'],
+                'engine_best_move': row['engine_best_move'],
+                'rating':           row['rating'],
+                'theme':            row['primary_theme'],
+            })
+        finally:
+            conn.close()
 
     # ── Anonymous: tier-based random delivery ─────────────────────────────────
     if user_id is None:
         streak = request.args.get('streak', 0, type=int)
-        where  = _level_filter(level_param) if level_param in (1, 2, 3) else _tier_filter(streak)
+        if themes_list:
+            where, params = _theme_filter(themes_list)
+        else:
+            where, params = (
+                _level_filter(level_param) if level_param in (1, 2, 3) else _tier_filter(streak)
+            ), ()
         conn   = get_db()
         try:
-            row = _random_row(conn, where) or _random_row(conn, 'TRUE')
+            row = _random_row(conn, where, params) or _random_row(conn, 'TRUE')
             if row is None:
                 return jsonify({'error': 'No puzzles found.'}), 404
             return jsonify({
@@ -737,9 +820,15 @@ def get_puzzle():
             'SELECT current_streak FROM users WHERE id = ?', (user_id,)
         ).fetchone()
         streak = user_row['current_streak'] if user_row else 0
-        where  = _level_filter(level_param) if level_param in (1, 2, 3) else _tier_filter(streak)
+        if themes_list:
+            where, where_params = _theme_filter(themes_list)
+        else:
+            where, where_params = (
+                _level_filter(level_param) if level_param in (1, 2, 3) else _tier_filter(streak)
+            ), ()
 
         # P1 — overdue SRS review, matching the current difficulty tier
+        # (or, for Improve Mode, the target theme set)
         row = conn.execute(
             f'''SELECT pb.id, pb.fen, pb.engine_best_move, pb.rating, pb.primary_theme
                 FROM personal_blunders pb
@@ -749,7 +838,7 @@ def get_puzzle():
                   AND {where}
                 ORDER BY ups.next_review ASC
                 LIMIT 1''',
-            (user_id,)
+            (user_id,) + where_params
         ).fetchone()
 
         # P2 — new (never-seen) puzzle in the current difficulty tier
@@ -757,7 +846,7 @@ def get_puzzle():
             unseen_where = (
                 f'{where} AND id NOT IN (SELECT puzzle_id FROM user_puzzles_state WHERE user_id = ?)'
             )
-            row = _random_row(conn, unseen_where, (user_id,))
+            row = _random_row(conn, unseen_where, where_params + (user_id,))
 
         # P3 — any overdue SRS review (tier-agnostic)
         if row is None:

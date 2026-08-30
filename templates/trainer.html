@@ -201,6 +201,16 @@
       <!-- ── Center: Board + controls ──────────────────────────────────── -->
       <div class="flex-1 flex flex-col items-center gap-5">
 
+        <!-- Mode switcher -->
+        <div class="w-full max-w-sm space-y-1.5">
+          <div class="flex items-center gap-1.5 p-1 rounded-lg border border-brand-border" style="background:#f6faf8;">
+            <button id="mode-btn-standard" class="mode-btn flex-1 text-xs font-semibold py-1.5 rounded-md transition-colors cursor-pointer" onclick="setMode('standard')">Standard</button>
+            <button id="mode-btn-improve" class="mode-btn flex-1 text-xs font-semibold py-1.5 rounded-md transition-colors cursor-pointer" onclick="setMode('improve')">🎯 Improve</button>
+            <button id="mode-btn-assessment" class="mode-btn flex-1 text-xs font-semibold py-1.5 rounded-md transition-colors cursor-pointer" onclick="setMode('assessment')">📊 Assessment</button>
+          </div>
+          <p id="improve-lock-hint" class="hidden text-brand-muted text-[11px] text-center"></p>
+        </div>
+
         <div class="rounded-lg overflow-hidden shadow-2xl shadow-brand-green/10">
           <div id="board"></div>
         </div>
@@ -210,6 +220,24 @@
              class="hidden w-full max-w-sm text-center py-2 px-4 rounded-lg text-xs font-semibold"
              style="background:rgba(139,92,246,0.08); border:1px solid rgba(139,92,246,0.3); color:#7c3aed;">
           ♻ Practice Mode: reviewing a previous puzzle. Attempts won't count toward your score.
+        </div>
+
+        <!-- Improve mode banner -->
+        <div id="improve-banner"
+             class="hidden w-full max-w-sm text-center py-2 px-4 rounded-lg text-xs font-semibold"
+             style="background:rgba(0,220,130,0.08); border:1px solid rgba(0,170,99,0.3); color:#00703f;">
+          🎯 Improve Mode: training your weakest themes — <span id="improve-banner-themes"></span>
+        </div>
+
+        <!-- Assessment mode banner -->
+        <div id="assessment-banner" class="hidden w-full max-w-sm space-y-1.5">
+          <div class="text-center py-2 px-4 rounded-lg text-xs font-semibold"
+               style="background:rgba(59,130,246,0.08); border:1px solid rgba(59,130,246,0.3); color:#1d4ed8;">
+            📊 Assessment Mode: puzzle <span id="assessment-progress-text">1/50</span>
+          </div>
+          <div class="w-full h-1.5 rounded-full" style="background:#e7ebe9;">
+            <div id="assessment-progress-bar" class="h-1.5 rounded-full transition-all duration-300" style="background:#3b82f6; width:0%;"></div>
+          </div>
         </div>
 
         <p id="status"
@@ -371,6 +399,35 @@
     </div>
   </div>
 
+  <!-- ─── Assessment Results Overlay ──────────────────────────────────── -->
+  <div id="assessment-overlay" class="fixed inset-0 z-[200] flex items-center justify-center hidden">
+    <div class="absolute inset-0" style="background:rgba(255,255,255,0.96);"></div>
+    <div class="relative z-10 text-center space-y-5 px-6 max-w-md mx-auto">
+      <div class="w-20 h-20 rounded-full mx-auto flex items-center justify-center text-5xl"
+           style="background:#f6faf8; border:2px solid #3b82f6;">
+        📊
+      </div>
+      <div class="space-y-2">
+        <h2 class="text-3xl font-extrabold text-brand-ink leading-tight">Assessment Complete!</h2>
+        <p id="assessment-overall" class="text-brand-muted text-base leading-relaxed"></p>
+      </div>
+      <div class="text-left space-y-2">
+        <p class="text-brand-gdark text-xs font-semibold tracking-widest uppercase">Weakest themes</p>
+        <div id="assessment-theme-list" class="space-y-2"></div>
+      </div>
+      <div class="flex flex-col items-center gap-3 pt-2">
+        <button onclick="closeAssessmentOverlayAndImprove()"
+                class="w-full max-w-xs bg-brand-green hover:bg-brand-gdark text-brand-ink font-semibold py-3 rounded-md transition-colors text-sm cursor-pointer">
+          🎯 Start Improve Mode
+        </button>
+        <button onclick="closeAssessmentOverlay()"
+                class="text-brand-muted hover:text-brand-ink text-sm transition-colors cursor-pointer">
+          Back to Standard
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- ─── Auth Modal ────────────────────────────────────────────────────── -->
   <div id="auth-modal" class="fixed inset-0 z-[100] flex items-center justify-center hidden">
     <div class="absolute inset-0" style="background:rgba(15,23,20,0.5);" onclick="closeModal()"></div>
@@ -450,6 +507,17 @@
     var budgetNotified     = false;   // true once the budget overlay has been shown
     var practiceMode       = false;   // true when reviewing a history entry (no scoring)
 
+    // ── Improve / Assessment mode state ──────────────────────────────────────
+    var currentMode         = 'standard';  // 'standard' | 'improve' | 'assessment'
+    var improveThemes       = [];
+    var assessmentThemePool = [];          // fetched once from /get-common-themes
+    var assessmentIndex     = 0;
+    var ASSESSMENT_TOTAL    = 50;
+    var assessmentRatingMid = 900;         // adaptive difficulty center; starts easy
+    var assessmentResults   = [];          // [{theme, correct}]
+    var lastAnalytics       = null;        // cached /get-analytics response
+    var IMPROVE_UNLOCK_AT   = 100;
+
     // ── Page init ──────────────────────────────────────────────────────────
     document.addEventListener('DOMContentLoaded', function() {
       // Fill header and sidebar with level config
@@ -472,6 +540,8 @@
       });
 
       initAuth();
+      updateModeButtonsUI();
+      updateImproveLockUI();
     });
 
     // ── Auth init ──────────────────────────────────────────────────────────
@@ -641,6 +711,184 @@
       setStatus(whose + ' to move, practice this ' + total + '-move puzzle.');
     }
 
+    // ── Improve / Assessment mode ────────────────────────────────────────────
+    function updateModeButtonsUI() {
+      ['standard', 'improve', 'assessment'].forEach(function(m) {
+        var btn = document.getElementById('mode-btn-' + m);
+        if (m === currentMode) {
+          btn.style.background = '#00dc82';
+          btn.style.color      = '#0b0c10';
+        } else {
+          btn.style.background = 'transparent';
+          btn.style.color      = '#64748b';
+        }
+      });
+      document.getElementById('improve-banner').classList.toggle('hidden', currentMode !== 'improve');
+      document.getElementById('assessment-banner').classList.toggle('hidden', currentMode !== 'assessment');
+      if (currentMode === 'improve') {
+        document.getElementById('improve-banner-themes').textContent =
+          improveThemes.map(prettyTheme).join(', ');
+      }
+    }
+
+    function updateImproveLockUI() {
+      var hint  = document.getElementById('improve-lock-hint');
+      var btn   = document.getElementById('mode-btn-improve');
+      var total = lastAnalytics ? lastAnalytics.total_attempts : 0;
+      if (total >= IMPROVE_UNLOCK_AT) {
+        hint.classList.add('hidden');
+        btn.style.opacity = '1';
+        btn.style.cursor  = 'pointer';
+      } else {
+        hint.classList.remove('hidden');
+        hint.textContent = '🔒 Unlocks at ' + IMPROVE_UNLOCK_AT + ' puzzles (' + total + '/' + IMPROVE_UNLOCK_AT + ')';
+        btn.style.opacity = '0.5';
+        btn.style.cursor  = 'not-allowed';
+      }
+    }
+
+    function setMode(mode) {
+      if (mode === currentMode) return;
+      if ((mode === 'improve' || mode === 'assessment') && !currentUser) {
+        openModal('login');
+        return;
+      }
+      if (mode === 'improve' && (!lastAnalytics || lastAnalytics.total_attempts < IMPROVE_UNLOCK_AT)) {
+        return; // still locked
+      }
+
+      currentMode = mode;
+      updateModeButtonsUI();
+
+      if (mode === 'improve') {
+        startImprove();
+      } else if (mode === 'assessment') {
+        startAssessment();
+      } else {
+        loadPuzzle();
+      }
+    }
+
+    function startImprove() {
+      var saved = null;
+      try {
+        var raw = localStorage.getItem('lastAssessmentWeakThemes');
+        if (raw) saved = JSON.parse(raw);
+      } catch (e) {}
+
+      if (saved && saved.length) {
+        improveThemes = saved.slice(0, 3);
+      } else if (lastAnalytics && lastAnalytics.by_theme) {
+        var qualifying = lastAnalytics.by_theme.filter(function(t) { return t.attempts >= 3; });
+        qualifying.sort(function(a, b) { return a.accuracy - b.accuracy; });
+        improveThemes = qualifying.slice(0, 3).map(function(t) { return t.theme; });
+      } else {
+        improveThemes = [];
+      }
+
+      if (improveThemes.length === 0) {
+        setStatus('Not enough theme data yet to find weak spots — keep solving!', '#ef4444');
+        currentMode = 'standard';
+        updateModeButtonsUI();
+        return;
+      }
+
+      updateModeButtonsUI();
+      loadPuzzle();
+    }
+
+    function startAssessment() {
+      assessmentIndex     = 0;
+      assessmentResults    = [];
+      assessmentRatingMid = 900;
+
+      if (assessmentThemePool.length > 0) {
+        loadPuzzle();
+        return;
+      }
+
+      fetch('/get-common-themes')
+        .then(function(r) { return r.json(); })
+        .then(function(d) {
+          assessmentThemePool = (d.themes || []).map(function(t) { return t.theme; });
+          if (assessmentThemePool.length === 0) assessmentThemePool = ['tactics'];
+          loadPuzzle();
+        })
+        .catch(function() {
+          assessmentThemePool = ['tactics'];
+          loadPuzzle();
+        });
+    }
+
+    function recordAssessmentIfActive(isCorrect) {
+      if (currentMode !== 'assessment') return;
+
+      assessmentResults.push({ theme: currentTheme, correct: isCorrect });
+      assessmentRatingMid += isCorrect ? 150 : -150;
+      assessmentRatingMid  = Math.max(400, Math.min(2400, assessmentRatingMid));
+      assessmentIndex++;
+
+      if (assessmentIndex >= ASSESSMENT_TOTAL) {
+        setTimeout(finishAssessment, 1200);
+      } else {
+        setTimeout(loadPuzzle, 1200);
+      }
+    }
+
+    function finishAssessment() {
+      var byTheme = {};
+      assessmentResults.forEach(function(r) {
+        if (!r.theme) return;
+        if (!byTheme[r.theme]) byTheme[r.theme] = { attempts: 0, correct: 0 };
+        byTheme[r.theme].attempts++;
+        if (r.correct) byTheme[r.theme].correct++;
+      });
+
+      var themeStats = Object.keys(byTheme).map(function(theme) {
+        var s = byTheme[theme];
+        return { theme: theme, attempts: s.attempts, accuracy: Math.round((s.correct / s.attempts) * 100) };
+      });
+      themeStats.sort(function(a, b) { return a.accuracy - b.accuracy; });
+
+      var totalCorrect = assessmentResults.filter(function(r) { return r.correct; }).length;
+      var overallAcc   = assessmentResults.length > 0
+        ? Math.round((totalCorrect / assessmentResults.length) * 100) : 0;
+      document.getElementById('assessment-overall').textContent =
+        'You solved ' + totalCorrect + ' of ' + assessmentResults.length +
+        ' puzzles (' + overallAcc + '% accuracy).';
+
+      var listEl = document.getElementById('assessment-theme-list');
+      listEl.innerHTML = themeStats.map(function(t) {
+        var barColor = t.accuracy < 50 ? '#ef4444' : t.accuracy < 75 ? '#f59e0b' : '#00dc82';
+        return '<div class="space-y-1">' +
+          '<div class="flex items-center justify-between text-xs">' +
+            '<span class="text-brand-ink font-medium">' + prettyTheme(t.theme) + '</span>' +
+            '<span class="text-brand-muted">' + t.accuracy + '% (' + t.attempts + ')</span>' +
+          '</div>' +
+          '<div class="w-full h-1.5 rounded-full" style="background:#e7ebe9;">' +
+            '<div class="h-1.5 rounded-full" style="background:' + barColor + '; width:' + t.accuracy + '%;"></div>' +
+          '</div>' +
+        '</div>';
+      }).join('');
+
+      var weakThemes = themeStats.slice(0, 3).map(function(t) { return t.theme; });
+      try { localStorage.setItem('lastAssessmentWeakThemes', JSON.stringify(weakThemes)); } catch (e) {}
+
+      currentMode = 'standard';
+      updateModeButtonsUI();
+      document.getElementById('assessment-overlay').classList.remove('hidden');
+    }
+
+    function closeAssessmentOverlay() {
+      document.getElementById('assessment-overlay').classList.add('hidden');
+      loadPuzzle();
+    }
+
+    function closeAssessmentOverlayAndImprove() {
+      document.getElementById('assessment-overlay').classList.add('hidden');
+      setMode('improve');
+    }
+
     // ── Status ─────────────────────────────────────────────────────────────
     function setStatus(text, color) {
       var el         = document.getElementById('status');
@@ -668,7 +916,22 @@
       document.getElementById('difficulty-label').textContent = '';
       document.getElementById('puzzle-theme').textContent = '';
 
-      fetch('/get-puzzle?level=' + LEVEL)
+      var url = '/get-puzzle?level=' + LEVEL;
+      if (currentMode === 'improve') {
+        url = '/get-puzzle?themes=' + encodeURIComponent(improveThemes.join(','));
+      } else if (currentMode === 'assessment') {
+        var theme = assessmentThemePool[assessmentIndex % assessmentThemePool.length];
+        var lo    = Math.max(400, assessmentRatingMid - 150);
+        var hi    = Math.min(2400, assessmentRatingMid + 150);
+        url = '/get-puzzle?themes=' + encodeURIComponent(theme) + '&min_rating=' + lo + '&max_rating=' + hi;
+
+        document.getElementById('assessment-progress-text').textContent =
+          (assessmentIndex + 1) + '/' + ASSESSMENT_TOTAL;
+        document.getElementById('assessment-progress-bar').style.width =
+          Math.round((assessmentIndex / ASSESSMENT_TOTAL) * 100) + '%';
+      }
+
+      fetch(url)
         .then(function(r) {
           if (!r.ok) throw new Error('No puzzles found for this level.');
           return r.json();
@@ -734,6 +997,7 @@
             addHistoryEntry(wrongAttempts < 2 ? 'green' : 'yellow');
             logAttempt(true);
             setStatus('✓ Puzzle solved! Well done.', '#00aa63');
+            recordAssessmentIfActive(true);
           } else {
             setStatus('✓ Solved in practice! Click "New Puzzle" for a fresh one.', '#7c3aed');
           }
@@ -755,8 +1019,13 @@
         if (wrongAttempts >= 3) {
           if (!practiceMode) {
             addHistoryEntry('red');
-            setStatus('✗ No more attempts. Loading next puzzle…', '#ef4444');
-            setTimeout(loadPuzzle, 1800);
+            if (currentMode === 'assessment') {
+              setStatus('✗ Failed. Recording and loading next puzzle…', '#ef4444');
+              recordAssessmentIfActive(false);
+            } else {
+              setStatus('✗ No more attempts. Loading next puzzle…', '#ef4444');
+              setTimeout(loadPuzzle, 1800);
+            }
           } else {
             setStatus('✗ All attempts used. Click "New Puzzle" for a fresh puzzle.', '#ef4444');
           }
@@ -790,6 +1059,7 @@
             addHistoryEntry(wrongAttempts < 2 ? 'green' : 'yellow');
             logAttempt(true);
             setStatus('✓ Puzzle solved! Well done.', '#00aa63');
+            recordAssessmentIfActive(true);
           } else {
             setStatus('✓ Solved in practice! Click "New Puzzle" for a fresh one.', '#7c3aed');
           }
@@ -814,14 +1084,19 @@
         checkTimeBudget();
       }
 
+      var body = {
+        puzzle_id:     currentPuzzleId,
+        time_spent_ms: timeMs,
+        is_correct:    isCorrect
+      };
+      if (currentMode === 'improve' || currentMode === 'assessment') {
+        body.mode = currentMode;
+      }
+
       fetch('/log-attempt', {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify({
-          puzzle_id:     currentPuzzleId,
-          time_spent_ms: timeMs,
-          is_correct:    isCorrect
-        })
+        body:    JSON.stringify(body)
       })
       .then(function() { fetchAnalytics(); })
       .catch(function() {});
@@ -833,6 +1108,8 @@
         .then(function(r) { return r.json(); })
         .then(function(d) {
           if (d.error) return;
+          lastAnalytics = d;
+          updateImproveLockUI();
           document.getElementById('stats-signin').classList.add('hidden');
           document.getElementById('stats-content').classList.remove('hidden');
           document.getElementById('stat-total').textContent    = d.total_attempts;
@@ -1000,8 +1277,14 @@
     document.getElementById('show-btn').addEventListener('click', function() {
       if (!currentFen || solutionMoves.length === 0) return;
 
-      // Viewing the solution counts as a failed attempt
+      // Viewing the solution counts as a failed attempt. Only record it for
+      // Assessment Mode if this puzzle hasn't already been resolved (e.g. the
+      // user solved it, then clicked Show Solution anyway) — addHistoryEntry
+      // itself no-ops in that case, but recordAssessmentIfActive has no such
+      // guard, so it must be skipped explicitly to avoid double-counting.
+      var alreadyResolved = puzzleChecked;
       addHistoryEntry('red');
+      if (!alreadyResolved) recordAssessmentIfActive(false);
 
       clearTimeout(replayTimeout);
       isReplaying = true;
