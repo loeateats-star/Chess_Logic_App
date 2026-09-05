@@ -308,27 +308,35 @@ def _rating_range_filter(min_rating: int, max_rating: int) -> tuple:
 
 
 def _random_row(conn, where: str, params: tuple = ()):
-    """Pick a pseudo-random row matching `where` in O(log n) via an indexed
-    id-range scan instead of ORDER BY RANDOM(), which forces a full-table
-    scan + sort — untenable once personal_blunders has millions of rows.
+    """Pick a genuinely uniform-random row matching `where`.
 
-    Jumps to a random id and takes the next matching row by id; if that
-    lands past the last match, wraps around to the first matching row.
-    Assumes matches are reasonably spread across the id space, which holds
-    here since import order (Lichess PuzzleId) isn't correlated with
-    rating or theme.
+    Previously this jumped to a random id and took the next matching row
+    by id ("id >= random_point ORDER BY id LIMIT 1"). That trick is only
+    unbiased if matches are perfectly spread across the id space — in
+    practice any clustering (and rating/theme are not perfectly decorrelated
+    from import order) means whichever match immediately follows a gap gets
+    picked far more than its share, which is what made puzzle order feel
+    fixed/repetitive instead of random.
+
+    TABLESAMPLE SYSTEM reads a small random slice of the table's pages (a
+    few percent) — independent of id, rating, or theme — cheaply enough to
+    avoid sorting the full multi-million-row table, then ORDER BY RANDOM()
+    picks uniformly within that slice. Falls back to a full (unsampled)
+    scan on the rare occasion a narrow filter (e.g. a specific theme +
+    rating band) isn't represented in the sampled slice at all.
     """
     row = conn.execute(
         f'''SELECT id, fen, engine_best_move, rating, primary_theme FROM personal_blunders
-            WHERE {where} AND id >= (
-                SELECT floor(RANDOM() * (SELECT COALESCE(MAX(id), 0) FROM personal_blunders))::bigint
-            )
-            ORDER BY id LIMIT 1''',
+            TABLESAMPLE SYSTEM (2)
+            WHERE {where}
+            ORDER BY RANDOM() LIMIT 1''',
         params
     ).fetchone()
     if row is None:
         row = conn.execute(
-            f'SELECT id, fen, engine_best_move, rating, primary_theme FROM personal_blunders WHERE {where} ORDER BY id LIMIT 1',
+            f'''SELECT id, fen, engine_best_move, rating, primary_theme FROM personal_blunders
+                WHERE {where}
+                ORDER BY RANDOM() LIMIT 1''',
             params
         ).fetchone()
     return row

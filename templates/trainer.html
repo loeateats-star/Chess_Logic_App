@@ -173,6 +173,7 @@
   <style>
     body { background-color: var(--color-bg); color: var(--color-ink); }
     #board { width: 400px; }
+    #rush-board { width: min(92vw, 480px); }
     .board-b72b1 { border: 2px solid #00dc82 !important; border-radius: 6px; }
     .black-3c85d { background-color: #66b38c !important; }
     .black-3c85d.notation-322f9 { color: #1a3d2b !important; }
@@ -355,25 +356,13 @@
       <div class="flex-1 flex flex-col items-center gap-5">
 
         <!-- Mode switcher -->
-        <div id="mode-switcher-wrap" class="w-full max-w-sm space-y-1.5">
+        <div class="w-full max-w-sm space-y-1.5">
           <div class="flex items-center gap-1.5 p-1 rounded-lg border border-brand-border" style="background:#f6faf8;">
             <button id="mode-btn-standard" class="mode-btn flex-1 text-xs font-semibold py-1.5 rounded-md transition-colors cursor-pointer" onclick="setMode('standard')">Standard</button>
             <button id="mode-btn-improve" class="mode-btn flex-1 text-xs font-semibold py-1.5 rounded-md transition-colors cursor-pointer" onclick="setMode('improve')">🎯 Improve</button>
             <button id="mode-btn-assessment" class="mode-btn flex-1 text-xs font-semibold py-1.5 rounded-md transition-colors cursor-pointer" onclick="setMode('assessment')">📊 Assessment</button>
           </div>
           <p id="improve-lock-hint" class="hidden text-brand-muted text-[11px] text-center"></p>
-        </div>
-
-        <!-- Puzzle Rush HUD — shown only while a rush run is active -->
-        <div id="rush-hud" class="hidden items-center justify-between gap-4 w-full max-w-sm rounded-lg border border-brand-border px-4 py-2.5" style="background:#f6faf8;">
-          <div class="flex items-center gap-2">
-            <span class="text-lg">⚡</span>
-            <span id="rush-timer" class="text-brand-ink text-xl font-extrabold tabular-nums">1:00</span>
-          </div>
-          <div class="flex items-center gap-2">
-            <span class="text-brand-muted text-xs uppercase tracking-wide">Score</span>
-            <span id="rush-score" class="text-brand-gdark text-xl font-extrabold">0</span>
-          </div>
         </div>
 
         <div class="rounded-lg overflow-hidden shadow-2xl shadow-brand-green/10">
@@ -410,7 +399,7 @@
           Click "New Puzzle" to begin.
         </p>
 
-        <div id="action-buttons-wrap" class="flex items-center gap-3">
+        <div class="flex items-center gap-3">
           <button id="train-btn"
                   class="bg-brand-green hover:bg-brand-gdark text-brand-ink font-semibold px-5 py-2.5 rounded-md transition-colors text-sm cursor-pointer">
             New Puzzle
@@ -593,6 +582,31 @@
                 class="text-brand-muted hover:text-brand-ink text-sm transition-colors cursor-pointer">
           Back to Standard
         </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Puzzle Rush Full-Screen Play Overlay ─────────────────────────── -->
+  <div id="rush-play-overlay" class="hidden fixed inset-0 z-[150] items-center" style="background:var(--color-bg);">
+    <div class="w-full h-full flex flex-col items-center">
+      <div class="w-full max-w-md flex items-center justify-between px-6 py-5">
+        <button onclick="quitRush()"
+                class="text-brand-muted hover:text-brand-ink text-sm font-semibold transition-colors cursor-pointer">
+          ✕ Quit
+        </button>
+        <div class="flex items-center gap-2">
+          <span class="text-xl">⚡</span>
+          <span id="rush-timer-fs" class="text-brand-ink text-3xl font-extrabold tabular-nums">1:00</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="text-brand-muted text-xs uppercase tracking-wide">Score</span>
+          <span id="rush-score-fs" class="text-brand-gdark text-3xl font-extrabold">0</span>
+        </div>
+      </div>
+      <div class="flex-1 w-full flex items-center justify-center px-4 pb-8">
+        <div class="rounded-lg overflow-hidden shadow-2xl shadow-brand-green/10">
+          <div id="rush-board"></div>
+        </div>
       </div>
     </div>
   </div>
@@ -1570,6 +1584,20 @@
     var rushMoveIndex       = 0;
     var rushWaitingComputer = false;
 
+    // Rush pulls puzzles by an explicit numeric rating band (the same
+    // "fresh, non-SRS" delivery path Assessment Mode uses) instead of the
+    // SRS priority queue. The SRS queue's P1 tier always returns the single
+    // most-overdue puzzle for a signed-in user until an attempt is logged
+    // against it — Rush never logs attempts (it's a speed drill, not a
+    // spaced-repetition session), so going through that path meant every
+    // fetch during a run kept re-serving the same overdue puzzle. Rating
+    // bands mirror _level_filter in app.py.
+    function rushRatingBand(level) {
+      if (level === 2) return [1000, 1600];
+      if (level === 3) return [1601, 4000];
+      return [0, 999];
+    }
+
     function openRushSetup() {
       fetch('/puzzle-rush/best')
         .then(function(r) { return r.json(); })
@@ -1594,9 +1622,6 @@
       clearTimeout(replayTimeout);
       isReplaying  = false;
       practiceMode = false;
-      document.getElementById('practice-banner').classList.add('hidden');
-      document.getElementById('improve-banner').classList.add('hidden');
-      document.getElementById('assessment-banner').classList.add('hidden');
       setBoardTheme('normal');
 
       rushActive      = true;
@@ -1605,12 +1630,9 @@
       rushCorrect     = 0;
       rushAttempted   = 0;
 
-      document.getElementById('mode-switcher-wrap').classList.add('hidden');
-      document.getElementById('action-buttons-wrap').classList.add('hidden');
-      document.getElementById('status').classList.add('hidden');
-      var hud = document.getElementById('rush-hud');
-      hud.classList.remove('hidden');
-      hud.classList.add('flex');
+      var overlay = document.getElementById('rush-play-overlay');
+      overlay.classList.remove('hidden');
+      overlay.classList.add('flex');
       updateRushHud();
 
       clearInterval(rushTimerId);
@@ -1626,15 +1648,18 @@
     function updateRushHud() {
       var m = Math.floor(Math.max(0, rushTimeLeft) / 60);
       var s = Math.max(0, rushTimeLeft) % 60;
-      document.getElementById('rush-timer').textContent = m + ':' + (s < 10 ? '0' : '') + s;
-      document.getElementById('rush-score').textContent = rushCorrect;
+      document.getElementById('rush-timer-fs').textContent = m + ':' + (s < 10 ? '0' : '') + s;
+      document.getElementById('rush-score-fs').textContent = rushCorrect;
     }
 
     function loadRushPuzzle() {
       if (!rushActive) return;
       rushWaitingComputer = false;
 
-      fetch('/get-puzzle?level=' + LEVEL)
+      var band = rushRatingBand(LEVEL);
+      var url  = '/get-puzzle?min_rating=' + band[0] + '&max_rating=' + band[1];
+
+      fetch(url)
         .then(function(r) {
           if (!r.ok) throw new Error('No puzzles found.');
           return r.json();
@@ -1647,7 +1672,7 @@
 
           game = new Chess(currentFen);
           if (board) board.destroy();
-          board = Chessboard('board', {
+          board = Chessboard('rush-board', {
             position:    currentFen,
             draggable:   true,
             pieceTheme:  '/static/img/chesspieces/wikipedia/{piece}.png',
@@ -1710,13 +1735,19 @@
       }
     }
 
+    function quitRush() {
+      if (!rushActive) return;
+      endRush();
+    }
+
     function endRush() {
       clearInterval(rushTimerId);
       rushTimerId = null;
       rushActive  = false;
 
-      document.getElementById('rush-hud').classList.add('hidden');
-      document.getElementById('rush-hud').classList.remove('flex');
+      var overlay = document.getElementById('rush-play-overlay');
+      overlay.classList.add('hidden');
+      overlay.classList.remove('flex');
 
       var accuracy = rushAttempted > 0 ? Math.round((rushCorrect / rushAttempted) * 100) : 0;
 
@@ -1742,9 +1773,6 @@
 
     function closeRushResults(playAgain) {
       document.getElementById('rush-results-overlay').classList.add('hidden');
-      document.getElementById('mode-switcher-wrap').classList.remove('hidden');
-      document.getElementById('action-buttons-wrap').classList.remove('hidden');
-      document.getElementById('status').classList.remove('hidden');
 
       if (playAgain) {
         openRushSetup();
