@@ -3,6 +3,16 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script>
+    (function() {
+      try {
+        var t = localStorage.getItem('theme');
+        if (t === 'dark' || (!t && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+          document.documentElement.classList.add('dark');
+        }
+      } catch (e) {}
+    })();
+  </script>
   <title>Synapchess</title>
 
   <!-- Tailwind CSS CDN (cdn.tailwindcss.com is the correct play-CDN endpoint) -->
@@ -13,18 +23,146 @@
         extend: {
           colors: {
             brand: {
-              bg:     '#ffffff',
-              card:   '#f6faf8',
-              border: '#e7ebe9',
-              green:  '#00dc82',
-              gdark:  '#00aa63',
-              muted:  '#64748b',
-              ink:    '#0b0c10',
+              bg:     'var(--color-bg)',
+              card:   'var(--color-surface)',
+              border: 'var(--color-border)',
+              green:  'var(--color-accent)',
+              gdark:  'var(--color-accent-dark)',
+              muted:  'var(--color-muted)',
+              ink:    'var(--color-ink)',
             }
           }
         }
       }
     }
+  </script>
+  <style>
+    :root {
+      --color-bg: #ffffff;
+      --color-surface: #f6faf8;
+      --color-border: #e7ebe9;
+      --color-chip: #e6f9f0;
+      --color-ink: #0b0c10;
+      --color-muted: #64748b;
+      --color-accent: #00dc82;
+      --color-accent-dark: #00aa63;
+      --color-header: rgba(255,255,255,0.92);
+      --color-overlay: rgba(255,255,255,0.96);
+    }
+    html.dark {
+      color-scheme: dark;
+      --color-bg: #0A0A0F;
+      --color-surface: #111118;
+      --color-border: #2a2620;
+      --color-chip: rgba(212,175,55,0.12);
+      --color-ink: #F0F0F0;
+      --color-muted: #9a9690;
+      --color-accent: #D4AF37;
+      --color-accent-dark: #B8941F;
+      --color-header: rgba(10,10,15,0.88);
+      --color-overlay: rgba(10,10,15,0.92);
+    }
+    html.dark body { background-color: var(--color-bg); color: var(--color-ink); }
+    body { transition: background-color .25s ease, color .25s ease; }
+    html.dark [style*="background:#ffffff"],
+    html.dark [style*="background: #ffffff"],
+    html.dark [style*="background-color: #ffffff"],
+    html.dark [style*="background-color:#ffffff"] { background-color: var(--color-bg) !important; }
+    html.dark [style*="background:#f6faf8"] { background-color: var(--color-surface) !important; }
+    html.dark [style*="background:#e7ebe9"] { background-color: var(--color-border) !important; }
+    html.dark [style*="background:#e6f9f0"] { background-color: var(--color-chip) !important; }
+    html.dark [style*="rgba(255,255,255,0.92)"] { background: var(--color-header) !important; }
+    html.dark [style*="rgba(255,255,255,0.96)"] { background: var(--color-overlay) !important; }
+    html.dark .text-slate-500 { color: var(--color-muted) !important; }
+    html.dark .text-slate-300 { color: var(--color-border) !important; }
+    html.dark .border-slate-200 { border-color: var(--color-border) !important; }
+    html.dark .bg-white { background-color: var(--color-surface) !important; }
+
+    /* Learn dropdown */
+    .nav-dropdown { position: relative; }
+    .nav-dropdown-trigger {
+      display: flex; align-items: center; gap: 4px; cursor: pointer;
+      background: none; border: none; font: inherit; padding: 0;
+    }
+    .nav-dropdown-trigger svg { width: 11px; height: 11px; transition: transform .18s ease; }
+    .nav-dropdown-panel {
+      position: absolute; top: 100%; left: 50%; transform: translate(-50%, 6px);
+      min-width: 200px; margin-top: 10px; padding: 8px; border-radius: 12px;
+      background: var(--color-bg); border: 1px solid var(--color-border);
+      box-shadow: 0 12px 32px rgba(0,0,0,0.14);
+      opacity: 0; visibility: hidden; pointer-events: none;
+      transition: opacity .18s ease, transform .18s ease;
+      z-index: 60;
+    }
+    .nav-dropdown-panel a {
+      display: flex; align-items: center; gap: 8px;
+      padding: 9px 12px; border-radius: 8px; font-size: 13px; font-weight: 500;
+      color: var(--color-muted); white-space: nowrap; transition: background .15s, color .15s;
+    }
+    .nav-dropdown-panel a:hover { background: var(--color-surface); color: var(--color-ink); }
+    .nav-dropdown.open .nav-dropdown-trigger svg { transform: rotate(180deg); }
+    .nav-dropdown.open .nav-dropdown-panel {
+      opacity: 1; visibility: visible; pointer-events: auto; transform: translate(-50%, 2px);
+    }
+    @media (hover: hover) {
+      .nav-dropdown:hover .nav-dropdown-trigger svg { transform: rotate(180deg); }
+      .nav-dropdown:hover .nav-dropdown-panel {
+        opacity: 1; visibility: visible; pointer-events: auto; transform: translate(-50%, 2px);
+      }
+    }
+
+    /* Dark mode toggle */
+    .theme-toggle {
+      display: flex; align-items: center; justify-content: center;
+      width: 32px; height: 32px; border-radius: 8px; flex-shrink: 0;
+      border: 1px solid var(--color-border); background: var(--color-surface);
+      color: var(--color-muted); cursor: pointer;
+      transition: color .15s, border-color .15s, background .15s;
+    }
+    .theme-toggle:hover { color: var(--color-ink); border-color: var(--color-accent); }
+    .theme-toggle .icon-moon { display: none; }
+    html.dark .theme-toggle .icon-sun { display: none; }
+    html.dark .theme-toggle .icon-moon { display: block; }
+  </style>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      var toggle = document.getElementById('theme-toggle');
+      if (toggle) {
+        toggle.addEventListener('click', function() {
+          var isDark = document.documentElement.classList.toggle('dark');
+          try { localStorage.setItem('theme', isDark ? 'dark' : 'light'); } catch (e) {}
+        });
+      }
+
+      document.querySelectorAll('.nav-dropdown').forEach(function(dd) {
+        var trigger = dd.querySelector('.nav-dropdown-trigger');
+        if (!trigger) return;
+        trigger.addEventListener('click', function(e) {
+          e.stopPropagation();
+          var willOpen = !dd.classList.contains('open');
+          document.querySelectorAll('.nav-dropdown.open').forEach(function(o) { o.classList.remove('open'); });
+          if (willOpen) {
+            dd.classList.add('open');
+            trigger.setAttribute('aria-expanded', 'true');
+          } else {
+            trigger.setAttribute('aria-expanded', 'false');
+          }
+        });
+      });
+      document.addEventListener('click', function() {
+        document.querySelectorAll('.nav-dropdown.open').forEach(function(o) {
+          o.classList.remove('open');
+          var t = o.querySelector('.nav-dropdown-trigger');
+          if (t) t.setAttribute('aria-expanded', 'false');
+        });
+      });
+      document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+          document.querySelectorAll('.nav-dropdown.open').forEach(function(o) { o.classList.remove('open'); });
+        }
+      });
+    });
   </script>
 
   <!-- jQuery 3.7.1 -->
@@ -38,7 +176,7 @@
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
 
   <style>
-    body  { background-color: #ffffff; }
+    body  { background-color: var(--color-bg); color: var(--color-ink); }
     /* Chessboard.js sizes itself from this width — do not remove */
     #board { width: 400px; }
     .board-b72b1 { border: 2px solid #00dc82 !important; border-radius: 6px; }
@@ -102,13 +240,28 @@
 
       <!-- Center nav -->
       <nav class="hidden md:flex items-center gap-8 text-sm font-medium">
-        <a href="/learn"  class="text-brand-muted hover:text-brand-ink transition-colors">Learn</a>
+        <div class="nav-dropdown">
+          <button type="button" class="nav-dropdown-trigger text-brand-muted hover:text-brand-ink transition-colors" aria-haspopup="true" aria-expanded="false">
+            Learn
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 9l6 6 6-6"/></svg>
+          </button>
+          <div class="nav-dropdown-panel" role="menu">
+            <a href="/trainer" role="menuitem">Puzzle Trainer</a>
+            <a href="/trainer?rush=1" role="menuitem">Puzzle Rush</a>
+            <a href="/analysis" role="menuitem">Game Analyzer</a>
+            <a href="/curriculum" role="menuitem">Lessons</a>
+          </div>
+        </div>
         <a href="/join"   class="text-brand-muted hover:text-brand-ink transition-colors">Join</a>
         <a href="/donate" class="text-brand-muted hover:text-brand-ink transition-colors">Donate</a>
       </nav>
 
       <!-- Right actions -->
       <div class="flex items-center gap-4 text-sm">
+        <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Toggle dark mode" title="Toggle dark mode">
+          <svg class="icon-sun" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path stroke-linecap="round" d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+          <svg class="icon-moon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+        </button>
 
         <!-- Logged-out state (default) -->
         <div id="auth-logged-out" class="flex items-center gap-3">

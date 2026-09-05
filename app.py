@@ -887,6 +887,36 @@ def get_puzzle():
         conn.close()
 
 
+# Puzzle Rush best-score tracker — kept in the session (not the DB), so it
+# works for anonymous players too and needs no schema changes.
+RUSH_DURATIONS = (60, 120, 180)
+
+
+@app.route('/puzzle-rush/best')
+def puzzle_rush_best():
+    best = session.get('puzzle_rush_best', {})
+    return jsonify({'best': {str(d): best.get(str(d), 0) for d in RUSH_DURATIONS}})
+
+
+@app.route('/puzzle-rush/score', methods=['POST'])
+def puzzle_rush_score():
+    data     = request.get_json(silent=True) or {}
+    duration = data.get('duration')
+    score    = data.get('score')
+
+    if duration not in RUSH_DURATIONS or not isinstance(score, int) or isinstance(score, bool) or score < 0:
+        return jsonify({'error': 'Invalid payload.'}), 400
+
+    best         = dict(session.get('puzzle_rush_best', {}))
+    key          = str(duration)
+    is_new_best  = score > best.get(key, 0)
+    if is_new_best:
+        best[key] = score
+        session['puzzle_rush_best'] = best
+
+    return jsonify({'best': best.get(key, 0), 'is_new_best': is_new_best})
+
+
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
     debug = os.environ.get('FLASK_DEBUG') == '1'

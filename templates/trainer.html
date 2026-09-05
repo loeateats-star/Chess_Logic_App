@@ -3,6 +3,16 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script>
+    (function() {
+      try {
+        var t = localStorage.getItem('theme');
+        if (t === 'dark' || (!t && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+          document.documentElement.classList.add('dark');
+        }
+      } catch (e) {}
+    })();
+  </script>
   <title>Level {{ level }} Puzzle Trainer: Synapchess</title>
 
   <script src="https://cdn.tailwindcss.com"></script>
@@ -12,18 +22,146 @@
         extend: {
           colors: {
             brand: {
-              bg:     '#ffffff',
-              card:   '#f6faf8',
-              border: '#e7ebe9',
-              green:  '#00dc82',
-              gdark:  '#00aa63',
-              muted:  '#64748b',
-              ink:    '#0b0c10',
+              bg:     'var(--color-bg)',
+              card:   'var(--color-surface)',
+              border: 'var(--color-border)',
+              green:  'var(--color-accent)',
+              gdark:  'var(--color-accent-dark)',
+              muted:  'var(--color-muted)',
+              ink:    'var(--color-ink)',
             }
           }
         }
       }
     }
+  </script>
+  <style>
+    :root {
+      --color-bg: #ffffff;
+      --color-surface: #f6faf8;
+      --color-border: #e7ebe9;
+      --color-chip: #e6f9f0;
+      --color-ink: #0b0c10;
+      --color-muted: #64748b;
+      --color-accent: #00dc82;
+      --color-accent-dark: #00aa63;
+      --color-header: rgba(255,255,255,0.92);
+      --color-overlay: rgba(255,255,255,0.96);
+    }
+    html.dark {
+      color-scheme: dark;
+      --color-bg: #0A0A0F;
+      --color-surface: #111118;
+      --color-border: #2a2620;
+      --color-chip: rgba(212,175,55,0.12);
+      --color-ink: #F0F0F0;
+      --color-muted: #9a9690;
+      --color-accent: #D4AF37;
+      --color-accent-dark: #B8941F;
+      --color-header: rgba(10,10,15,0.88);
+      --color-overlay: rgba(10,10,15,0.92);
+    }
+    html.dark body { background-color: var(--color-bg); color: var(--color-ink); }
+    body { transition: background-color .25s ease, color .25s ease; }
+    html.dark [style*="background:#ffffff"],
+    html.dark [style*="background: #ffffff"],
+    html.dark [style*="background-color: #ffffff"],
+    html.dark [style*="background-color:#ffffff"] { background-color: var(--color-bg) !important; }
+    html.dark [style*="background:#f6faf8"] { background-color: var(--color-surface) !important; }
+    html.dark [style*="background:#e7ebe9"] { background-color: var(--color-border) !important; }
+    html.dark [style*="background:#e6f9f0"] { background-color: var(--color-chip) !important; }
+    html.dark [style*="rgba(255,255,255,0.92)"] { background: var(--color-header) !important; }
+    html.dark [style*="rgba(255,255,255,0.96)"] { background: var(--color-overlay) !important; }
+    html.dark .text-slate-500 { color: var(--color-muted) !important; }
+    html.dark .text-slate-300 { color: var(--color-border) !important; }
+    html.dark .border-slate-200 { border-color: var(--color-border) !important; }
+    html.dark .bg-white { background-color: var(--color-surface) !important; }
+
+    /* Learn dropdown */
+    .nav-dropdown { position: relative; }
+    .nav-dropdown-trigger {
+      display: flex; align-items: center; gap: 4px; cursor: pointer;
+      background: none; border: none; font: inherit; padding: 0;
+    }
+    .nav-dropdown-trigger svg { width: 11px; height: 11px; transition: transform .18s ease; }
+    .nav-dropdown-panel {
+      position: absolute; top: 100%; left: 50%; transform: translate(-50%, 6px);
+      min-width: 200px; margin-top: 10px; padding: 8px; border-radius: 12px;
+      background: var(--color-bg); border: 1px solid var(--color-border);
+      box-shadow: 0 12px 32px rgba(0,0,0,0.14);
+      opacity: 0; visibility: hidden; pointer-events: none;
+      transition: opacity .18s ease, transform .18s ease;
+      z-index: 60;
+    }
+    .nav-dropdown-panel a {
+      display: flex; align-items: center; gap: 8px;
+      padding: 9px 12px; border-radius: 8px; font-size: 13px; font-weight: 500;
+      color: var(--color-muted); white-space: nowrap; transition: background .15s, color .15s;
+    }
+    .nav-dropdown-panel a:hover { background: var(--color-surface); color: var(--color-ink); }
+    .nav-dropdown.open .nav-dropdown-trigger svg { transform: rotate(180deg); }
+    .nav-dropdown.open .nav-dropdown-panel {
+      opacity: 1; visibility: visible; pointer-events: auto; transform: translate(-50%, 2px);
+    }
+    @media (hover: hover) {
+      .nav-dropdown:hover .nav-dropdown-trigger svg { transform: rotate(180deg); }
+      .nav-dropdown:hover .nav-dropdown-panel {
+        opacity: 1; visibility: visible; pointer-events: auto; transform: translate(-50%, 2px);
+      }
+    }
+
+    /* Dark mode toggle */
+    .theme-toggle {
+      display: flex; align-items: center; justify-content: center;
+      width: 32px; height: 32px; border-radius: 8px; flex-shrink: 0;
+      border: 1px solid var(--color-border); background: var(--color-surface);
+      color: var(--color-muted); cursor: pointer;
+      transition: color .15s, border-color .15s, background .15s;
+    }
+    .theme-toggle:hover { color: var(--color-ink); border-color: var(--color-accent); }
+    .theme-toggle .icon-moon { display: none; }
+    html.dark .theme-toggle .icon-sun { display: none; }
+    html.dark .theme-toggle .icon-moon { display: block; }
+  </style>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      var toggle = document.getElementById('theme-toggle');
+      if (toggle) {
+        toggle.addEventListener('click', function() {
+          var isDark = document.documentElement.classList.toggle('dark');
+          try { localStorage.setItem('theme', isDark ? 'dark' : 'light'); } catch (e) {}
+        });
+      }
+
+      document.querySelectorAll('.nav-dropdown').forEach(function(dd) {
+        var trigger = dd.querySelector('.nav-dropdown-trigger');
+        if (!trigger) return;
+        trigger.addEventListener('click', function(e) {
+          e.stopPropagation();
+          var willOpen = !dd.classList.contains('open');
+          document.querySelectorAll('.nav-dropdown.open').forEach(function(o) { o.classList.remove('open'); });
+          if (willOpen) {
+            dd.classList.add('open');
+            trigger.setAttribute('aria-expanded', 'true');
+          } else {
+            trigger.setAttribute('aria-expanded', 'false');
+          }
+        });
+      });
+      document.addEventListener('click', function() {
+        document.querySelectorAll('.nav-dropdown.open').forEach(function(o) {
+          o.classList.remove('open');
+          var t = o.querySelector('.nav-dropdown-trigger');
+          if (t) t.setAttribute('aria-expanded', 'false');
+        });
+      });
+      document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+          document.querySelectorAll('.nav-dropdown.open').forEach(function(o) { o.classList.remove('open'); });
+        }
+      });
+    });
   </script>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
@@ -33,7 +171,7 @@
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
 
   <style>
-    body { background-color: #ffffff; }
+    body { background-color: var(--color-bg); color: var(--color-ink); }
     #board { width: 400px; }
     .board-b72b1 { border: 2px solid #00dc82 !important; border-radius: 6px; }
     .black-3c85d { background-color: #66b38c !important; }
@@ -64,12 +202,27 @@
       </a>
 
       <nav class="hidden md:flex items-center gap-8 text-sm font-medium">
-        <a href="/learn"  class="text-brand-ink">Learn</a>
+        <div class="nav-dropdown">
+          <button type="button" class="nav-dropdown-trigger text-brand-ink" aria-haspopup="true" aria-expanded="false">
+            Learn
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 9l6 6 6-6"/></svg>
+          </button>
+          <div class="nav-dropdown-panel" role="menu">
+            <a href="/trainer" role="menuitem">Puzzle Trainer</a>
+            <a href="/trainer?rush=1" role="menuitem">Puzzle Rush</a>
+            <a href="/analysis" role="menuitem">Game Analyzer</a>
+            <a href="/curriculum" role="menuitem">Lessons</a>
+          </div>
+        </div>
         <a href="/join"   class="text-brand-muted hover:text-brand-ink transition-colors">Join</a>
         <a href="/donate" class="text-brand-muted hover:text-brand-ink transition-colors">Donate</a>
       </nav>
 
       <div class="flex items-center gap-4 text-sm">
+        <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Toggle dark mode" title="Toggle dark mode">
+          <svg class="icon-sun" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path stroke-linecap="round" d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+          <svg class="icon-moon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+        </button>
         <div id="auth-logged-out" class="flex items-center gap-3">
           <button id="btn-login"
                   class="text-brand-muted hover:text-brand-ink transition-colors cursor-pointer text-sm">
@@ -202,13 +355,25 @@
       <div class="flex-1 flex flex-col items-center gap-5">
 
         <!-- Mode switcher -->
-        <div class="w-full max-w-sm space-y-1.5">
+        <div id="mode-switcher-wrap" class="w-full max-w-sm space-y-1.5">
           <div class="flex items-center gap-1.5 p-1 rounded-lg border border-brand-border" style="background:#f6faf8;">
             <button id="mode-btn-standard" class="mode-btn flex-1 text-xs font-semibold py-1.5 rounded-md transition-colors cursor-pointer" onclick="setMode('standard')">Standard</button>
             <button id="mode-btn-improve" class="mode-btn flex-1 text-xs font-semibold py-1.5 rounded-md transition-colors cursor-pointer" onclick="setMode('improve')">🎯 Improve</button>
             <button id="mode-btn-assessment" class="mode-btn flex-1 text-xs font-semibold py-1.5 rounded-md transition-colors cursor-pointer" onclick="setMode('assessment')">📊 Assessment</button>
           </div>
           <p id="improve-lock-hint" class="hidden text-brand-muted text-[11px] text-center"></p>
+        </div>
+
+        <!-- Puzzle Rush HUD — shown only while a rush run is active -->
+        <div id="rush-hud" class="hidden items-center justify-between gap-4 w-full max-w-sm rounded-lg border border-brand-border px-4 py-2.5" style="background:#f6faf8;">
+          <div class="flex items-center gap-2">
+            <span class="text-lg">⚡</span>
+            <span id="rush-timer" class="text-brand-ink text-xl font-extrabold tabular-nums">1:00</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="text-brand-muted text-xs uppercase tracking-wide">Score</span>
+            <span id="rush-score" class="text-brand-gdark text-xl font-extrabold">0</span>
+          </div>
         </div>
 
         <div class="rounded-lg overflow-hidden shadow-2xl shadow-brand-green/10">
@@ -245,7 +410,7 @@
           Click "New Puzzle" to begin.
         </p>
 
-        <div class="flex items-center gap-3">
+        <div id="action-buttons-wrap" class="flex items-center gap-3">
           <button id="train-btn"
                   class="bg-brand-green hover:bg-brand-gdark text-brand-ink font-semibold px-5 py-2.5 rounded-md transition-colors text-sm cursor-pointer">
             New Puzzle
@@ -253,6 +418,10 @@
           <button id="show-btn"
                   class="border border-brand-border hover:border-brand-green text-brand-muted hover:text-brand-ink font-semibold px-5 py-2.5 rounded-md transition-colors text-sm cursor-pointer bg-white">
             Show Solution
+          </button>
+          <button id="rush-launch-btn" onclick="openRushSetup()"
+                  class="border border-brand-border hover:border-brand-green text-brand-muted hover:text-brand-ink font-semibold px-5 py-2.5 rounded-md transition-colors text-sm cursor-pointer bg-white">
+            ⚡ Puzzle Rush
           </button>
         </div>
 
@@ -428,6 +597,80 @@
     </div>
   </div>
 
+  <!-- ─── Puzzle Rush Setup Overlay ────────────────────────────────────── -->
+  <div id="rush-setup-overlay" class="fixed inset-0 z-[200] flex items-center justify-center hidden">
+    <div class="absolute inset-0" style="background:rgba(255,255,255,0.96);" onclick="closeRushSetup()"></div>
+    <div class="relative z-10 text-center space-y-5 px-8 py-8 max-w-sm mx-auto rounded-2xl border border-brand-border" style="background:#ffffff;">
+      <button onclick="closeRushSetup()"
+              class="absolute top-4 right-4 text-brand-muted hover:text-brand-ink transition-colors text-lg leading-none cursor-pointer">✕</button>
+      <div class="w-16 h-16 rounded-full mx-auto flex items-center justify-center text-4xl"
+           style="background:#e6f9f0; border:2px solid #00dc82;">
+        ⚡
+      </div>
+      <div class="space-y-2">
+        <h2 class="text-2xl font-extrabold text-brand-ink leading-tight">Puzzle Rush</h2>
+        <p class="text-brand-muted text-sm leading-relaxed">Solve as many puzzles as you can before time runs out.</p>
+      </div>
+      <div class="space-y-2">
+        <button onclick="startRush(60)"
+                class="w-full flex items-center justify-between px-4 py-3 rounded-lg border border-brand-border hover:border-brand-green transition-colors cursor-pointer bg-white">
+          <span class="text-brand-ink font-semibold text-sm">1 Minute</span>
+          <span id="rush-best-60" class="text-brand-muted text-xs">Best: —</span>
+        </button>
+        <button onclick="startRush(120)"
+                class="w-full flex items-center justify-between px-4 py-3 rounded-lg border border-brand-border hover:border-brand-green transition-colors cursor-pointer bg-white">
+          <span class="text-brand-ink font-semibold text-sm">2 Minutes</span>
+          <span id="rush-best-120" class="text-brand-muted text-xs">Best: —</span>
+        </button>
+        <button onclick="startRush(180)"
+                class="w-full flex items-center justify-between px-4 py-3 rounded-lg border border-brand-border hover:border-brand-green transition-colors cursor-pointer bg-white">
+          <span class="text-brand-ink font-semibold text-sm">3 Minutes</span>
+          <span id="rush-best-180" class="text-brand-muted text-xs">Best: —</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Puzzle Rush Results Overlay ──────────────────────────────────── -->
+  <div id="rush-results-overlay" class="fixed inset-0 z-[200] flex items-center justify-center hidden">
+    <div class="absolute inset-0" style="background:rgba(255,255,255,0.96);"></div>
+    <div class="relative z-10 text-center space-y-5 px-8 py-8 max-w-sm mx-auto rounded-2xl border border-brand-border" style="background:#ffffff;">
+      <div class="w-20 h-20 rounded-full mx-auto flex items-center justify-center text-5xl"
+           style="background:#f6faf8; border:2px solid #00dc82;">
+        ⚡
+      </div>
+      <div class="space-y-1">
+        <h2 class="text-3xl font-extrabold text-brand-ink leading-tight">Time's Up!</h2>
+        <span id="rush-new-best-badge"
+              class="hidden inline-block text-xs font-bold uppercase tracking-wide px-2 py-1 rounded-full"
+              style="background:#e6f9f0; color:#00aa63;">
+          🏆 New Best!
+        </span>
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div class="rounded-lg border border-brand-border p-3" style="background:#f6faf8;">
+          <p class="text-brand-muted text-xs uppercase tracking-wide">Score</p>
+          <p id="rush-result-score" class="text-brand-ink text-2xl font-extrabold">0</p>
+        </div>
+        <div class="rounded-lg border border-brand-border p-3" style="background:#f6faf8;">
+          <p class="text-brand-muted text-xs uppercase tracking-wide">Accuracy</p>
+          <p id="rush-result-accuracy" class="text-brand-ink text-2xl font-extrabold">0%</p>
+        </div>
+      </div>
+      <p class="text-brand-muted text-sm">Best score: <span id="rush-result-best" class="text-brand-gdark font-bold">0</span></p>
+      <div class="flex flex-col items-center gap-3 pt-2">
+        <button onclick="closeRushResults(true)"
+                class="w-full max-w-xs bg-brand-green hover:bg-brand-gdark text-brand-ink font-semibold py-3 rounded-md transition-colors text-sm cursor-pointer">
+          ⚡ Play Again
+        </button>
+        <button onclick="closeRushResults(false)"
+                class="text-brand-muted hover:text-brand-ink text-sm transition-colors cursor-pointer">
+          Back to Trainer
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- ─── Auth Modal ────────────────────────────────────────────────────── -->
   <div id="auth-modal" class="fixed inset-0 z-[100] flex items-center justify-center hidden">
     <div class="absolute inset-0" style="background:rgba(15,23,20,0.5);" onclick="closeModal()"></div>
@@ -542,6 +785,11 @@
       initAuth();
       updateModeButtonsUI();
       updateImproveLockUI();
+
+      // Dropdown link ("Puzzle Rush") launches straight into the setup overlay
+      if (new URLSearchParams(window.location.search).get('rush') === '1') {
+        openRushSetup();
+      }
     });
 
     // ── Auth init ──────────────────────────────────────────────────────────
@@ -1310,6 +1558,200 @@
       }
       playNext(0);
     });
+
+    // ── Puzzle Rush ─────────────────────────────────────────────────────────
+    var rushActive          = false;
+    var rushDurationSec     = 60;
+    var rushTimeLeft        = 0;
+    var rushTimerId         = null;
+    var rushCorrect         = 0;
+    var rushAttempted       = 0;
+    var rushSolutionMoves   = [];
+    var rushMoveIndex       = 0;
+    var rushWaitingComputer = false;
+
+    function openRushSetup() {
+      fetch('/puzzle-rush/best')
+        .then(function(r) { return r.json(); })
+        .then(function(d) {
+          var best = d.best || {};
+          [60, 120, 180].forEach(function(sec) {
+            var el = document.getElementById('rush-best-' + sec);
+            if (el) el.textContent = 'Best: ' + (best[String(sec)] || 0);
+          });
+        })
+        .catch(function() {});
+      document.getElementById('rush-setup-overlay').classList.remove('hidden');
+    }
+
+    function closeRushSetup() {
+      document.getElementById('rush-setup-overlay').classList.add('hidden');
+    }
+
+    function startRush(durationSec) {
+      closeRushSetup();
+
+      clearTimeout(replayTimeout);
+      isReplaying  = false;
+      practiceMode = false;
+      document.getElementById('practice-banner').classList.add('hidden');
+      document.getElementById('improve-banner').classList.add('hidden');
+      document.getElementById('assessment-banner').classList.add('hidden');
+      setBoardTheme('normal');
+
+      rushActive      = true;
+      rushDurationSec = durationSec;
+      rushTimeLeft    = durationSec;
+      rushCorrect     = 0;
+      rushAttempted   = 0;
+
+      document.getElementById('mode-switcher-wrap').classList.add('hidden');
+      document.getElementById('action-buttons-wrap').classList.add('hidden');
+      document.getElementById('status').classList.add('hidden');
+      var hud = document.getElementById('rush-hud');
+      hud.classList.remove('hidden');
+      hud.classList.add('flex');
+      updateRushHud();
+
+      clearInterval(rushTimerId);
+      rushTimerId = setInterval(function() {
+        rushTimeLeft--;
+        updateRushHud();
+        if (rushTimeLeft <= 0) endRush();
+      }, 1000);
+
+      loadRushPuzzle();
+    }
+
+    function updateRushHud() {
+      var m = Math.floor(Math.max(0, rushTimeLeft) / 60);
+      var s = Math.max(0, rushTimeLeft) % 60;
+      document.getElementById('rush-timer').textContent = m + ':' + (s < 10 ? '0' : '') + s;
+      document.getElementById('rush-score').textContent = rushCorrect;
+    }
+
+    function loadRushPuzzle() {
+      if (!rushActive) return;
+      rushWaitingComputer = false;
+
+      fetch('/get-puzzle?level=' + LEVEL)
+        .then(function(r) {
+          if (!r.ok) throw new Error('No puzzles found.');
+          return r.json();
+        })
+        .then(function(data) {
+          if (!rushActive) return;
+          currentFen       = data.fen;
+          rushSolutionMoves = (data.engine_best_move || '').split(' ').filter(Boolean);
+          rushMoveIndex     = 0;
+
+          game = new Chess(currentFen);
+          if (board) board.destroy();
+          board = Chessboard('board', {
+            position:    currentFen,
+            draggable:   true,
+            pieceTheme:  '/static/img/chesspieces/wikipedia/{piece}.png',
+            onDragStart: function() {
+              if (!rushActive || rushWaitingComputer) return false;
+            },
+            onDrop:      onDropRush,
+            orientation: game.turn() === 'w' ? 'white' : 'black'
+          });
+        })
+        .catch(function() {
+          if (rushActive) setTimeout(loadRushPuzzle, 500);
+        });
+    }
+
+    function onDropRush(source, target) {
+      if (!rushActive || rushWaitingComputer) return 'snapback';
+
+      var move = game.move({ from: source, to: target, promotion: 'q' });
+      if (move === null) return 'snapback';
+
+      var userMove = source + target;
+
+      if (userMove === rushSolutionMoves[rushMoveIndex].slice(0, 4)) {
+        board.position(game.fen());
+        rushMoveIndex++;
+
+        if (rushMoveIndex >= rushSolutionMoves.length) {
+          rushCorrect++;
+          rushAttempted++;
+          updateRushHud();
+          setTimeout(loadRushPuzzle, 250);
+          return;
+        }
+
+        rushWaitingComputer = true;
+        setTimeout(function() {
+          if (!rushActive) return;
+          var uci   = rushSolutionMoves[rushMoveIndex];
+          var promo = uci.length > 4 ? uci[4] : 'q';
+          game.move({ from: uci.slice(0, 2), to: uci.slice(2, 4), promotion: promo });
+          board.position(game.fen());
+          rushMoveIndex++;
+          rushWaitingComputer = false;
+
+          if (rushMoveIndex >= rushSolutionMoves.length) {
+            rushCorrect++;
+            rushAttempted++;
+            updateRushHud();
+            setTimeout(loadRushPuzzle, 250);
+          }
+        }, 300);
+
+      } else {
+        game.undo();
+        rushAttempted++;
+        updateRushHud();
+        setTimeout(loadRushPuzzle, 300);
+        return 'snapback';
+      }
+    }
+
+    function endRush() {
+      clearInterval(rushTimerId);
+      rushTimerId = null;
+      rushActive  = false;
+
+      document.getElementById('rush-hud').classList.add('hidden');
+      document.getElementById('rush-hud').classList.remove('flex');
+
+      var accuracy = rushAttempted > 0 ? Math.round((rushCorrect / rushAttempted) * 100) : 0;
+
+      fetch('/puzzle-rush/score', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ duration: rushDurationSec, score: rushCorrect })
+      })
+        .then(function(r) { return r.json(); })
+        .then(function(d) { showRushResults(accuracy, d.best, d.is_new_best); })
+        .catch(function() { showRushResults(accuracy, rushCorrect, false); });
+
+      if (rushCorrect > 0 && typeof confetti === 'function') fireConfetti();
+    }
+
+    function showRushResults(accuracy, best, isNewBest) {
+      document.getElementById('rush-result-score').textContent    = rushCorrect;
+      document.getElementById('rush-result-accuracy').textContent = accuracy + '%';
+      document.getElementById('rush-result-best').textContent     = best;
+      document.getElementById('rush-new-best-badge').classList.toggle('hidden', !isNewBest);
+      document.getElementById('rush-results-overlay').classList.remove('hidden');
+    }
+
+    function closeRushResults(playAgain) {
+      document.getElementById('rush-results-overlay').classList.add('hidden');
+      document.getElementById('mode-switcher-wrap').classList.remove('hidden');
+      document.getElementById('action-buttons-wrap').classList.remove('hidden');
+      document.getElementById('status').classList.remove('hidden');
+
+      if (playAgain) {
+        openRushSetup();
+      } else {
+        loadPuzzle();
+      }
+    }
   </script>
 
 </body>
