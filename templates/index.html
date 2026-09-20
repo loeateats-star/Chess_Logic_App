@@ -178,7 +178,13 @@
   <style>
     body  { background-color: var(--color-bg); color: var(--color-ink); }
     /* Chessboard.js sizes itself from this width — do not remove */
-    #board { width: 400px; }
+    #board { width: min(400px, 92vw); }
+    #board {
+      touch-action: none;
+      -webkit-user-select: none;
+      user-select: none;
+      -webkit-touch-callout: none;
+    }
     .board-b72b1 { border: 2px solid #00dc82 !important; border-radius: 6px; }
     /* Dark squares — premium mint green */
     .black-3c85d { background-color: #66b38c !important; }
@@ -332,10 +338,6 @@
 
         <!-- CTA pills -->
         <div class="flex flex-wrap gap-3 pt-1">
-          <a href="/learn"
-             class="inline-flex items-center justify-center rounded-full px-6 py-3 text-xs font-bold tracking-wide uppercase transition-colors border border-brand-green text-brand-gdark hover:bg-brand-green hover:text-brand-ink">
-            Learn More
-          </a>
           <a href="/trainer"
              class="inline-flex items-center justify-center rounded-full px-6 py-3 text-xs font-bold tracking-wide uppercase transition-colors bg-brand-green hover:bg-brand-gdark text-brand-ink">
             Start Training

@@ -173,7 +173,13 @@
 
   <style>
     body { background-color: var(--color-bg); color: var(--color-ink); }
-    #board { width: 420px; }
+    #board { width: min(420px, 92vw); }
+    #board {
+      touch-action: none;
+      -webkit-user-select: none;
+      user-select: none;
+      -webkit-touch-callout: none;
+    }
     .board-b72b1 { border: 2px solid #00dc82 !important; border-radius: 6px; }
 
     .badge { display:inline-flex; align-items:center; gap:4px; padding:2px 8px; border-radius:999px; font-size:11px; font-weight:700; white-space:nowrap; }

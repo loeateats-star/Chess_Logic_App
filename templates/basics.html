@@ -174,7 +174,13 @@
     body { background-color: var(--color-bg); color: var(--color-ink); }
 
     /* Chessboard sizing and theme overrides */
-    #board { width: 400px; }
+    #board { width: min(400px, 92vw); }
+    #board {
+      touch-action: none;
+      -webkit-user-select: none;
+      user-select: none;
+      -webkit-touch-callout: none;
+    }
     .board-b72b1 { border: 2px solid #00dc82 !important; border-radius: 6px; }
     .black-3c85d { background-color: #66b38c !important; }
     .black-3c85d.notation-322f9 { color: #1a3d2b !important; }
@@ -270,10 +276,10 @@
   <!-- ─── Main Learning Interface ─────────────────────────────────────── -->
   <section class="py-12 px-6" style="background:#ffffff;">
     <div class="max-w-6xl mx-auto">
-    <div class="flex gap-8 items-start">
+    <div class="flex flex-col md:flex-row gap-8 items-stretch md:items-start">
 
       <!-- ── Left sidebar: module list ────────────────────────────────── -->
-      <aside class="w-72 flex-shrink-0 space-y-3">
+      <aside class="w-full md:w-72 flex-shrink-0 space-y-3">
         <p class="text-xs font-semibold tracking-widest uppercase text-brand-muted mb-5">Modules</p>
 
         <!-- Rook module -->

@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin: Synapchess</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root {
+      --color-bg: #ffffff;
+      --color-surface: #f6faf8;
+      --color-border: #e7ebe9;
+      --color-ink: #0b0c10;
+      --color-muted: #64748b;
+      --color-accent: #00dc82;
+      --color-accent-dark: #00aa63;
+    }
+    body { background-color: var(--color-bg); color: var(--color-ink); }
+  </style>
+</head>
+<body class="antialiased min-h-screen" style="font-family: Inter, system-ui, sans-serif;">
+
+  <header class="border-b" style="border-color: var(--color-border);">
+    <div class="max-w-4xl mx-auto px-6 h-16 flex items-center justify-between">
+      <a href="/" class="flex items-center gap-2 font-semibold text-sm" style="color: var(--color-ink);">
+        <span class="flex items-center justify-center w-7 h-7 rounded-md font-bold text-base"
+              style="background: var(--color-accent); color: var(--color-ink);">♟</span>
+        Synapchess Admin
+      </a>
+      <a href="/" class="text-sm" style="color: var(--color-muted);">← Back to site</a>
+    </div>
+  </header>
+
+  <main class="max-w-4xl mx-auto px-6 py-14">
+
+    {% if not authorized %}
+      <!-- ── Locked ──────────────────────────────────────────────────────── -->
+      <div class="max-w-sm mx-auto text-center space-y-5">
+        <h1 class="text-2xl font-extrabold">Admin access required</h1>
+        <p class="text-sm" style="color: var(--color-muted);">
+          This page is restricted. Sign in with the admin account to view it{% if code_enabled %}, or enter the admin code below{% endif %}.
+        </p>
+
+        {% if code_enabled %}
+          <form method="POST" action="/admin" class="space-y-3">
+            <input
+              type="password"
+              name="code"
+              placeholder="Admin code"
+              autocomplete="off"
+              required
+              class="w-full text-sm rounded-lg px-3 py-2.5 border outline-none"
+              style="border-color: var(--color-border); background: var(--color-surface);"
+            />
+            {% if error %}
+              <p class="text-xs font-medium" style="color:#ef4444;">{{ error }}</p>
+            {% endif %}
+            <button type="submit"
+                    class="w-full text-sm font-semibold rounded-lg px-4 py-2.5"
+                    style="background: var(--color-accent); color: var(--color-ink);">
+              Unlock
+            </button>
+          </form>
+        {% endif %}
+      </div>
+
+    {% else %}
+      <!-- ── Dashboard ───────────────────────────────────────────────────── -->
+      <h1 class="text-2xl font-extrabold mb-1">Admin Dashboard</h1>
+      <p class="text-sm mb-10" style="color: var(--color-muted);">A quick look at site-wide activity.</p>
+
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+
+        <div class="rounded-xl border p-5 space-y-1" style="border-color: var(--color-border); background: var(--color-surface);">
+          <div class="text-3xl font-black tabular-nums">{{ total_users }}</div>
+          <div class="text-xs font-semibold uppercase tracking-wide" style="color: var(--color-muted);">
+            Registered users
+          </div>
+        </div>
+
+        <div class="rounded-xl border p-5 space-y-1" style="border-color: var(--color-border); background: var(--color-surface);">
+          <div class="text-3xl font-black tabular-nums" style="color: var(--color-accent-dark);">{{ active_30d }}</div>
+          <div class="text-xs font-semibold uppercase tracking-wide" style="color: var(--color-muted);">
+            Active in last 30 days
+          </div>
+        </div>
+
+        <div class="rounded-xl border p-5 space-y-1" style="border-color: var(--color-border); background: var(--color-surface);">
+          <div class="text-3xl font-black tabular-nums">{{ engaged_users }}</div>
+          <div class="text-xs font-semibold uppercase tracking-wide" style="color: var(--color-muted);">
+            Completed a puzzle or lesson
+          </div>
+        </div>
+
+        <div class="rounded-xl border p-5 space-y-1" style="border-color: var(--color-border); background: var(--color-surface);">
+          <div class="text-3xl font-black tabular-nums" style="color: var(--color-accent-dark);">{{ puzzles_solved }}</div>
+          <div class="text-xs font-semibold uppercase tracking-wide" style="color: var(--color-muted);">
+            Total puzzles solved
+          </div>
+        </div>
+
+      </div>
+    {% endif %}
+
+  </main>
+
+</body>
+</html>

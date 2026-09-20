@@ -38,7 +38,13 @@
     }
 
     /* ── Board theme: purple galaxy ── */
-    #board { width: 400px; }
+    #board { width: min(400px, 92vw); }
+    #board {
+      touch-action: none;
+      -webkit-user-select: none;
+      user-select: none;
+      -webkit-touch-callout: none;
+    }
     .board-b72b1 {
       border: 2px solid rgba(168,85,247,0.75) !important;
       border-radius: 6px;

@@ -147,6 +147,7 @@ def init_db():
             'ALTER TABLE personal_blunders ADD COLUMN IF NOT EXISTS primary_theme TEXT',
             'ALTER TABLE student_analytics ADD COLUMN IF NOT EXISTS theme TEXT',
             'ALTER TABLE student_analytics ADD COLUMN IF NOT EXISTS mode  TEXT',
+            'ALTER TABLE users ADD COLUMN IF NOT EXISTS last_login TIMESTAMP',
         ]:
             conn.execute(stmt)
         conn.commit()
@@ -440,6 +441,14 @@ MAX_USERNAME_LEN = 64
 MIN_PASSWORD_LEN = 8
 MAX_PASSWORD_LEN = 128
 
+# ── Admin access ──────────────────────────────────────────────────────────────
+# The named account always gets the admin dashboard. ADMIN_CODE is an optional
+# escape hatch (set it as an env var) so admin access isn't permanently welded
+# to one username — anyone who knows the code can unlock /admin for their
+# current browser session without needing to be logged in as that account.
+ADMIN_USERNAME = 'LohitGold123'
+ADMIN_CODE     = os.environ.get('ADMIN_CODE')
+
 
 @app.route('/register', methods=['POST'])
 @limiter.limit('10 per hour')
@@ -492,8 +501,20 @@ def login():
     if row is None or not check_password_hash(row['password_hash'], password):
         return jsonify({'error': 'Invalid username or password.'}), 401
 
+    conn = get_db()
+    try:
+        conn.execute(
+            "UPDATE users SET last_login = (NOW() AT TIME ZONE 'UTC') WHERE id = ?",
+            (row['id'],)
+        )
+        conn.commit()
+    finally:
+        conn.close()
+
     session['user_id']  = row['id']
     session['username'] = username
+    if username == ADMIN_USERNAME:
+        session['is_admin'] = True
     return jsonify({
         'message':           f'Welcome back, {username}!',
         'streak':            row['current_streak'],
@@ -923,6 +944,69 @@ def puzzle_rush_score():
         session['puzzle_rush_best'] = best
 
     return jsonify({'best': best.get(key, 0), 'is_new_best': is_new_best})
+
+
+# ── Admin dashboard ───────────────────────────────────────────────────────────
+
+def _is_admin() -> bool:
+    return bool(session.get('is_admin')) or session.get('username') == ADMIN_USERNAME
+
+
+@app.route('/admin', methods=['GET', 'POST'])
+@limiter.limit('20 per hour', methods=['POST'])
+def admin_dashboard():
+    if request.method == 'POST':
+        code = (request.form.get('code') or '').strip()
+        if ADMIN_CODE and code and code == ADMIN_CODE:
+            session['is_admin'] = True
+        else:
+            return render_template(
+                'admin.html', authorized=False,
+                code_enabled=bool(ADMIN_CODE), error='Incorrect code.'
+            ), 403
+
+    if not _is_admin():
+        return render_template(
+            'admin.html', authorized=False, code_enabled=bool(ADMIN_CODE)
+        ), 403
+
+    conn = get_db()
+    try:
+        total_users = conn.execute('SELECT COUNT(*) AS c FROM users').fetchone()['c']
+
+        active_30d = conn.execute('''
+            SELECT COUNT(*) AS c FROM users
+            WHERE last_login >= (NOW() AT TIME ZONE 'UTC') - INTERVAL '30 days'
+        ''').fetchone()['c']
+
+        # "Completed at least one puzzle or lesson" — a correct puzzle attempt
+        # in student_analytics, or a finished video in user_video_progress.
+        engaged_users = conn.execute('''
+            SELECT COUNT(*) AS c FROM users u
+            WHERE EXISTS (
+                      SELECT 1 FROM student_analytics sa
+                      WHERE sa.user_id = u.id AND sa.is_correct = 1
+                  )
+               OR EXISTS (
+                      SELECT 1 FROM user_video_progress vp
+                      WHERE vp.user_id = u.id
+                  )
+        ''').fetchone()['c']
+
+        puzzles_solved = conn.execute(
+            'SELECT COUNT(*) AS c FROM student_analytics WHERE is_correct = 1'
+        ).fetchone()['c']
+    finally:
+        conn.close()
+
+    return render_template(
+        'admin.html',
+        authorized=True,
+        total_users=total_users,
+        active_30d=active_30d,
+        engaged_users=engaged_users,
+        puzzles_solved=puzzles_solved,
+    )
 
 
 if __name__ == '__main__':

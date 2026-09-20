@@ -172,8 +172,20 @@
 
   <style>
     body { background-color: var(--color-bg); color: var(--color-ink); }
-    #board { width: 400px; }
+    #board { width: min(400px, 92vw); }
     #rush-board { width: min(92vw, 480px); }
+    /* Touch-friendly dragging: without this, mobile browsers treat a finger
+       press-and-drag on the board as a page-scroll/selection gesture, which
+       fights chessboard.js's own touch handling and makes piece drags feel
+       stuck or laggy. touch-action:none hands the gesture entirely to the
+       board; user-select/-webkit-touch-callout stop long-press text
+       selection and the iOS callout menu from interrupting a drag. */
+    #board, #rush-board {
+      touch-action: none;
+      -webkit-user-select: none;
+      user-select: none;
+      -webkit-touch-callout: none;
+    }
     .board-b72b1 { border: 2px solid #00dc82 !important; border-radius: 6px; }
     .black-3c85d { background-color: #66b38c !important; }
     .black-3c85d.notation-322f9 { color: #1a3d2b !important; }
@@ -269,10 +281,10 @@
 
   <!-- ─── Trainer Layout ────────────────────────────────────────────────── -->
   <section class="py-10 px-6" style="background:#ffffff;">
-    <div class="max-w-6xl mx-auto flex gap-7 items-start">
+    <div class="max-w-6xl mx-auto flex flex-col md:flex-row gap-7 items-stretch md:items-start">
 
       <!-- ── Left: Level info ──────────────────────────────────────────── -->
-      <aside class="w-52 flex-shrink-0 space-y-4">
+      <aside class="w-full md:w-52 flex-shrink-0 space-y-4">
 
         <!-- Level card -->
         <div class="rounded-xl border border-brand-border p-4 space-y-3" style="background:#f6faf8;">
@@ -417,7 +429,7 @@
       </div>
 
       <!-- ── Right: Live stats + history ───────────────────────────────── -->
-      <aside class="w-52 flex-shrink-0 space-y-4">
+      <aside class="w-full md:w-52 flex-shrink-0 space-y-4">
 
         <!-- Live stats -->
         <div class="rounded-xl border border-brand-border p-4 space-y-3" style="background:#f6faf8;">
@@ -1584,6 +1596,17 @@
     var rushMoveIndex       = 0;
     var rushWaitingComputer = false;
 
+    // A dedicated board instance (kept separate from the standard trainer's
+    // `board`) so Rush never tears down and rebuilds the DOM board between
+    // puzzles — that rebuild (destroy + recreate 64 squares/pieces) was the
+    // main source of visible lag/jank on a mode where puzzles change every
+    // 1-2 seconds. It's created once on the first puzzle and just
+    // repositioned after that. `rushNextPuzzle` holds a puzzle fetched ahead
+    // of time so advancing between puzzles doesn't wait on the network.
+    var rushBoard       = null;
+    var rushNextPuzzle  = null;
+    var rushPrefetching = false;
+
     // Rush pulls puzzles by an explicit numeric rating band (the same
     // "fresh, non-SRS" delivery path Assessment Mode uses) instead of the
     // SRS priority queue. The SRS queue's P1 tier always returns the single
@@ -1629,6 +1652,8 @@
       rushTimeLeft    = durationSec;
       rushCorrect     = 0;
       rushAttempted   = 0;
+      rushNextPuzzle  = null;
+      rushPrefetching = false;
 
       var overlay = document.getElementById('rush-play-overlay');
       overlay.classList.remove('hidden');
@@ -1652,27 +1677,43 @@
       document.getElementById('rush-score-fs').textContent = rushCorrect;
     }
 
+    function fetchRushPuzzle() {
+      var band = rushRatingBand(LEVEL);
+      var url  = '/get-puzzle?min_rating=' + band[0] + '&max_rating=' + band[1];
+      return fetch(url).then(function(r) {
+        if (!r.ok) throw new Error('No puzzles found.');
+        return r.json();
+      });
+    }
+
+    // Fetches the next puzzle in the background while the current one is
+    // still being solved, so loadRushPuzzle() usually has zero network wait
+    // when it's time to advance — that round-trip was the other big
+    // contributor to Rush feeling laggy on a tight timer.
+    function prefetchRushPuzzle() {
+      if (!rushActive || rushPrefetching || rushNextPuzzle) return;
+      rushPrefetching = true;
+      fetchRushPuzzle()
+        .then(function(data) { rushNextPuzzle = data; })
+        .catch(function() { /* fall back to a synchronous fetch next time */ })
+        .then(function() { rushPrefetching = false; });
+    }
+
     function loadRushPuzzle() {
       if (!rushActive) return;
       rushWaitingComputer = false;
 
-      var band = rushRatingBand(LEVEL);
-      var url  = '/get-puzzle?min_rating=' + band[0] + '&max_rating=' + band[1];
+      function applyPuzzle(data) {
+        if (!rushActive) return;
+        currentFen        = data.fen;
+        rushSolutionMoves = (data.engine_best_move || '').split(' ').filter(Boolean);
+        rushMoveIndex      = 0;
 
-      fetch(url)
-        .then(function(r) {
-          if (!r.ok) throw new Error('No puzzles found.');
-          return r.json();
-        })
-        .then(function(data) {
-          if (!rushActive) return;
-          currentFen       = data.fen;
-          rushSolutionMoves = (data.engine_best_move || '').split(' ').filter(Boolean);
-          rushMoveIndex     = 0;
+        game = new Chess(currentFen);
+        var orientation = game.turn() === 'w' ? 'white' : 'black';
 
-          game = new Chess(currentFen);
-          if (board) board.destroy();
-          board = Chessboard('rush-board', {
+        if (!rushBoard) {
+          rushBoard = Chessboard('rush-board', {
             position:    currentFen,
             draggable:   true,
             pieceTheme:  '/static/img/chesspieces/wikipedia/{piece}.png',
@@ -1680,9 +1721,26 @@
               if (!rushActive || rushWaitingComputer) return false;
             },
             onDrop:      onDropRush,
-            orientation: game.turn() === 'w' ? 'white' : 'black'
+            orientation: orientation
           });
-        })
+        } else {
+          rushBoard.orientation(orientation);
+          rushBoard.position(currentFen, false);
+        }
+
+        // Start fetching the puzzle after this one right away.
+        prefetchRushPuzzle();
+      }
+
+      if (rushNextPuzzle) {
+        var data = rushNextPuzzle;
+        rushNextPuzzle = null;
+        applyPuzzle(data);
+        return;
+      }
+
+      fetchRushPuzzle()
+        .then(applyPuzzle)
         .catch(function() {
           if (rushActive) setTimeout(loadRushPuzzle, 500);
         });
@@ -1697,7 +1755,7 @@
       var userMove = source + target;
 
       if (userMove === rushSolutionMoves[rushMoveIndex].slice(0, 4)) {
-        board.position(game.fen());
+        rushBoard.position(game.fen());
         rushMoveIndex++;
 
         if (rushMoveIndex >= rushSolutionMoves.length) {
@@ -1714,7 +1772,7 @@
           var uci   = rushSolutionMoves[rushMoveIndex];
           var promo = uci.length > 4 ? uci[4] : 'q';
           game.move({ from: uci.slice(0, 2), to: uci.slice(2, 4), promotion: promo });
-          board.position(game.fen());
+          rushBoard.position(game.fen());
           rushMoveIndex++;
           rushWaitingComputer = false;
 
