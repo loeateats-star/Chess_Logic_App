@@ -86,7 +86,7 @@
 
   <style>
     body { background-color: var(--color-bg); color: var(--color-ink); }
-    #play-board { width: min(420px, 92vw); }
+    #play-board { width: min(560px, 94vw); }
     #play-board {
       touch-action: none;
       -webkit-user-select: none;
@@ -169,7 +169,7 @@
 
   <!-- ─── Main ──────────────────────────────────────────────────────────── -->
   <section class="py-12 px-6">
-    <div class="max-w-lg mx-auto space-y-5">
+    <div class="max-w-xl mx-auto space-y-5">
 
       <p id="error-banner" class="hidden text-xs font-medium text-center rounded-lg px-4 py-2.5"
          style="background:rgba(239,68,68,0.08); border:1px solid rgba(239,68,68,0.3); color:#ef4444;"></p>
@@ -207,11 +207,7 @@
 
         <div class="rounded-2xl border border-brand-border p-6 space-y-4" style="background:#f6faf8;">
           <p class="text-xs font-semibold uppercase tracking-widest text-brand-gdark text-center">Choose a time control</p>
-          <div class="grid grid-cols-3 gap-3">
-            <button onclick="startSeek('bullet')" class="tc-btn rounded-xl border border-brand-border py-4 text-center hover:border-brand-green transition-colors cursor-pointer bg-white">
-              <div class="text-xl font-black">1+0</div>
-              <div class="text-xs text-brand-muted mt-1">Bullet</div>
-            </button>
+          <div class="grid grid-cols-2 gap-3">
             <button onclick="startSeek('blitz')" class="tc-btn rounded-xl border border-brand-border py-4 text-center hover:border-brand-green transition-colors cursor-pointer bg-white">
               <div class="text-xl font-black">5+0</div>
               <div class="text-xs text-brand-muted mt-1">Blitz</div>
@@ -221,7 +217,7 @@
               <div class="text-xs text-brand-muted mt-1">Rapid</div>
             </button>
           </div>
-          <p class="text-xs text-brand-muted text-center">Casual games only — results won't affect your Lichess rating.</p>
+          <p class="text-xs text-brand-muted text-center">Rated games — results affect your Lichess rating.</p>
         </div>
       </div>
 
@@ -229,7 +225,7 @@
       <div id="state-seeking" class="hidden rounded-2xl border border-brand-border p-10 text-center space-y-4" style="background:#f6faf8;">
         <div class="spinner mx-auto"></div>
         <p class="text-sm font-medium">Searching for an opponent on Lichess…</p>
-        <p class="text-xs text-brand-muted">This can take a few seconds up to a minute or two, depending on who's online.</p>
+        <p class="text-xs text-brand-muted">Rated pairing can take a little while — we'll keep looking for up to 10 minutes.</p>
         <button onclick="cancelSeek()" class="btn-ghost text-xs text-brand-muted hover:text-brand-ink transition-colors cursor-pointer underline">
           Cancel
         </button>

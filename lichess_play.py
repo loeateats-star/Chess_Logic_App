@@ -33,6 +33,7 @@ import hashlib
 import json
 import secrets
 import threading
+import time
 from urllib.parse import urlencode
 
 import chess
@@ -49,13 +50,19 @@ OAUTH_SCOPE  = 'board:play'
 
 # time (minutes), increment (seconds) — mirrors real-time seek limits Lichess accepts
 TIME_CONTROLS = {
-    'bullet': (1, 0),
-    'blitz':  (5, 0),
-    'rapid':  (10, 0),
+    'blitz': (5, 0),
+    'rapid': (10, 0),
 }
 DEFAULT_TIME_CONTROL = 'blitz'
 
-STREAM_TIMEOUT = 120  # generous vs. Lichess's ~9s keepalive heartbeat
+# Rated: these are real Lichess games and count toward the connected
+# account's actual public rating — that's a deliberate choice (rated seeks
+# also draw from a much deeper pool of waiting opponents than casual ones,
+# which is most of why casual seeks were pairing so rarely).
+RATED = True
+
+STREAM_TIMEOUT = 120    # per-read timeout on each streaming connection — generous vs. Lichess's ~9s heartbeat
+MAX_SEEK_WAIT  = 600    # give up and report "no opponent" only after ~10 minutes of retrying
 
 
 def get_db():
@@ -262,59 +269,98 @@ def lichess_disconnect():
 # ── Matchmaking (background thread) ────────────────────────────────────────
 
 def _run_seek(user_id, token, minutes, increment, seek_id):
+    """Keeps re-seeking until paired, cancelled, or MAX_SEEK_WAIT elapses.
+
+    A single /api/board/seek connection isn't guaranteed to stay open
+    forever — Lichess itself can close it (with no match) well before a
+    human waiting on lichess.org's own "Create a game" screen would give up,
+    which is what made pairing look instant-fail rather than patient. So
+    this just re-issues the seek in a loop instead of treating one closed
+    connection as a final answer. Both streaming connections (the seek
+    itself, and the account event stream that announces the match) also
+    reconnect on a dropped/timed-out read rather than giving up the whole
+    attempt.
+    """
     game_info = {'id': None, 'color': None}
+    stop_flag = threading.Event()
+    deadline  = time.monotonic() + MAX_SEEK_WAIT
 
     def watch_events():
-        try:
-            resp = requests.get(
-                LICHESS_BASE + '/api/stream/event',
-                headers=_auth_header(token), stream=True, timeout=STREAM_TIMEOUT
-            )
-        except requests.RequestException:
-            return
-        try:
-            for line in resp.iter_lines():
-                if game_info['id'] is not None or not _is_current(user_id, seek_id):
-                    return
-                if not line:
-                    continue
-                try:
-                    event = json.loads(line)
-                except ValueError:
-                    continue
-                if event.get('type') == 'gameStart':
-                    game_info['id']    = event['game']['gameId']
-                    game_info['color'] = event['game'].get('color')
-                    return
-        finally:
-            resp.close()
+        while not stop_flag.is_set() and time.monotonic() < deadline:
+            if game_info['id'] is not None or not _is_current(user_id, seek_id):
+                return
+            try:
+                resp = requests.get(
+                    LICHESS_BASE + '/api/stream/event',
+                    headers=_auth_header(token), stream=True, timeout=STREAM_TIMEOUT
+                )
+            except requests.RequestException:
+                time.sleep(2)
+                continue
+            try:
+                for line in resp.iter_lines():
+                    if stop_flag.is_set() or game_info['id'] is not None or not _is_current(user_id, seek_id):
+                        return
+                    if not line:
+                        continue
+                    try:
+                        event = json.loads(line)
+                    except ValueError:
+                        continue
+                    if event.get('type') == 'gameStart':
+                        game_info['id']    = event['game']['gameId']
+                        game_info['color'] = event['game'].get('color')
+                        return
+            except requests.RequestException:
+                pass  # connection dropped mid-stream — loop around and reconnect
+            finally:
+                resp.close()
 
     events_thread = threading.Thread(target=watch_events, daemon=True)
     events_thread.start()
 
-    try:
-        seek_resp = requests.post(
-            LICHESS_BASE + '/api/board/seek',
-            headers=_auth_header(token),
-            data={'rated': 'false', 'time': minutes, 'increment': increment},
-            stream=True, timeout=STREAM_TIMEOUT,
-        )
+    seek_error = None
+    while (
+        game_info['id'] is None
+        and _is_current(user_id, seek_id)
+        and time.monotonic() < deadline
+    ):
+        try:
+            seek_resp = requests.post(
+                LICHESS_BASE + '/api/board/seek',
+                headers=_auth_header(token),
+                data={'rated': 'true' if RATED else 'false', 'time': minutes, 'increment': increment},
+                stream=True, timeout=STREAM_TIMEOUT,
+            )
+        except requests.RequestException:
+            time.sleep(2)
+            continue
+
+        if not seek_resp.ok:
+            try:
+                seek_error = seek_resp.json().get('error')
+            except ValueError:
+                seek_error = None
+            seek_resp.close()
+            break  # Lichess rejected the request outright — retrying won't help
+
         try:
             for _ in seek_resp.iter_lines():
                 if game_info['id'] is not None or not _is_current(user_id, seek_id):
                     break
+        except requests.RequestException:
+            pass  # dropped mid-wait — loop around and re-seek
         finally:
             seek_resp.close()
-    except requests.RequestException:
-        pass
 
+    stop_flag.set()
     events_thread.join(timeout=5)
 
     if not _is_current(user_id, seek_id):
         return  # cancelled, or superseded by a newer seek — leave its state alone
 
     if not game_info['id']:
-        _set_state(user_id, {'status': 'idle', 'message': 'No opponent found — try again.'})
+        _set_state(user_id, {'status': 'idle', 'message': seek_error or 'No opponent found — try again.'})
         return
 
     _stream_game(user_id, token, game_info['id'], game_info['color'], seek_id)
