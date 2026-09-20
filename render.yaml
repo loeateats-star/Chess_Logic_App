@@ -10,3 +10,5 @@ services:
         sync: false   # set manually in the Render dashboard — points at Neon, not a Render-managed database
       - key: SECRET_KEY
         generateValue: true
+      - key: ADMIN_CODE
+        sync: false   # set manually in the Render dashboard — the code that unlocks /admin
