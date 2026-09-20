@@ -170,11 +170,11 @@
 </head>
 <body class="text-brand-ink antialiased" style="font-family: Inter, system-ui, sans-serif;">
 
-  <!-- ─── SiteHeader ────────────────────────────────────────────────────── -->
+  <!-- âââ SiteHeader ââââââââââââââââââââââââââââââââââââââââââââââââââââââ -->
   <header class="sticky top-0 z-50 border-b border-brand-border" style="background:rgba(255,255,255,0.92); backdrop-filter:blur(8px);">
     <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
       <a href="/" class="flex items-center gap-2 font-semibold text-brand-ink text-sm">
-        <span class="flex items-center justify-center w-7 h-7 rounded-md bg-brand-green text-brand-ink font-bold text-base">♟</span>
+        <span class="flex items-center justify-center w-7 h-7 rounded-md bg-brand-green text-brand-ink font-bold text-base">â</span>
         Synapchess
       </a>
       <nav class="hidden md:flex items-center gap-8 text-sm font-medium">
@@ -186,6 +186,7 @@
           <div class="nav-dropdown-panel" role="menu">
             <a href="/trainer" role="menuitem">Puzzle Trainer</a>
             <a href="/trainer?rush=1" role="menuitem">Puzzle Rush</a>
+            <a href="/play" role="menuitem">Play Live ⚡</a>
             <a href="/analysis" role="menuitem">Game Analyzer</a>
             <a href="/curriculum" role="menuitem">Lessons</a>
           </div>
@@ -207,7 +208,7 @@
     </div>
   </header>
 
-  <!-- ─── Page Header ───────────────────────────────────────────────────── -->
+  <!-- âââ Page Header âââââââââââââââââââââââââââââââââââââââââââââââââââââ -->
   <section class="py-16 px-6 border-b border-brand-border" style="background:#ffffff;">
     <div class="max-w-6xl mx-auto space-y-6">
 
@@ -247,7 +248,7 @@
           Progress tracked automatically
         </span>
         <span class="inline-flex items-center gap-1.5 border border-brand-border rounded-md px-3 py-1.5 text-xs text-brand-muted bg-white">
-          <span class="text-brand-green">•</span>
+          <span class="text-brand-green">â¢</span>
           Fiscally sponsored by HCB Foundation
         </span>
       </div>
@@ -255,7 +256,7 @@
     </div>
   </section>
 
-  <!-- ─── 4-Tier Playlist Grid ──────────────────────────────────────────── -->
+  <!-- âââ 4-Tier Playlist Grid ââââââââââââââââââââââââââââââââââââââââââââ -->
   <section class="py-24 px-6" style="background:#ffffff;">
     <div class="max-w-6xl mx-auto grid md:grid-cols-2 gap-6">
       {% for section in sections %}
@@ -280,7 +281,7 @@
           <div class="flex items-center justify-between pt-3 border-t border-brand-border text-xs text-brand-muted">
             <span>{{ section.videos|length }} video{{ 's' if section.videos|length != 1 else '' }}</span>
             <a href="/curriculum/{{ section.slug }}"
-               class="text-brand-gdark font-medium hover:text-brand-green transition-colors">▶ Watch Series →</a>
+               class="text-brand-gdark font-medium hover:text-brand-green transition-colors">â¶ Watch Series â</a>
           </div>
         </div>
       </article>
@@ -288,7 +289,7 @@
     </div>
   </section>
 
-  <!-- ─── Dashboard CTA ─────────────────────────────────────────────────── -->
+  <!-- âââ Dashboard CTA âââââââââââââââââââââââââââââââââââââââââââââââââââ -->
   <section class="py-24 px-6 border-t border-brand-border" style="background:#f6faf8;">
     <div class="max-w-4xl mx-auto">
       <div class="rounded-2xl border border-brand-border p-16 text-center space-y-6 bg-white">
@@ -306,14 +307,14 @@
     </div>
   </section>
 
-  <!-- ─── SiteFooter ────────────────────────────────────────────────────── -->
+  <!-- âââ SiteFooter ââââââââââââââââââââââââââââââââââââââââââââââââââââââ -->
   <footer class="border-t border-brand-border pt-16 pb-8 px-6" style="background:#ffffff;">
     <div class="max-w-6xl mx-auto">
 
       <div class="grid grid-cols-2 md:grid-cols-4 gap-10 mb-14">
         <div class="col-span-2 space-y-3">
           <a href="/" class="flex items-center gap-2 font-semibold text-brand-ink text-sm">
-            <span class="flex items-center justify-center w-7 h-7 rounded-md bg-brand-green text-brand-ink font-bold text-base">♟</span>
+            <span class="flex items-center justify-center w-7 h-7 rounded-md bg-brand-green text-brand-ink font-bold text-base">â</span>
             Synapchess
           </a>
           <p class="text-brand-muted text-sm leading-relaxed max-w-xs">
@@ -340,7 +341,7 @@
       </div>
 
       <div class="border-t border-brand-border pt-6 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-brand-muted">
-        <span>© 2026 Synapchess. All rights reserved.</span>
+        <span>Â© 2026 Synapchess. All rights reserved.</span>
         <div class="flex gap-5">
           <a href="#" class="hover:text-brand-ink transition-colors">Privacy</a>
           <a href="#" class="hover:text-brand-ink transition-colors">Terms</a>

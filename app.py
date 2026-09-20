@@ -212,6 +212,14 @@ from game_analysis import games_bp, init_games_db  # noqa: E402
 init_games_db()
 app.register_blueprint(games_bp)
 
+# ── "Play vs the Lichess pool" feature ─────────────────────────────────────────
+# OAuth2 (PKCE) + Board API integration living in its own module for the same
+# reason game_analysis.py is separate — see lichess_play.py's module docstring.
+from lichess_play import lichess_bp, init_lichess_db  # noqa: E402
+
+init_lichess_db()
+app.register_blueprint(lichess_bp)
+
 
 # ── SM-2 spaced-repetition ────────────────────────────────────────────────────
 
@@ -401,6 +409,11 @@ def special_rules():
 @app.route('/analysis')
 def analysis_page():
     return render_template('analysis.html')
+
+
+@app.route('/play')
+def play():
+    return render_template('play.html')
 
 
 @app.route('/trainer')

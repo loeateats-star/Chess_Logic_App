@@ -200,17 +200,17 @@
       animation: checkPop 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
     }
   </style>
-  <!-- Runtime board theme — swapped by JS when entering/exiting practice mode -->
+  <!-- Runtime board theme â swapped by JS when entering/exiting practice mode -->
   <style id="board-theme"></style>
 </head>
 <body class="text-brand-ink antialiased" style="font-family: Inter, system-ui, sans-serif;">
 
-  <!-- ─── SiteHeader ────────────────────────────────────────────────────── -->
+  <!-- âââ SiteHeader ââââââââââââââââââââââââââââââââââââââââââââââââââââââ -->
   <header class="sticky top-0 z-50 border-b border-brand-border" style="background:rgba(255,255,255,0.92); backdrop-filter:blur(8px);">
     <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
 
       <a href="/" class="flex items-center gap-2 font-semibold text-brand-ink text-sm">
-        <span class="flex items-center justify-center w-7 h-7 rounded-md bg-brand-green text-brand-ink font-bold text-base">♟</span>
+        <span class="flex items-center justify-center w-7 h-7 rounded-md bg-brand-green text-brand-ink font-bold text-base">â</span>
         Synapchess
       </a>
 
@@ -223,6 +223,7 @@
           <div class="nav-dropdown-panel" role="menu">
             <a href="/trainer" role="menuitem">Puzzle Trainer</a>
             <a href="/trainer?rush=1" role="menuitem">Puzzle Rush</a>
+            <a href="/play" role="menuitem">Play Live ⚡</a>
             <a href="/analysis" role="menuitem">Game Analyzer</a>
             <a href="/curriculum" role="menuitem">Lessons</a>
           </div>
@@ -258,7 +259,7 @@
     </div>
   </header>
 
-  <!-- ─── Page Header ───────────────────────────────────────────────────── -->
+  <!-- âââ Page Header âââââââââââââââââââââââââââââââââââââââââââââââââââââ -->
   <section class="py-10 px-6 border-b border-brand-border" style="background:#ffffff;">
     <div class="max-w-6xl mx-auto space-y-3">
       <a href="/"
@@ -279,11 +280,11 @@
     </div>
   </section>
 
-  <!-- ─── Trainer Layout ────────────────────────────────────────────────── -->
+  <!-- âââ Trainer Layout ââââââââââââââââââââââââââââââââââââââââââââââââââ -->
   <section class="py-10 px-6" style="background:#ffffff;">
     <div class="max-w-6xl mx-auto flex flex-col md:flex-row gap-7 items-stretch md:items-start">
 
-      <!-- ── Left: Level info ──────────────────────────────────────────── -->
+      <!-- ââ Left: Level info ââââââââââââââââââââââââââââââââââââââââââââ -->
       <aside class="w-full md:w-52 flex-shrink-0 space-y-4">
 
         <!-- Level card -->
@@ -325,7 +326,7 @@
           <p class="text-brand-muted text-xs">Session streak</p>
           <div class="flex items-center gap-2">
             <span id="streak-count" class="text-brand-ink text-2xl font-extrabold">0</span>
-            <span id="streak-stars" class="text-base">⭐</span>
+            <span id="streak-stars" class="text-base">â­</span>
           </div>
         </div>
 
@@ -348,31 +349,31 @@
           <a href="/trainer?level=1"
              data-level="1"
              class="level-link flex items-center justify-between px-3 py-2 rounded-lg border border-brand-border hover:border-brand-green text-brand-muted hover:text-brand-ink transition-colors text-xs bg-white">
-            <span>Level 1</span><span>⭐</span>
+            <span>Level 1</span><span>â­</span>
           </a>
           <a href="/trainer?level=2"
              data-level="2"
              class="level-link flex items-center justify-between px-3 py-2 rounded-lg border border-brand-border hover:border-brand-green text-brand-muted hover:text-brand-ink transition-colors text-xs bg-white">
-            <span>Level 2</span><span>⭐⭐</span>
+            <span>Level 2</span><span>â­â­</span>
           </a>
           <a href="/trainer?level=3"
              data-level="3"
              class="level-link flex items-center justify-between px-3 py-2 rounded-lg border border-brand-border hover:border-brand-green text-brand-muted hover:text-brand-ink transition-colors text-xs bg-white">
-            <span>Level 3</span><span>⭐⭐⭐</span>
+            <span>Level 3</span><span>â­â­â­</span>
           </a>
         </div>
 
       </aside>
 
-      <!-- ── Center: Board + controls ──────────────────────────────────── -->
+      <!-- ââ Center: Board + controls ââââââââââââââââââââââââââââââââââââ -->
       <div class="flex-1 flex flex-col items-center gap-5">
 
         <!-- Mode switcher -->
         <div class="w-full max-w-sm space-y-1.5">
           <div class="flex items-center gap-1.5 p-1 rounded-lg border border-brand-border" style="background:#f6faf8;">
             <button id="mode-btn-standard" class="mode-btn flex-1 text-xs font-semibold py-1.5 rounded-md transition-colors cursor-pointer" onclick="setMode('standard')">Standard</button>
-            <button id="mode-btn-improve" class="mode-btn flex-1 text-xs font-semibold py-1.5 rounded-md transition-colors cursor-pointer" onclick="setMode('improve')">🎯 Improve</button>
-            <button id="mode-btn-assessment" class="mode-btn flex-1 text-xs font-semibold py-1.5 rounded-md transition-colors cursor-pointer" onclick="setMode('assessment')">📊 Assessment</button>
+            <button id="mode-btn-improve" class="mode-btn flex-1 text-xs font-semibold py-1.5 rounded-md transition-colors cursor-pointer" onclick="setMode('improve')">ð¯ Improve</button>
+            <button id="mode-btn-assessment" class="mode-btn flex-1 text-xs font-semibold py-1.5 rounded-md transition-colors cursor-pointer" onclick="setMode('assessment')">ð Assessment</button>
           </div>
           <p id="improve-lock-hint" class="hidden text-brand-muted text-[11px] text-center"></p>
         </div>
@@ -381,25 +382,25 @@
           <div id="board"></div>
         </div>
 
-        <!-- Practice mode banner — shown when reviewing a history entry -->
+        <!-- Practice mode banner â shown when reviewing a history entry -->
         <div id="practice-banner"
              class="hidden w-full max-w-sm text-center py-2 px-4 rounded-lg text-xs font-semibold"
              style="background:rgba(139,92,246,0.08); border:1px solid rgba(139,92,246,0.3); color:#7c3aed;">
-          ♻ Practice Mode: reviewing a previous puzzle. Attempts won't count toward your score.
+          â» Practice Mode: reviewing a previous puzzle. Attempts won't count toward your score.
         </div>
 
         <!-- Improve mode banner -->
         <div id="improve-banner"
              class="hidden w-full max-w-sm text-center py-2 px-4 rounded-lg text-xs font-semibold"
              style="background:rgba(0,220,130,0.08); border:1px solid rgba(0,170,99,0.3); color:#00703f;">
-          🎯 Improve Mode: training your weakest themes — <span id="improve-banner-themes"></span>
+          ð¯ Improve Mode: training your weakest themes â <span id="improve-banner-themes"></span>
         </div>
 
         <!-- Assessment mode banner -->
         <div id="assessment-banner" class="hidden w-full max-w-sm space-y-1.5">
           <div class="text-center py-2 px-4 rounded-lg text-xs font-semibold"
                style="background:rgba(59,130,246,0.08); border:1px solid rgba(59,130,246,0.3); color:#1d4ed8;">
-            📊 Assessment Mode: puzzle <span id="assessment-progress-text">1/50</span>
+            ð Assessment Mode: puzzle <span id="assessment-progress-text">1/50</span>
           </div>
           <div class="w-full h-1.5 rounded-full" style="background:#e7ebe9;">
             <div id="assessment-progress-bar" class="h-1.5 rounded-full transition-all duration-300" style="background:#3b82f6; width:0%;"></div>
@@ -422,13 +423,13 @@
           </button>
           <button id="rush-launch-btn" onclick="openRushSetup()"
                   class="border border-brand-border hover:border-brand-green text-brand-muted hover:text-brand-ink font-semibold px-5 py-2.5 rounded-md transition-colors text-sm cursor-pointer bg-white">
-            ⚡ Puzzle Rush
+            â¡ Puzzle Rush
           </button>
         </div>
 
       </div>
 
-      <!-- ── Right: Live stats + history ───────────────────────────────── -->
+      <!-- ââ Right: Live stats + history âââââââââââââââââââââââââââââââââ -->
       <aside class="w-full md:w-52 flex-shrink-0 space-y-4">
 
         <!-- Live stats -->
@@ -448,7 +449,7 @@
             </p>
             <button onclick="openModal('login')"
                     class="text-brand-gdark text-xs font-medium hover:text-brand-green transition-colors cursor-pointer">
-              Sign in →
+              Sign in â
             </button>
           </div>
 
@@ -456,15 +457,15 @@
           <div id="stats-content" class="space-y-2 hidden">
             <div class="flex items-center justify-between rounded-lg px-3 py-2 border border-brand-border bg-white">
               <span class="text-brand-muted text-xs">Total</span>
-              <span id="stat-total" class="text-brand-ink text-xs font-bold">—</span>
+              <span id="stat-total" class="text-brand-ink text-xs font-bold">â</span>
             </div>
             <div class="flex items-center justify-between rounded-lg px-3 py-2 border border-brand-border bg-white">
               <span class="text-brand-muted text-xs">Accuracy</span>
-              <span id="stat-accuracy" class="text-brand-gdark text-xs font-bold">—</span>
+              <span id="stat-accuracy" class="text-brand-gdark text-xs font-bold">â</span>
             </div>
             <div class="flex items-center justify-between rounded-lg px-3 py-2 border border-brand-border bg-white">
               <span class="text-brand-muted text-xs">Avg Time</span>
-              <span id="stat-velocity" class="text-brand-ink text-xs font-bold">—</span>
+              <span id="stat-velocity" class="text-brand-ink text-xs font-bold">â</span>
             </div>
             <div class="border-t border-brand-border pt-2 mt-1 space-y-1">
               <p class="text-brand-muted text-[10px] uppercase tracking-wide">By theme</p>
@@ -495,14 +496,14 @@
     </div>
   </section>
 
-  <!-- ─── SiteFooter ────────────────────────────────────────────────────── -->
+  <!-- âââ SiteFooter ââââââââââââââââââââââââââââââââââââââââââââââââââââââ -->
   <footer class="border-t border-brand-border pt-16 pb-8 px-6" style="background:#ffffff;">
     <div class="max-w-6xl mx-auto">
 
       <div class="grid grid-cols-2 md:grid-cols-4 gap-10 mb-14">
         <div class="col-span-2 space-y-3">
           <a href="/" class="flex items-center gap-2 font-semibold text-brand-ink text-sm">
-            <span class="flex items-center justify-center w-7 h-7 rounded-md bg-brand-green text-brand-ink font-bold text-base">♟</span>
+            <span class="flex items-center justify-center w-7 h-7 rounded-md bg-brand-green text-brand-ink font-bold text-base">â</span>
             Synapchess
           </a>
           <p class="text-brand-muted text-sm leading-relaxed max-w-xs">
@@ -529,7 +530,7 @@
       </div>
 
       <div class="border-t border-brand-border pt-6 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-brand-muted">
-        <span>© 2026 Synapchess. All rights reserved.</span>
+        <span>Â© 2026 Synapchess. All rights reserved.</span>
         <div class="flex gap-5">
           <a href="#" class="hover:text-brand-ink transition-colors">Privacy</a>
           <a href="#" class="hover:text-brand-ink transition-colors">Terms</a>
@@ -538,13 +539,13 @@
     </div>
   </footer>
 
-  <!-- ─── Budget Complete Overlay ─────────────────────────────────────── -->
+  <!-- âââ Budget Complete Overlay âââââââââââââââââââââââââââââââââââââââ -->
   <div id="budget-overlay" class="fixed inset-0 z-[200] flex items-center justify-center hidden">
     <div class="absolute inset-0" style="background:rgba(255,255,255,0.96);"></div>
     <div class="relative z-10 text-center space-y-6 px-6 max-w-sm mx-auto">
       <div class="w-20 h-20 rounded-full mx-auto flex items-center justify-center text-5xl"
            style="background:#f6faf8; border:2px solid #00dc82;">
-        🏆
+        ð
       </div>
       <div class="space-y-3">
         <h2 class="text-3xl font-extrabold text-brand-ink leading-tight">
@@ -554,7 +555,7 @@
           You've hit your training allocation for today.<br />
           Rest up and let your brain consolidate your gains.
         </p>
-        <p class="text-brand-gdark font-bold text-lg">See you tomorrow. ♟</p>
+        <p class="text-brand-gdark font-bold text-lg">See you tomorrow. â</p>
       </div>
       <div class="flex flex-col items-center gap-3 pt-2">
         <a href="/"
@@ -569,13 +570,13 @@
     </div>
   </div>
 
-  <!-- ─── Assessment Results Overlay ──────────────────────────────────── -->
+  <!-- âââ Assessment Results Overlay ââââââââââââââââââââââââââââââââââââ -->
   <div id="assessment-overlay" class="fixed inset-0 z-[200] flex items-center justify-center hidden">
     <div class="absolute inset-0" style="background:rgba(255,255,255,0.96);"></div>
     <div class="relative z-10 text-center space-y-5 px-6 max-w-md mx-auto">
       <div class="w-20 h-20 rounded-full mx-auto flex items-center justify-center text-5xl"
            style="background:#f6faf8; border:2px solid #3b82f6;">
-        📊
+        ð
       </div>
       <div class="space-y-2">
         <h2 class="text-3xl font-extrabold text-brand-ink leading-tight">Assessment Complete!</h2>
@@ -588,7 +589,7 @@
       <div class="flex flex-col items-center gap-3 pt-2">
         <button onclick="closeAssessmentOverlayAndImprove()"
                 class="w-full max-w-xs bg-brand-green hover:bg-brand-gdark text-brand-ink font-semibold py-3 rounded-md transition-colors text-sm cursor-pointer">
-          🎯 Start Improve Mode
+          ð¯ Start Improve Mode
         </button>
         <button onclick="closeAssessmentOverlay()"
                 class="text-brand-muted hover:text-brand-ink text-sm transition-colors cursor-pointer">
@@ -598,16 +599,16 @@
     </div>
   </div>
 
-  <!-- ─── Puzzle Rush Full-Screen Play Overlay ─────────────────────────── -->
+  <!-- âââ Puzzle Rush Full-Screen Play Overlay âââââââââââââââââââââââââââ -->
   <div id="rush-play-overlay" class="hidden fixed inset-0 z-[150] items-center" style="background:var(--color-bg);">
     <div class="w-full h-full flex flex-col items-center">
       <div class="w-full max-w-md flex items-center justify-between px-6 py-5">
         <button onclick="quitRush()"
                 class="text-brand-muted hover:text-brand-ink text-sm font-semibold transition-colors cursor-pointer">
-          ✕ Quit
+          â Quit
         </button>
         <div class="flex items-center gap-2">
-          <span class="text-xl">⚡</span>
+          <span class="text-xl">â¡</span>
           <span id="rush-timer-fs" class="text-brand-ink text-3xl font-extrabold tabular-nums">1:00</span>
         </div>
         <div class="flex items-center gap-2">
@@ -623,15 +624,15 @@
     </div>
   </div>
 
-  <!-- ─── Puzzle Rush Setup Overlay ────────────────────────────────────── -->
+  <!-- âââ Puzzle Rush Setup Overlay ââââââââââââââââââââââââââââââââââââââ -->
   <div id="rush-setup-overlay" class="fixed inset-0 z-[200] flex items-center justify-center hidden">
     <div class="absolute inset-0" style="background:rgba(255,255,255,0.96);" onclick="closeRushSetup()"></div>
     <div class="relative z-10 text-center space-y-5 px-8 py-8 max-w-sm mx-auto rounded-2xl border border-brand-border" style="background:#ffffff;">
       <button onclick="closeRushSetup()"
-              class="absolute top-4 right-4 text-brand-muted hover:text-brand-ink transition-colors text-lg leading-none cursor-pointer">✕</button>
+              class="absolute top-4 right-4 text-brand-muted hover:text-brand-ink transition-colors text-lg leading-none cursor-pointer">â</button>
       <div class="w-16 h-16 rounded-full mx-auto flex items-center justify-center text-4xl"
            style="background:#e6f9f0; border:2px solid #00dc82;">
-        ⚡
+        â¡
       </div>
       <div class="space-y-2">
         <h2 class="text-2xl font-extrabold text-brand-ink leading-tight">Puzzle Rush</h2>
@@ -641,36 +642,36 @@
         <button onclick="startRush(60)"
                 class="w-full flex items-center justify-between px-4 py-3 rounded-lg border border-brand-border hover:border-brand-green transition-colors cursor-pointer bg-white">
           <span class="text-brand-ink font-semibold text-sm">1 Minute</span>
-          <span id="rush-best-60" class="text-brand-muted text-xs">Best: —</span>
+          <span id="rush-best-60" class="text-brand-muted text-xs">Best: â</span>
         </button>
         <button onclick="startRush(120)"
                 class="w-full flex items-center justify-between px-4 py-3 rounded-lg border border-brand-border hover:border-brand-green transition-colors cursor-pointer bg-white">
           <span class="text-brand-ink font-semibold text-sm">2 Minutes</span>
-          <span id="rush-best-120" class="text-brand-muted text-xs">Best: —</span>
+          <span id="rush-best-120" class="text-brand-muted text-xs">Best: â</span>
         </button>
         <button onclick="startRush(180)"
                 class="w-full flex items-center justify-between px-4 py-3 rounded-lg border border-brand-border hover:border-brand-green transition-colors cursor-pointer bg-white">
           <span class="text-brand-ink font-semibold text-sm">3 Minutes</span>
-          <span id="rush-best-180" class="text-brand-muted text-xs">Best: —</span>
+          <span id="rush-best-180" class="text-brand-muted text-xs">Best: â</span>
         </button>
       </div>
     </div>
   </div>
 
-  <!-- ─── Puzzle Rush Results Overlay ──────────────────────────────────── -->
+  <!-- âââ Puzzle Rush Results Overlay ââââââââââââââââââââââââââââââââââââ -->
   <div id="rush-results-overlay" class="fixed inset-0 z-[200] flex items-center justify-center hidden">
     <div class="absolute inset-0" style="background:rgba(255,255,255,0.96);"></div>
     <div class="relative z-10 text-center space-y-5 px-8 py-8 max-w-sm mx-auto rounded-2xl border border-brand-border" style="background:#ffffff;">
       <div class="w-20 h-20 rounded-full mx-auto flex items-center justify-center text-5xl"
            style="background:#f6faf8; border:2px solid #00dc82;">
-        ⚡
+        â¡
       </div>
       <div class="space-y-1">
         <h2 class="text-3xl font-extrabold text-brand-ink leading-tight">Time's Up!</h2>
         <span id="rush-new-best-badge"
               class="hidden inline-block text-xs font-bold uppercase tracking-wide px-2 py-1 rounded-full"
               style="background:#e6f9f0; color:#00aa63;">
-          🏆 New Best!
+          ð New Best!
         </span>
       </div>
       <div class="grid grid-cols-2 gap-3">
@@ -687,7 +688,7 @@
       <div class="flex flex-col items-center gap-3 pt-2">
         <button onclick="closeRushResults(true)"
                 class="w-full max-w-xs bg-brand-green hover:bg-brand-gdark text-brand-ink font-semibold py-3 rounded-md transition-colors text-sm cursor-pointer">
-          ⚡ Play Again
+          â¡ Play Again
         </button>
         <button onclick="closeRushResults(false)"
                 class="text-brand-muted hover:text-brand-ink text-sm transition-colors cursor-pointer">
@@ -697,13 +698,13 @@
     </div>
   </div>
 
-  <!-- ─── Auth Modal ────────────────────────────────────────────────────── -->
+  <!-- âââ Auth Modal ââââââââââââââââââââââââââââââââââââââââââââââââââââââ -->
   <div id="auth-modal" class="fixed inset-0 z-[100] flex items-center justify-center hidden">
     <div class="absolute inset-0" style="background:rgba(15,23,20,0.5);" onclick="closeModal()"></div>
     <div class="relative z-10 w-full max-w-sm mx-4 rounded-2xl border border-brand-border p-8 space-y-6"
          style="background:#ffffff;">
       <button onclick="closeModal()"
-              class="absolute top-4 right-4 text-brand-muted hover:text-brand-ink transition-colors text-lg leading-none cursor-pointer">✕</button>
+              class="absolute top-4 right-4 text-brand-muted hover:text-brand-ink transition-colors text-lg leading-none cursor-pointer">â</button>
       <div class="flex gap-6 border-b border-brand-border pb-4">
         <button id="tab-login" onclick="switchTab('login')"
                 class="text-brand-ink font-semibold text-sm pb-1 border-b-2 border-brand-green cursor-pointer">Login</button>
@@ -726,24 +727,24 @@
     </div>
   </div>
 
-  <!-- ─── Engine ────────────────────────────────────────────────────────── -->
+  <!-- âââ Engine ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ -->
   <script>
-    // ── Level config (from Flask) ──────────────────────────────────────────
+    // ââ Level config (from Flask) ââââââââââââââââââââââââââââââââââââââââââ
     var LEVEL = {{ level }};
 
     var LEVEL_INFO = {
-      1: { label: 'Level 1 · Beginner Tactics',       title: 'Beginner Tactics Trainer',       stars: '⭐',     desc: 'Short tactical combinations: absolute pins, skewers, and double attacks.', range: 'Rating below 1000', unlock: 'Streak 0–4'  },
-      2: { label: 'Level 2 · Intermediate Strategy',  title: 'Intermediate Strategy Trainer',  stars: '⭐⭐',   desc: 'Multi-move combinations: piece overloads, decoy sacrifices, and positional play.', range: 'Rating 1000–1600', unlock: 'Streak 5–9'  },
-      3: { label: 'Level 3 · Advanced Calculation',   title: 'Advanced Calculation Trainer',   stars: '⭐⭐⭐', desc: 'Deep calculation: horizon effects, endgame logic, and master-level sequences.', range: 'Rating above 1600', unlock: 'Streak 10+' }
+      1: { label: 'Level 1 Â· Beginner Tactics',       title: 'Beginner Tactics Trainer',       stars: 'â­',     desc: 'Short tactical combinations: absolute pins, skewers, and double attacks.', range: 'Rating below 1000', unlock: 'Streak 0â4'  },
+      2: { label: 'Level 2 Â· Intermediate Strategy',  title: 'Intermediate Strategy Trainer',  stars: 'â­â­',   desc: 'Multi-move combinations: piece overloads, decoy sacrifices, and positional play.', range: 'Rating 1000â1600', unlock: 'Streak 5â9'  },
+      3: { label: 'Level 3 Â· Advanced Calculation',   title: 'Advanced Calculation Trainer',   stars: 'â­â­â­', desc: 'Deep calculation: horizon effects, endgame logic, and master-level sequences.', range: 'Rating above 1600', unlock: 'Streak 10+' }
     };
     var cfg = LEVEL_INFO[LEVEL] || LEVEL_INFO[1];
 
-    // ── Rating-based difficulty + theme display helpers ─────────────────────
+    // ââ Rating-based difficulty + theme display helpers âââââââââââââââââââââ
     function difficultyFromRating(rating) {
       if (typeof rating !== 'number') return { stars: '', label: '' };
-      if (rating < 1000)  return { stars: '⭐',   label: 'Beginner' };
-      if (rating <= 1600) return { stars: '⭐⭐',  label: 'Intermediate' };
-      return                     { stars: '⭐⭐⭐', label: 'Advanced' };
+      if (rating < 1000)  return { stars: 'â­',   label: 'Beginner' };
+      if (rating <= 1600) return { stars: 'â­â­',  label: 'Intermediate' };
+      return                     { stars: 'â­â­â­', label: 'Advanced' };
     }
 
     function prettyTheme(token) {
@@ -751,7 +752,7 @@
       return token.replace(/([A-Z])/g, ' $1').replace(/^./, function(c) { return c.toUpperCase(); });
     }
 
-    // ── State ──────────────────────────────────────────────────────────────
+    // ââ State ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
     var board              = null;
     var game               = null;
     var currentFen         = null;
@@ -776,7 +777,7 @@
     var budgetNotified     = false;   // true once the budget overlay has been shown
     var practiceMode       = false;   // true when reviewing a history entry (no scoring)
 
-    // ── Improve / Assessment mode state ──────────────────────────────────────
+    // ââ Improve / Assessment mode state ââââââââââââââââââââââââââââââââââââââ
     var currentMode         = 'standard';  // 'standard' | 'improve' | 'assessment'
     var improveThemes       = [];
     var assessmentThemePool = [];          // fetched once from /get-common-themes
@@ -787,7 +788,7 @@
     var lastAnalytics       = null;        // cached /get-analytics response
     var IMPROVE_UNLOCK_AT   = 100;
 
-    // ── Page init ──────────────────────────────────────────────────────────
+    // ââ Page init ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
     document.addEventListener('DOMContentLoaded', function() {
       // Fill header and sidebar with level config
       document.getElementById('header-label').textContent = cfg.label;
@@ -818,7 +819,7 @@
       }
     });
 
-    // ── Auth init ──────────────────────────────────────────────────────────
+    // ââ Auth init ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
     function initAuth() {
       fetch('/me')
         .then(function(r) { return r.json(); })
@@ -861,14 +862,14 @@
       }
     }
 
-    // ── Streak ─────────────────────────────────────────────────────────────
+    // ââ Streak âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
     function updateStreakDisplay() {
       var lvl = streak < 5 ? 1 : streak < 10 ? 2 : 3;
       document.getElementById('streak-count').textContent = streak;
-      document.getElementById('streak-stars').textContent = '⭐'.repeat(lvl);
+      document.getElementById('streak-stars').textContent = 'â­'.repeat(lvl);
     }
 
-    // ── Confetti ───────────────────────────────────────────────────────────
+    // ââ Confetti âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
     function fireConfetti() {
       if (typeof confetti !== 'function') return;
       confetti({
@@ -879,7 +880,7 @@
       });
     }
 
-    // ── Puzzle history entry ───────────────────────────────────────────────
+    // ââ Puzzle history entry âââââââââââââââââââââââââââââââââââââââââââââââ
     // result: 'green' (solved 1st/2nd try), 'yellow' (solved 3rd try), 'red' (failed)
     function addHistoryEntry(result) {
       if (puzzleChecked || practiceMode) return;
@@ -899,18 +900,18 @@
 
       var bg, fg, sym, label;
       if (result === 'yellow') {
-        bg = '#f59e0b'; fg = '#0b0c10'; sym = '✓'; label = 'Solved (3rd try)';
+        bg = '#f59e0b'; fg = '#0b0c10'; sym = 'â'; label = 'Solved (3rd try)';
       } else if (result === 'red') {
-        bg = '#ef4444'; fg = '#ffffff'; sym = '✗'; label = 'Failed';
+        bg = '#ef4444'; fg = '#ffffff'; sym = 'â'; label = 'Failed';
       } else {
-        bg = '#00dc82'; fg = '#0b0c10'; sym = '✓'; label = 'Solved';
+        bg = '#00dc82'; fg = '#0b0c10'; sym = 'â'; label = 'Solved';
         fireConfetti();
       }
 
       var container = document.getElementById('history-checks');
       var el        = document.createElement('div');
       el.className  = 'check-pop';
-      el.title      = 'Puzzle #' + savedNum + ': ' + label + ' · Click to review in Practice Mode';
+      el.title      = 'Puzzle #' + savedNum + ': ' + label + ' Â· Click to review in Practice Mode';
       el.style.cssText = [
         'width:34px', 'height:34px', 'border-radius:50%',
         'background:' + bg, 'color:' + fg,
@@ -926,7 +927,7 @@
       document.getElementById('puzzle-count').textContent = sessionCount;
     }
 
-    // ── Board theme (normal = mint green, practice = light purple) ────────
+    // ââ Board theme (normal = mint green, practice = light purple) ââââââââ
     function setBoardTheme(mode) {
       var el = document.getElementById('board-theme');
       if (mode === 'practice') {
@@ -940,7 +941,7 @@
       }
     }
 
-    // ── Practice mode: replay a history puzzle without scoring ─────────────
+    // ââ Practice mode: replay a history puzzle without scoring âââââââââââââ
     function reviewPuzzle(fen, moves, puzzleId, rating, theme) {
       clearTimeout(replayTimeout);
       isReplaying        = false;
@@ -985,7 +986,7 @@
       setStatus(whose + ' to move, practice this ' + total + '-move puzzle.');
     }
 
-    // ── Improve / Assessment mode ────────────────────────────────────────────
+    // ââ Improve / Assessment mode ââââââââââââââââââââââââââââââââââââââââââââ
     function updateModeButtonsUI() {
       ['standard', 'improve', 'assessment'].forEach(function(m) {
         var btn = document.getElementById('mode-btn-' + m);
@@ -1015,7 +1016,7 @@
         btn.style.cursor  = 'pointer';
       } else {
         hint.classList.remove('hidden');
-        hint.textContent = '🔒 Unlocks at ' + IMPROVE_UNLOCK_AT + ' puzzles (' + total + '/' + IMPROVE_UNLOCK_AT + ')';
+        hint.textContent = 'ð Unlocks at ' + IMPROVE_UNLOCK_AT + ' puzzles (' + total + '/' + IMPROVE_UNLOCK_AT + ')';
         btn.style.opacity = '0.5';
         btn.style.cursor  = 'not-allowed';
       }
@@ -1061,7 +1062,7 @@
       }
 
       if (improveThemes.length === 0) {
-        setStatus('Not enough theme data yet to find weak spots — keep solving!', '#ef4444');
+        setStatus('Not enough theme data yet to find weak spots â keep solving!', '#ef4444');
         currentMode = 'standard';
         updateModeButtonsUI();
         return;
@@ -1163,14 +1164,14 @@
       setMode('improve');
     }
 
-    // ── Status ─────────────────────────────────────────────────────────────
+    // ââ Status âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
     function setStatus(text, color) {
       var el         = document.getElementById('status');
       el.textContent = text;
       el.style.color = color || '#64748b';
     }
 
-    // ── Load puzzle ────────────────────────────────────────────────────────
+    // ââ Load puzzle ââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
     function loadPuzzle() {
       clearTimeout(replayTimeout);
       isReplaying  = false;
@@ -1185,7 +1186,7 @@
       puzzleChecked = false;
       wrongAttempts = 0;
 
-      setStatus('Loading puzzle…');
+      setStatus('Loading puzzleâ¦');
       document.getElementById('difficulty-stars').textContent = '';
       document.getElementById('difficulty-label').textContent = '';
       document.getElementById('puzzle-theme').textContent = '';
@@ -1251,7 +1252,7 @@
         });
     }
 
-    // ── Drop handler ───────────────────────────────────────────────────────
+    // ââ Drop handler âââââââââââââââââââââââââââââââââââââââââââââââââââââââ
     function onDrop(source, target) {
       if (isReplaying) return 'snapback';
 
@@ -1270,15 +1271,15 @@
             updateStreakDisplay();
             addHistoryEntry(wrongAttempts < 2 ? 'green' : 'yellow');
             logAttempt(true);
-            setStatus('✓ Puzzle solved! Well done.', '#00aa63');
+            setStatus('â Puzzle solved! Well done.', '#00aa63');
             recordAssessmentIfActive(true);
           } else {
-            setStatus('✓ Solved in practice! Click "New Puzzle" for a fresh one.', '#7c3aed');
+            setStatus('â Solved in practice! Click "New Puzzle" for a fresh one.', '#7c3aed');
           }
           return;
         }
 
-        setStatus('✓ Correct! Computer is responding…', '#00aa63');
+        setStatus('â Correct! Computer is respondingâ¦', '#00aa63');
         playComputerMove();
 
       } else {
@@ -1294,25 +1295,25 @@
           if (!practiceMode) {
             addHistoryEntry('red');
             if (currentMode === 'assessment') {
-              setStatus('✗ Failed. Recording and loading next puzzle…', '#ef4444');
+              setStatus('â Failed. Recording and loading next puzzleâ¦', '#ef4444');
               recordAssessmentIfActive(false);
             } else {
-              setStatus('✗ No more attempts. Loading next puzzle…', '#ef4444');
+              setStatus('â No more attempts. Loading next puzzleâ¦', '#ef4444');
               setTimeout(loadPuzzle, 1800);
             }
           } else {
-            setStatus('✗ All attempts used. Click "New Puzzle" for a fresh puzzle.', '#ef4444');
+            setStatus('â All attempts used. Click "New Puzzle" for a fresh puzzle.', '#ef4444');
           }
           return 'snapback';
         }
 
         var left = 3 - wrongAttempts;
-        setStatus('✗ Incorrect. ' + left + ' attempt' + (left === 1 ? '' : 's') + ' remaining.', '#ef4444');
+        setStatus('â Incorrect. ' + left + ' attempt' + (left === 1 ? '' : 's') + ' remaining.', '#ef4444');
         return 'snapback';
       }
     }
 
-    // ── Computer response ──────────────────────────────────────────────────
+    // ââ Computer response ââââââââââââââââââââââââââââââââââââââââââââââââââ
     function playComputerMove() {
       waitingForComputer = true;
       setTimeout(function() {
@@ -1332,10 +1333,10 @@
             updateStreakDisplay();
             addHistoryEntry(wrongAttempts < 2 ? 'green' : 'yellow');
             logAttempt(true);
-            setStatus('✓ Puzzle solved! Well done.', '#00aa63');
+            setStatus('â Puzzle solved! Well done.', '#00aa63');
             recordAssessmentIfActive(true);
           } else {
-            setStatus('✓ Solved in practice! Click "New Puzzle" for a fresh one.', '#7c3aed');
+            setStatus('â Solved in practice! Click "New Puzzle" for a fresh one.', '#7c3aed');
           }
         } else {
           var whose = game.turn() === 'w' ? 'White' : 'Black';
@@ -1345,7 +1346,7 @@
       }, 450);
     }
 
-    // ── Telemetry ──────────────────────────────────────────────────────────
+    // ââ Telemetry ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
     function logAttempt(isCorrect) {
       if (!currentPuzzleId || !currentUser || practiceMode) return;
       var timeMs = puzzleStartTime ? Math.round(performance.now() - puzzleStartTime) : null;
@@ -1389,7 +1390,7 @@
           document.getElementById('stat-total').textContent    = d.total_attempts;
           var pct  = d.total_attempts > 0 ? Math.round(d.accuracy) + '%' : '0%';
           document.getElementById('stat-accuracy').textContent = pct;
-          var secs = d.avg_time_ms > 0 ? (d.avg_time_ms / 1000).toFixed(1) + 's' : '—';
+          var secs = d.avg_time_ms > 0 ? (d.avg_time_ms / 1000).toFixed(1) + 's' : 'â';
           document.getElementById('stat-velocity').textContent = secs;
 
           var wrap = document.getElementById('stat-themes');
@@ -1402,7 +1403,7 @@
         .catch(function() {});
     }
 
-    // ── Auth modal ─────────────────────────────────────────────────────────
+    // ââ Auth modal âââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
     function openModal(tab) {
       activeModalTab = tab || 'login';
       switchTab(activeModalTab);
@@ -1452,7 +1453,7 @@
         return;
       }
       errorEl.classList.add('hidden');
-      submitBtn.textContent = 'Please wait…';
+      submitBtn.textContent = 'Please waitâ¦';
 
       var endpoint = activeModalTab === 'login' ? '/login' : '/register';
       fetch(endpoint, {
@@ -1500,7 +1501,7 @@
       });
     }
 
-    // ── Time budget ────────────────────────────────────────────────────────
+    // ââ Time budget ââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
     function updateBudgetBar() {
       if (!dailyBudgetMs) return;
       var usedMin  = Math.floor(totalTimeMs / 60000);
@@ -1525,7 +1526,7 @@
       document.getElementById('budget-overlay').classList.add('hidden');
     }
 
-    // ── Button wiring ──────────────────────────────────────────────────────
+    // ââ Button wiring ââââââââââââââââââââââââââââââââââââââââââââââââââââââ
     document.getElementById('btn-login').addEventListener('click', function() { openModal('login'); });
 
     document.getElementById('btn-logout').addEventListener('click', function() {
@@ -1553,7 +1554,7 @@
 
       // Viewing the solution counts as a failed attempt. Only record it for
       // Assessment Mode if this puzzle hasn't already been resolved (e.g. the
-      // user solved it, then clicked Show Solution anyway) — addHistoryEntry
+      // user solved it, then clicked Show Solution anyway) â addHistoryEntry
       // itself no-ops in that case, but recordAssessmentIfActive has no such
       // guard, so it must be skipped explicitly to avoid double-counting.
       var alreadyResolved = puzzleChecked;
@@ -1564,7 +1565,7 @@
       isReplaying = true;
       game = new Chess(currentFen);
       board.position(currentFen, false);
-      setStatus('Playing solution…');
+      setStatus('Playing solutionâ¦');
 
       function playNext(idx) {
         if (idx >= solutionMoves.length) {
@@ -1585,7 +1586,7 @@
       playNext(0);
     });
 
-    // ── Puzzle Rush ─────────────────────────────────────────────────────────
+    // ââ Puzzle Rush âââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
     var rushActive          = false;
     var rushDurationSec     = 60;
     var rushTimeLeft        = 0;
@@ -1598,7 +1599,7 @@
 
     // A dedicated board instance (kept separate from the standard trainer's
     // `board`) so Rush never tears down and rebuilds the DOM board between
-    // puzzles — that rebuild (destroy + recreate 64 squares/pieces) was the
+    // puzzles â that rebuild (destroy + recreate 64 squares/pieces) was the
     // main source of visible lag/jank on a mode where puzzles change every
     // 1-2 seconds. It's created once on the first puzzle and just
     // repositioned after that. `rushNextPuzzle` holds a puzzle fetched ahead
@@ -1611,7 +1612,7 @@
     // "fresh, non-SRS" delivery path Assessment Mode uses) instead of the
     // SRS priority queue. The SRS queue's P1 tier always returns the single
     // most-overdue puzzle for a signed-in user until an attempt is logged
-    // against it — Rush never logs attempts (it's a speed drill, not a
+    // against it â Rush never logs attempts (it's a speed drill, not a
     // spaced-repetition session), so going through that path meant every
     // fetch during a run kept re-serving the same overdue puzzle. Rating
     // bands mirror _level_filter in app.py.
@@ -1688,7 +1689,7 @@
 
     // Fetches the next puzzle in the background while the current one is
     // still being solved, so loadRushPuzzle() usually has zero network wait
-    // when it's time to advance — that round-trip was the other big
+    // when it's time to advance â that round-trip was the other big
     // contributor to Rush feeling laggy on a tight timer.
     function prefetchRushPuzzle() {
       if (!rushActive || rushPrefetching || rushNextPuzzle) return;

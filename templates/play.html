@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script>
+    (function() {
+      try {
+        var t = localStorage.getItem('theme');
+        if (t === 'dark' || (!t && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+          document.documentElement.classList.add('dark');
+        }
+      } catch (e) {}
+    })();
+  </script>
+  <title>Play Live: Synapchess</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              bg:     'var(--color-bg)',
+              card:   'var(--color-surface)',
+              border: 'var(--color-border)',
+              green:  'var(--color-accent)',
+              gdark:  'var(--color-accent-dark)',
+              muted:  'var(--color-muted)',
+              ink:    'var(--color-ink)',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    :root {
+      --color-bg: #ffffff;
+      --color-surface: #f6faf8;
+      --color-border: #e7ebe9;
+      --color-chip: #e6f9f0;
+      --color-ink: #0b0c10;
+      --color-muted: #64748b;
+      --color-accent: #00dc82;
+      --color-accent-dark: #00aa63;
+      --color-header: rgba(255,255,255,0.92);
+      --color-overlay: rgba(255,255,255,0.96);
+    }
+    html.dark {
+      color-scheme: dark;
+      --color-bg: #0A0A0F;
+      --color-surface: #111118;
+      --color-border: #2a2620;
+      --color-chip: rgba(212,175,55,0.12);
+      --color-ink: #F0F0F0;
+      --color-muted: #9a9690;
+      --color-accent: #D4AF37;
+      --color-accent-dark: #B8941F;
+      --color-header: rgba(10,10,15,0.88);
+      --color-overlay: rgba(10,10,15,0.92);
+    }
+    html.dark body { background-color: var(--color-bg); color: var(--color-ink); }
+    body { transition: background-color .25s ease, color .25s ease; }
+
+    /* Dark mode toggle */
+    .theme-toggle {
+      display: flex; align-items: center; justify-content: center;
+      width: 32px; height: 32px; border-radius: 8px; flex-shrink: 0;
+      border: 1px solid var(--color-border); background: var(--color-surface);
+      color: var(--color-muted); cursor: pointer;
+      transition: color .15s, border-color .15s, background .15s;
+    }
+    .theme-toggle:hover { color: var(--color-ink); border-color: var(--color-accent); }
+    .theme-toggle .icon-moon { display: none; }
+    html.dark .theme-toggle .icon-sun { display: none; }
+    html.dark .theme-toggle .icon-moon { display: block; }
+  </style>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
+  <link rel="stylesheet" href="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.css" />
+  <script src="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+
+  <style>
+    body { background-color: var(--color-bg); color: var(--color-ink); }
+    #play-board { width: min(420px, 92vw); }
+    #play-board {
+      touch-action: none;
+      -webkit-user-select: none;
+      user-select: none;
+      -webkit-touch-callout: none;
+    }
+    .board-b72b1 { border: 2px solid #00dc82 !important; border-radius: 6px; }
+    .black-3c85d { background-color: #66b38c !important; }
+    .black-3c85d.notation-322f9 { color: #1a3d2b !important; }
+    .white-1e1d7.notation-322f9 { color: #66b38c !important; }
+
+    .clock {
+      font-variant-numeric: tabular-nums;
+      transition: color .2s ease, background .2s ease;
+    }
+    .clock.on-move { color: var(--color-accent-dark); }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .spinner {
+      width: 34px; height: 34px; border-radius: 50%;
+      border: 3px solid var(--color-border);
+      border-top-color: var(--color-accent);
+      animation: spin 0.9s linear infinite;
+    }
+  </style>
+</head>
+<body class="text-brand-ink antialiased" style="font-family: Inter, system-ui, sans-serif;">
+
+  <!-- ─── SiteHeader ────────────────────────────────────────────────────── -->
+  <header class="sticky top-0 z-50 border-b border-brand-border" style="background:rgba(255,255,255,0.92); backdrop-filter:blur(8px);">
+    <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+
+      <a href="/" class="flex items-center gap-2 font-semibold text-brand-ink text-sm">
+        <span class="flex items-center justify-center w-7 h-7 rounded-md bg-brand-green text-brand-ink font-bold text-base">♟</span>
+        Synapchess
+      </a>
+
+      <nav class="hidden md:flex items-center gap-8 text-sm font-medium">
+        <a href="/trainer" class="text-brand-muted hover:text-brand-ink transition-colors">Puzzle Trainer</a>
+        <a href="/play"    class="text-brand-ink font-semibold transition-colors">Play Live</a>
+        <a href="/join"    class="text-brand-muted hover:text-brand-ink transition-colors">Join</a>
+        <a href="/donate"  class="text-brand-muted hover:text-brand-ink transition-colors">Donate</a>
+      </nav>
+
+      <div class="flex items-center gap-4 text-sm">
+        <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Toggle dark mode" title="Toggle dark mode">
+          <svg class="icon-sun" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path stroke-linecap="round" d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+          <svg class="icon-moon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+        </button>
+        <div id="auth-logged-out" class="flex items-center gap-3">
+          <button id="btn-login" class="text-brand-muted hover:text-brand-ink transition-colors cursor-pointer text-sm">
+            Student Login
+          </button>
+        </div>
+        <div id="auth-logged-in" class="hidden items-center gap-3">
+          <span id="nav-welcome" class="text-brand-muted text-xs"></span>
+          <span class="text-brand-border text-xs">|</span>
+          <button id="btn-logout" class="text-brand-muted hover:text-brand-ink transition-colors cursor-pointer text-xs">
+            Logout
+          </button>
+        </div>
+        <a href="/" class="bg-brand-green hover:bg-brand-gdark text-brand-ink font-semibold px-4 py-2 rounded-md transition-colors text-sm">
+          Dashboard
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- ─── Page Header ───────────────────────────────────────────────────── -->
+  <section class="py-10 px-6 border-b border-brand-border" style="background:#ffffff;">
+    <div class="max-w-3xl mx-auto space-y-2 text-center">
+      <span class="text-brand-gdark text-xs font-semibold tracking-widest uppercase">Live · Powered by Lichess</span>
+      <h1 class="text-3xl md:text-4xl font-extrabold leading-tight">Play a real opponent</h1>
+      <p class="text-brand-muted text-sm max-w-xl mx-auto leading-relaxed">
+        Connect your Lichess account and get matched with a real player from Lichess's own pool —
+        right here on Synapchess.
+      </p>
+    </div>
+  </section>
+
+  <!-- ─── Main ──────────────────────────────────────────────────────────── -->
+  <section class="py-12 px-6">
+    <div class="max-w-lg mx-auto space-y-5">
+
+      <p id="error-banner" class="hidden text-xs font-medium text-center rounded-lg px-4 py-2.5"
+         style="background:rgba(239,68,68,0.08); border:1px solid rgba(239,68,68,0.3); color:#ef4444;"></p>
+
+      <!-- ── Not logged into Synapchess ───────────────────────────────── -->
+      <div id="state-logged-out" class="hidden rounded-2xl border border-brand-border p-8 text-center space-y-4" style="background:#f6faf8;">
+        <p class="text-sm text-brand-muted">Log in to your Synapchess account to play a live game.</p>
+        <button onclick="openModal('login')"
+                class="bg-brand-green hover:bg-brand-gdark text-brand-ink font-semibold px-5 py-2.5 rounded-lg text-sm cursor-pointer transition-colors">
+          Log in
+        </button>
+      </div>
+
+      <!-- ── Logged in, Lichess not connected ─────────────────────────── -->
+      <div id="state-not-connected" class="hidden rounded-2xl border border-brand-border p-8 text-center space-y-4" style="background:#f6faf8;">
+        <div class="text-3xl">♞</div>
+        <p class="text-sm text-brand-ink font-semibold">Connect your Lichess account</p>
+        <p class="text-xs text-brand-muted max-w-xs mx-auto leading-relaxed">
+          We use Lichess's official Board API to pair you with a real opponent and relay the game
+          onto this board. You'll be asked to authorize Synapchess on lichess.org — we never see
+          your Lichess password.
+        </p>
+        <a href="/lichess/connect"
+           class="inline-block bg-brand-green hover:bg-brand-gdark text-brand-ink font-semibold px-5 py-2.5 rounded-lg text-sm transition-colors">
+          Connect Lichess account
+        </a>
+      </div>
+
+      <!-- ── Connected, idle: pick a time control ─────────────────────── -->
+      <div id="state-idle" class="hidden space-y-4">
+        <div class="flex items-center justify-between rounded-lg border border-brand-border px-4 py-2.5 text-xs" style="background:#f6faf8;">
+          <span class="text-brand-muted">Connected as <strong id="idle-username" class="text-brand-ink"></strong></span>
+          <button onclick="disconnectLichess()" class="text-brand-muted hover:text-red-500 transition-colors cursor-pointer">Disconnect</button>
+        </div>
+
+        <div class="rounded-2xl border border-brand-border p-6 space-y-4" style="background:#f6faf8;">
+          <p class="text-xs font-semibold uppercase tracking-widest text-brand-gdark text-center">Choose a time control</p>
+          <div class="grid grid-cols-3 gap-3">
+            <button onclick="startSeek('bullet')" class="tc-btn rounded-xl border border-brand-border py-4 text-center hover:border-brand-green transition-colors cursor-pointer bg-white">
+              <div class="text-xl font-black">1+0</div>
+              <div class="text-xs text-brand-muted mt-1">Bullet</div>
+            </button>
+            <button onclick="startSeek('blitz')" class="tc-btn rounded-xl border border-brand-border py-4 text-center hover:border-brand-green transition-colors cursor-pointer bg-white">
+              <div class="text-xl font-black">5+0</div>
+              <div class="text-xs text-brand-muted mt-1">Blitz</div>
+            </button>
+            <button onclick="startSeek('rapid')" class="tc-btn rounded-xl border border-brand-border py-4 text-center hover:border-brand-green transition-colors cursor-pointer bg-white">
+              <div class="text-xl font-black">10+0</div>
+              <div class="text-xs text-brand-muted mt-1">Rapid</div>
+            </button>
+          </div>
+          <p class="text-xs text-brand-muted text-center">Casual games only — results won't affect your Lichess rating.</p>
+        </div>
+      </div>
+
+      <!-- ── Seeking ───────────────────────────────────────────────────── -->
+      <div id="state-seeking" class="hidden rounded-2xl border border-brand-border p-10 text-center space-y-4" style="background:#f6faf8;">
+        <div class="spinner mx-auto"></div>
+        <p class="text-sm font-medium">Searching for an opponent on Lichess…</p>
+        <p class="text-xs text-brand-muted">This can take a few seconds up to a minute or two, depending on who's online.</p>
+        <button onclick="cancelSeek()" class="btn-ghost text-xs text-brand-muted hover:text-brand-ink transition-colors cursor-pointer underline">
+          Cancel
+        </button>
+      </div>
+
+      <!-- ── Playing ───────────────────────────────────────────────────── -->
+      <div id="state-playing" class="hidden space-y-3">
+        <div class="flex items-center justify-between rounded-lg border border-brand-border px-4 py-2.5" style="background:#f6faf8;">
+          <div class="text-sm">
+            <span id="opp-name" class="font-semibold"></span>
+            <span id="opp-rating" class="text-brand-muted text-xs"></span>
+          </div>
+          <div id="opp-clock" class="clock text-lg font-bold tabular-nums"></div>
+        </div>
+
+        <div class="flex justify-center">
+          <div class="rounded-lg overflow-hidden shadow-2xl shadow-brand-green/10">
+            <div id="play-board"></div>
+          </div>
+        </div>
+
+        <div class="flex items-center justify-between rounded-lg border border-brand-border px-4 py-2.5" style="background:#f6faf8;">
+          <div class="text-sm">
+            <span id="me-name" class="font-semibold">You</span>
+          </div>
+          <div id="me-clock" class="clock text-lg font-bold tabular-nums"></div>
+        </div>
+
+        <p id="play-status" class="text-xs text-center text-brand-muted"></p>
+
+        <div class="text-center">
+          <button onclick="resignGame()" class="text-xs text-brand-muted hover:text-red-500 transition-colors cursor-pointer underline">
+            Resign
+          </button>
+        </div>
+      </div>
+
+      <!-- ── Finished ──────────────────────────────────────────────────── -->
+      <div id="state-finished" class="hidden rounded-2xl border border-brand-border p-8 text-center space-y-4" style="background:#f6faf8;">
+        <div id="finished-emoji" class="text-4xl">🏁</div>
+        <p id="finished-text" class="text-sm font-semibold"></p>
+        <button onclick="resetToIdle()"
+                class="bg-brand-green hover:bg-brand-gdark text-brand-ink font-semibold px-5 py-2.5 rounded-lg text-sm cursor-pointer transition-colors">
+          Find another opponent
+        </button>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ─── Auth modal ────────────────────────────────────────────────────── -->
+  <div id="auth-modal" class="fixed inset-0 z-[100] flex items-center justify-center hidden">
+    <div class="absolute inset-0" style="background:rgba(15,23,20,0.5);" onclick="closeModal()"></div>
+    <div class="relative z-10 w-full max-w-sm mx-4 rounded-2xl border border-brand-border p-8 space-y-6" style="background:#ffffff;">
+      <button onclick="closeModal()" class="absolute top-4 right-4 text-brand-muted hover:text-brand-ink transition-colors text-lg leading-none cursor-pointer">✕</button>
+      <div class="flex gap-6 border-b border-brand-border pb-4">
+        <button id="tab-login" onclick="switchTab('login')" class="text-brand-ink font-semibold text-sm pb-1 border-b-2 border-brand-green cursor-pointer">Login</button>
+        <button id="tab-register" onclick="switchTab('register')" class="text-brand-muted hover:text-brand-ink font-semibold text-sm pb-1 border-b-2 border-transparent cursor-pointer">Register</button>
+      </div>
+      <div class="space-y-4">
+        <input id="modal-username" type="text" placeholder="Username" autocomplete="username"
+               class="w-full px-4 py-3 rounded-lg border border-brand-border text-brand-ink text-sm outline-none focus:border-brand-green transition-colors" style="background:#f6faf8;" />
+        <input id="modal-password" type="password" placeholder="Password" autocomplete="current-password"
+               class="w-full px-4 py-3 rounded-lg border border-brand-border text-brand-ink text-sm outline-none focus:border-brand-green transition-colors" style="background:#f6faf8;" />
+        <p id="modal-error" class="text-xs hidden" style="color:#ef4444;"></p>
+        <button id="modal-submit" onclick="submitModal()"
+                class="w-full bg-brand-green hover:bg-brand-gdark text-brand-ink font-semibold py-3 rounded-lg transition-colors text-sm cursor-pointer">
+          Login
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      var toggle = document.getElementById('theme-toggle');
+      if (toggle) {
+        toggle.addEventListener('click', function() {
+          var isDark = document.documentElement.classList.toggle('dark');
+          try { localStorage.setItem('theme', isDark ? 'dark' : 'light'); } catch (e) {}
+        });
+      }
+      document.getElementById('btn-login').addEventListener('click', function() { openModal('login'); });
+      document.getElementById('btn-logout').addEventListener('click', function() {
+        fetch('/logout').then(function() { window.location.reload(); });
+      });
+
+      var err = new URLSearchParams(window.location.search).get('lichess_error');
+      if (err) showError('Lichess connection failed (' + err + '). Please try again.');
+
+      initAuth();
+    });
+
+    // ── Auth modal (same pattern as trainer.html, trimmed down) ──────────────
+    var activeModalTab = 'login';
+    var currentUser    = null;
+
+    function openModal(tab) {
+      activeModalTab = tab || 'login';
+      switchTab(activeModalTab);
+      document.getElementById('modal-username').value = '';
+      document.getElementById('modal-password').value = '';
+      var e = document.getElementById('modal-error');
+      e.classList.add('hidden');
+      e.style.color = '#ef4444';
+      document.getElementById('auth-modal').classList.remove('hidden');
+      setTimeout(function() { document.getElementById('modal-username').focus(); }, 50);
+    }
+    function closeModal() { document.getElementById('auth-modal').classList.add('hidden'); }
+    function switchTab(tab) {
+      activeModalTab = tab;
+      var lt = document.getElementById('tab-login'), rt = document.getElementById('tab-register');
+      var sub = document.getElementById('modal-submit');
+      if (tab === 'login') {
+        lt.classList.add('text-brand-ink','border-brand-green'); lt.classList.remove('text-brand-muted','border-transparent');
+        rt.classList.remove('text-brand-ink','border-brand-green'); rt.classList.add('text-brand-muted','border-transparent');
+        sub.textContent = 'Login';
+      } else {
+        rt.classList.add('text-brand-ink','border-brand-green'); rt.classList.remove('text-brand-muted','border-transparent');
+        lt.classList.remove('text-brand-ink','border-brand-green'); lt.classList.add('text-brand-muted','border-transparent');
+        sub.textContent = 'Create Account';
+      }
+    }
+    function submitModal() {
+      var username = document.getElementById('modal-username').value.trim();
+      var password = document.getElementById('modal-password').value;
+      var errorEl   = document.getElementById('modal-error');
+      var submitBtn = document.getElementById('modal-submit');
+      if (!username || !password) {
+        errorEl.style.color = '#ef4444';
+        errorEl.textContent = 'Please fill in both fields.';
+        errorEl.classList.remove('hidden');
+        return;
+      }
+      errorEl.classList.add('hidden');
+      submitBtn.textContent = 'Please wait…';
+      var endpoint = activeModalTab === 'login' ? '/login' : '/register';
+      fetch(endpoint, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: username, password: password })
+      })
+      .then(function(r) { return r.json().then(function(d) { return { ok: r.ok, data: d }; }); })
+      .then(function(res) {
+        if (!res.ok) {
+          errorEl.style.color = '#ef4444';
+          errorEl.textContent = res.data.error || 'Something went wrong.';
+          errorEl.classList.remove('hidden');
+          submitBtn.textContent = activeModalTab === 'login' ? 'Login' : 'Create Account';
+          return;
+        }
+        if (activeModalTab === 'register') {
+          switchTab('login');
+          errorEl.style.color = '#00aa63';
+          errorEl.textContent = 'Account created! Please log in.';
+          errorEl.classList.remove('hidden');
+          document.getElementById('modal-username').value = username;
+          document.getElementById('modal-password').value = '';
+          document.getElementById('modal-password').focus();
+          return;
+        }
+        currentUser = { username: username };
+        closeModal();
+        updateNavAuth();
+        refreshLichessStatus();
+      })
+      .catch(function() {
+        errorEl.style.color = '#ef4444';
+        errorEl.textContent = 'Network error. Please try again.';
+        errorEl.classList.remove('hidden');
+        submitBtn.textContent = activeModalTab === 'login' ? 'Login' : 'Create Account';
+      });
+    }
+
+    function initAuth() {
+      fetch('/me')
+        .then(function(r) { return r.json(); })
+        .then(function(d) {
+          currentUser = d.logged_in ? { username: d.username } : null;
+          updateNavAuth();
+        })
+        .catch(function() { updateNavAuth(); });
+    }
+
+    function updateNavAuth() {
+      var out = document.getElementById('auth-logged-out');
+      var inn = document.getElementById('auth-logged-in');
+      if (currentUser) {
+        out.classList.add('hidden');
+        inn.classList.remove('hidden'); inn.classList.add('flex');
+        document.getElementById('nav-welcome').textContent = 'Welcome, ' + currentUser.username + '!';
+        refreshLichessStatus();
+      } else {
+        out.classList.remove('hidden');
+        inn.classList.add('hidden'); inn.classList.remove('flex');
+        setScreen('logged-out');
+      }
+    }
+
+    function showError(msg) {
+      var el = document.getElementById('error-banner');
+      el.textContent = msg;
+      el.classList.remove('hidden');
+    }
+    function clearError() {
+      document.getElementById('error-banner').classList.add('hidden');
+    }
+
+    // ── Screen state machine ──────────────────────────────────────────────
+    var SCREENS = ['logged-out', 'not-connected', 'idle', 'seeking', 'playing', 'finished'];
+    function setScreen(name) {
+      SCREENS.forEach(function(s) {
+        var el = document.getElementById('state-' + s);
+        if (el) el.classList.add('hidden');
+      });
+      var target = document.getElementById('state-' + name);
+      if (target) target.classList.remove('hidden');
+    }
+
+    // ── Lichess status polling ────────────────────────────────────────────
+    var pollTimer   = null;
+    var playBoard   = null;
+    var localGame   = null;
+    var boardFen    = null;
+    var myColor     = null;
+    var gameStatus  = null;   // mirrors server 'status'
+    var currentTurn = null;
+    var moveGuardUntil = 0;   // briefly ignore stale polls right after our own move
+
+    function startPolling() {
+      if (pollTimer) return;
+      pollTimer = setInterval(refreshLichessStatus, 1000);
+    }
+    function stopPolling() {
+      if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
+    }
+
+    function refreshLichessStatus() {
+      if (!currentUser) return;
+      fetch('/api/lichess/status')
+        .then(function(r) { return r.json(); })
+        .then(handleStatus)
+        .catch(function() {});
+    }
+
+    function handleStatus(data) {
+      if (data.error) { setScreen('logged-out'); return; }
+
+      if (!data.connected) {
+        stopPolling();
+        setScreen('not-connected');
+        return;
+      }
+      document.getElementById('idle-username').textContent = data.lichess_username;
+
+      if (data.status === 'seeking') {
+        startPolling();
+        setScreen('seeking');
+        return;
+      }
+
+      if (data.status === 'playing') {
+        startPolling();
+        renderPlaying(data);
+        return;
+      }
+
+      if (data.status === 'finished') {
+        stopPolling();
+        renderFinished(data);
+        return;
+      }
+
+      // idle
+      stopPolling();
+      if (data.message) showError(data.message);
+      setScreen('idle');
+    }
+
+    function startSeek(control) {
+      clearError();
+      fetch('/api/lichess/seek', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ time_control: control })
+      })
+        .then(function(r) { return r.json(); })
+        .then(function() { startPolling(); refreshLichessStatus(); })
+        .catch(function() { showError('Could not start matchmaking. Please try again.'); });
+    }
+
+    function cancelSeek() {
+      fetch('/api/lichess/cancel', { method: 'POST' })
+        .then(function() { setScreen('idle'); refreshLichessStatus(); });
+    }
+
+    function disconnectLichess() {
+      stopPolling();
+      fetch('/lichess/disconnect', { method: 'POST' })
+        .then(function() { setScreen('not-connected'); });
+    }
+
+    function resignGame() {
+      if (!confirm('Resign this game?')) return;
+      fetch('/api/lichess/resign', { method: 'POST' });
+    }
+
+    function resetToIdle() {
+      // Clear the server's 'finished' status first — otherwise a poll that's
+      // already in flight can land right after and bounce us straight back
+      // to the finished screen.
+      fetch('/api/lichess/cancel', { method: 'POST' })
+        .then(function() { setScreen('idle'); refreshLichessStatus(); });
+    }
+
+    // ── Board rendering ───────────────────────────────────────────────────
+    function fmtClock(ms) {
+      if (ms == null) return '--:--';
+      var total = Math.max(0, Math.floor(ms / 1000));
+      var m = Math.floor(total / 60), s = total % 60;
+      return m + ':' + (s < 10 ? '0' : '') + s;
+    }
+
+    function renderPlaying(data) {
+      setScreen('playing');
+      clearError();
+
+      myColor     = data.my_color;
+      gameStatus  = data.status;
+      currentTurn = data.turn;
+
+      document.getElementById('opp-name').textContent =
+        myColor === 'white' ? data.black.name : data.white.name;
+      var oppRating = myColor === 'white' ? data.black.rating : data.white.rating;
+      document.getElementById('opp-rating').textContent = oppRating ? ' (' + oppRating + ')' : '';
+      document.getElementById('me-name').textContent = 'You (' + data.lichess_username + ')';
+
+      syncClocks(data);
+
+      var skipBoardUpdate = Date.now() < moveGuardUntil && data.fen !== boardFen;
+      if (!playBoard) {
+        boardFen  = data.fen;
+        localGame = new Chess(data.fen);
+        playBoard = Chessboard('play-board', {
+          position:    data.fen,
+          draggable:   true,
+          pieceTheme:  '/static/img/chesspieces/wikipedia/{piece}.png',
+          orientation: myColor === 'black' ? 'black' : 'white',
+          onDragStart: function() {
+            return gameStatus === 'playing' && currentTurn === myColor;
+          },
+          onDrop: onPlayDrop
+        });
+      } else if (data.fen !== boardFen && !skipBoardUpdate) {
+        boardFen  = data.fen;
+        localGame = new Chess(data.fen);
+        playBoard.position(data.fen);
+      }
+
+      var statusEl = document.getElementById('play-status');
+      if (data.opponent_gone) {
+        statusEl.textContent = 'Your opponent has left the game.';
+      } else {
+        statusEl.textContent = currentTurn === myColor ? 'Your move.' : "Opponent's move…";
+      }
+    }
+
+    function onPlayDrop(source, target) {
+      if (gameStatus !== 'playing' || currentTurn !== myColor) return 'snapback';
+
+      var move;
+      try {
+        move = localGame.move({ from: source, to: target, promotion: 'q' });
+      } catch (e) {
+        move = null;
+      }
+      if (!move) return 'snapback';
+
+      var uci = source + target + (move.promotion || '');
+      boardFen = localGame.fen();
+      moveGuardUntil = Date.now() + 1500;
+
+      fetch('/api/lichess/move', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ move: uci })
+      })
+        .then(function(r) { return r.json().then(function(d) { return { ok: r.ok, data: d }; }); })
+        .then(function(res) {
+          if (!res.ok) {
+            showError(res.data.error || 'Lichess rejected that move.');
+            refreshLichessStatus();
+          }
+        })
+        .catch(function() { refreshLichessStatus(); });
+    }
+
+    // ── Clocks ─────────────────────────────────────────────────────────────
+    var clockSyncedAt = 0, wtimeAtSync = null, btimeAtSync = null;
+    function syncClocks(data) {
+      wtimeAtSync   = data.wtime_ms;
+      btimeAtSync   = data.btime_ms;
+      clockSyncedAt = Date.now();
+    }
+    setInterval(function() {
+      if (gameStatus !== 'playing' || wtimeAtSync == null) return;
+      var elapsed = Date.now() - clockSyncedAt;
+      var w = currentTurn === 'white' ? Math.max(0, wtimeAtSync - elapsed) : wtimeAtSync;
+      var b = currentTurn === 'black' ? Math.max(0, btimeAtSync - elapsed) : btimeAtSync;
+
+      var whiteEl = myColor === 'white' ? document.getElementById('me-clock') : document.getElementById('opp-clock');
+      var blackEl = myColor === 'black' ? document.getElementById('me-clock') : document.getElementById('opp-clock');
+      whiteEl.textContent = fmtClock(w);
+      blackEl.textContent = fmtClock(b);
+      whiteEl.classList.toggle('on-move', currentTurn === 'white');
+      blackEl.classList.toggle('on-move', currentTurn === 'black');
+    }, 250);
+
+    function renderFinished(data) {
+      setScreen('finished');
+      if (playBoard) { playBoard.destroy(); playBoard = null; }
+      gameStatus = 'finished';
+
+      document.getElementById('finished-text').textContent = data.result_text || 'Game over.';
+      var won = data.result_text && data.result_text.indexOf('You won') === 0;
+      document.getElementById('finished-emoji').textContent = won ? '🏆' : '🏁';
+      if (won && typeof confetti === 'function') {
+        confetti({ particleCount: 90, spread: 70, origin: { y: 0.6 }, colors: ['#00dc82', '#00aa63', '#f6faf8'] });
+      }
+    }
+  </script>
+
+</body>
+</html>

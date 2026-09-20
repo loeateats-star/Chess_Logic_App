@@ -189,12 +189,12 @@
 </head>
 <body class="text-brand-ink antialiased" style="font-family: Inter, system-ui, sans-serif;">
 
-  <!-- ─── SiteHeader ────────────────────────────────────────────────────── -->
+  <!-- âââ SiteHeader ââââââââââââââââââââââââââââââââââââââââââââââââââââââ -->
   <header class="sticky top-0 z-50 border-b border-brand-border" style="background:rgba(255,255,255,0.92); backdrop-filter:blur(8px);">
     <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
 
       <a href="/" class="flex items-center gap-2 font-semibold text-brand-ink text-sm">
-        <span class="flex items-center justify-center w-7 h-7 rounded-md bg-brand-green text-brand-ink font-bold text-base">♟</span>
+        <span class="flex items-center justify-center w-7 h-7 rounded-md bg-brand-green text-brand-ink font-bold text-base">â</span>
         Synapchess
       </a>
 
@@ -207,6 +207,7 @@
           <div class="nav-dropdown-panel" role="menu">
             <a href="/trainer" role="menuitem">Puzzle Trainer</a>
             <a href="/trainer?rush=1" role="menuitem">Puzzle Rush</a>
+            <a href="/play" role="menuitem">Play Live ⚡</a>
             <a href="/analysis" role="menuitem">Game Analyzer</a>
             <a href="/curriculum" role="menuitem">Lessons</a>
           </div>
@@ -229,7 +230,7 @@
     </div>
   </header>
 
-  <!-- ─── Page Header ───────────────────────────────────────────────────── -->
+  <!-- âââ Page Header âââââââââââââââââââââââââââââââââââââââââââââââââââââ -->
   <section class="py-12 px-6 border-b border-brand-border" style="background:#ffffff;">
     <div class="max-w-6xl mx-auto space-y-4">
 
@@ -242,7 +243,7 @@
         <span class="text-brand-ink">Special Rules</span>
       </div>
 
-      <p class="text-brand-gdark text-xs font-semibold tracking-widest uppercase">Level 0.5 · Special Rules</p>
+      <p class="text-brand-gdark text-xs font-semibold tracking-widest uppercase">Level 0.5 Â· Special Rules</p>
 
       <h1 class="text-4xl md:text-5xl font-extrabold text-brand-ink leading-tight">
         Special Rules of Chess
@@ -265,9 +266,9 @@
     </div>
   </section>
 
-  <!-- ═══════════════════════════════════════════════════════════════════ -->
-  <!-- RULE 1 · CHECK                                                      -->
-  <!-- ═══════════════════════════════════════════════════════════════════ -->
+  <!-- âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ -->
+  <!-- RULE 1 Â· CHECK                                                      -->
+  <!-- âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ -->
   <section id="check" class="py-20 px-6 rule-section" style="background:#ffffff;">
     <div class="max-w-6xl mx-auto flex flex-col lg:flex-row items-center gap-14">
 
@@ -323,9 +324,9 @@
     </div>
   </section>
 
-  <!-- ═══════════════════════════════════════════════════════════════════ -->
-  <!-- RULE 2 · CHECKMATE                                                  -->
-  <!-- ═══════════════════════════════════════════════════════════════════ -->
+  <!-- âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ -->
+  <!-- RULE 2 Â· CHECKMATE                                                  -->
+  <!-- âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ -->
   <section id="checkmate" class="py-20 px-6 rule-section" style="background:#ffffff;">
     <div class="max-w-6xl mx-auto flex flex-col-reverse lg:flex-row items-center gap-14">
 
@@ -347,15 +348,15 @@
         <div class="rounded-xl border border-brand-border p-5 space-y-3" style="background:#f6faf8;">
           <p class="text-brand-ink text-sm font-semibold">Key facts about checkmate:</p>
           <ul class="space-y-2 text-brand-muted text-xs leading-relaxed">
-            <li class="flex items-start gap-2"><span class="text-brand-green mt-0.5">•</span><span>The game ends <em>instantly</em>. No moves can be made after checkmate.</span></li>
-            <li class="flex items-start gap-2"><span class="text-brand-green mt-0.5">•</span><span>All three escape routes (move, block, and capture) must be impossible simultaneously.</span></li>
-            <li class="flex items-start gap-2"><span class="text-brand-green mt-0.5">•</span><span>The fastest possible checkmate (Fool's Mate) occurs in just two moves.</span></li>
-            <li class="flex items-start gap-2"><span class="text-brand-green mt-0.5">•</span><span>A king can never move into check, even to escape a different check.</span></li>
+            <li class="flex items-start gap-2"><span class="text-brand-green mt-0.5">â¢</span><span>The game ends <em>instantly</em>. No moves can be made after checkmate.</span></li>
+            <li class="flex items-start gap-2"><span class="text-brand-green mt-0.5">â¢</span><span>All three escape routes (move, block, and capture) must be impossible simultaneously.</span></li>
+            <li class="flex items-start gap-2"><span class="text-brand-green mt-0.5">â¢</span><span>The fastest possible checkmate (Fool's Mate) occurs in just two moves.</span></li>
+            <li class="flex items-start gap-2"><span class="text-brand-green mt-0.5">â¢</span><span>A king can never move into check, even to escape a different check.</span></li>
           </ul>
         </div>
       </div>
 
-      <!-- Board: 2-rook checkmate — black king h8, wR a8 (check), wR b7 (cuts 7th rank) -->
+      <!-- Board: 2-rook checkmate â black king h8, wR a8 (check), wR b7 (cuts 7th rank) -->
       <div class="flex-shrink-0 flex flex-col items-center gap-3">
         <div class="rounded-lg overflow-hidden shadow-2xl shadow-brand-green/10">
           <div id="board-checkmate" class="mini-board"></div>
@@ -368,13 +369,13 @@
     </div>
   </section>
 
-  <!-- ═══════════════════════════════════════════════════════════════════ -->
-  <!-- RULE 3 · STALEMATE                                                  -->
-  <!-- ═══════════════════════════════════════════════════════════════════ -->
+  <!-- âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ -->
+  <!-- RULE 3 Â· STALEMATE                                                  -->
+  <!-- âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ -->
   <section id="stalemate" class="py-20 px-6 rule-section" style="background:#ffffff;">
     <div class="max-w-6xl mx-auto flex flex-col lg:flex-row items-center gap-14">
 
-      <!-- Board: Black king h8, queen f7 — stalemate (king not in check, no legal moves) -->
+      <!-- Board: Black king h8, queen f7 â stalemate (king not in check, no legal moves) -->
       <div class="flex-shrink-0 flex flex-col items-center gap-3">
         <div class="rounded-lg overflow-hidden shadow-2xl shadow-brand-green/10">
           <div id="board-stalemate" class="mini-board"></div>
@@ -398,7 +399,7 @@
         </p>
         <div class="rounded-xl border p-5 space-y-2" style="background:#f6faf8; border-color:rgba(245,158,11,0.4);">
           <div class="flex items-center gap-2">
-            <span class="text-amber-600 text-base">⚠</span>
+            <span class="text-amber-600 text-base">â </span>
             <p class="text-amber-600 text-sm font-semibold">Critical for winning players</p>
           </div>
           <p class="text-brand-muted text-xs leading-relaxed">
@@ -412,11 +413,11 @@
           <div class="grid grid-cols-2 gap-3 text-xs">
             <div class="space-y-1">
               <p class="text-brand-green font-semibold">Checkmate</p>
-              <p class="text-brand-muted leading-relaxed">King is in check. No escape. <strong class="text-brand-ink">→ Loss</strong></p>
+              <p class="text-brand-muted leading-relaxed">King is in check. No escape. <strong class="text-brand-ink">â Loss</strong></p>
             </div>
             <div class="space-y-1">
               <p class="text-amber-600 font-semibold">Stalemate</p>
-              <p class="text-brand-muted leading-relaxed">King is safe. No moves. <strong class="text-brand-ink">→ Draw</strong></p>
+              <p class="text-brand-muted leading-relaxed">King is safe. No moves. <strong class="text-brand-ink">â Draw</strong></p>
             </div>
           </div>
         </div>
@@ -424,9 +425,9 @@
     </div>
   </section>
 
-  <!-- ═══════════════════════════════════════════════════════════════════ -->
-  <!-- RULE 4 · EN PASSANT                                                 -->
-  <!-- ═══════════════════════════════════════════════════════════════════ -->
+  <!-- âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ -->
+  <!-- RULE 4 Â· EN PASSANT                                                 -->
+  <!-- âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ -->
   <section id="en-passant" class="py-20 px-6 rule-section" style="background:#ffffff;">
     <div class="max-w-6xl mx-auto flex flex-col-reverse lg:flex-row items-center gap-14">
 
@@ -475,17 +476,17 @@
             <div id="board-ep-before" class="mini-board"></div>
           </div>
           <p class="text-brand-muted text-xs text-center">
-            Black pawn just moved d7→d5.<br/>
+            Black pawn just moved d7âd5.<br/>
             White pawn on e5 may capture en passant.
           </p>
         </div>
 
         <!-- Arrow -->
-        <div class="board-arrow text-2xl">↓</div>
+        <div class="board-arrow text-2xl">â</div>
 
         <!-- After -->
         <div class="flex flex-col items-center gap-2">
-          <p class="text-brand-muted text-xs font-semibold tracking-widest uppercase">After (e5×d6)</p>
+          <p class="text-brand-muted text-xs font-semibold tracking-widest uppercase">After (e5Ãd6)</p>
           <div class="rounded-lg overflow-hidden shadow-xl shadow-brand-green/10">
             <div id="board-ep-after" class="mini-board"></div>
           </div>
@@ -498,9 +499,9 @@
     </div>
   </section>
 
-  <!-- ═══════════════════════════════════════════════════════════════════ -->
-  <!-- RULE 5 · CASTLING                                                   -->
-  <!-- ═══════════════════════════════════════════════════════════════════ -->
+  <!-- âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ -->
+  <!-- RULE 5 Â· CASTLING                                                   -->
+  <!-- âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ -->
   <section id="castling" class="py-20 px-6 rule-section" style="background:#ffffff;">
     <div class="max-w-6xl mx-auto space-y-14">
 
@@ -519,12 +520,12 @@
       <div class="rounded-2xl border border-brand-border p-6" style="background:#f6faf8;">
         <p class="text-brand-ink text-sm font-semibold mb-4">Castling is only legal when ALL of these are true:</p>
         <div class="grid sm:grid-cols-2 gap-3 text-xs text-brand-muted">
-          <div class="flex items-start gap-2"><span class="text-brand-green mt-0.5">•</span><span>The <strong class="text-brand-ink">King has never moved</strong> before in the game.</span></div>
-          <div class="flex items-start gap-2"><span class="text-brand-green mt-0.5">•</span><span>The <strong class="text-brand-ink">Rook on that side has never moved</strong> before in the game.</span></div>
-          <div class="flex items-start gap-2"><span class="text-brand-green mt-0.5">•</span><span><strong class="text-brand-ink">No pieces stand between</strong> the King and the Rook.</span></div>
-          <div class="flex items-start gap-2"><span class="text-brand-green mt-0.5">•</span><span>The King is <strong class="text-brand-ink">not currently in check</strong>.</span></div>
-          <div class="flex items-start gap-2"><span class="text-brand-green mt-0.5">•</span><span>The King does <strong class="text-brand-ink">not pass through</strong> a square attacked by the opponent.</span></div>
-          <div class="flex items-start gap-2"><span class="text-brand-green mt-0.5">•</span><span>The King does <strong class="text-brand-ink">not land on</strong> a square attacked by the opponent.</span></div>
+          <div class="flex items-start gap-2"><span class="text-brand-green mt-0.5">â¢</span><span>The <strong class="text-brand-ink">King has never moved</strong> before in the game.</span></div>
+          <div class="flex items-start gap-2"><span class="text-brand-green mt-0.5">â¢</span><span>The <strong class="text-brand-ink">Rook on that side has never moved</strong> before in the game.</span></div>
+          <div class="flex items-start gap-2"><span class="text-brand-green mt-0.5">â¢</span><span><strong class="text-brand-ink">No pieces stand between</strong> the King and the Rook.</span></div>
+          <div class="flex items-start gap-2"><span class="text-brand-green mt-0.5">â¢</span><span>The King is <strong class="text-brand-ink">not currently in check</strong>.</span></div>
+          <div class="flex items-start gap-2"><span class="text-brand-green mt-0.5">â¢</span><span>The King does <strong class="text-brand-ink">not pass through</strong> a square attacked by the opponent.</span></div>
+          <div class="flex items-start gap-2"><span class="text-brand-green mt-0.5">â¢</span><span>The King does <strong class="text-brand-ink">not land on</strong> a square attacked by the opponent.</span></div>
         </div>
       </div>
 
@@ -550,7 +551,7 @@
             <p class="text-brand-muted text-xs text-center">King on e1, Rook on h1<br/>Clear path between them</p>
           </div>
 
-          <div class="board-arrow text-3xl">→</div>
+          <div class="board-arrow text-3xl">â</div>
 
           <!-- Kingside After -->
           <div class="flex flex-col items-center gap-2 flex-shrink-0">
@@ -589,7 +590,7 @@
             <p class="text-brand-muted text-xs text-center">King on e1, Rook on a1<br/>b1, c1, d1 must all be empty</p>
           </div>
 
-          <div class="board-arrow text-3xl">→</div>
+          <div class="board-arrow text-3xl">â</div>
 
           <!-- Queenside After -->
           <div class="flex flex-col items-center gap-2 flex-shrink-0">
@@ -605,7 +606,7 @@
     </div>
   </section>
 
-  <!-- ─── Continue CTA ──────────────────────────────────────────────────── -->
+  <!-- âââ Continue CTA ââââââââââââââââââââââââââââââââââââââââââââââââââââ -->
   <section class="py-20 px-6 border-t border-brand-border" style="background:#f6faf8;">
     <div class="max-w-4xl mx-auto text-center space-y-6">
       <p class="text-brand-green text-xs font-semibold tracking-widest uppercase">You're ready</p>
@@ -630,14 +631,14 @@
     </div>
   </section>
 
-  <!-- ─── SiteFooter ────────────────────────────────────────────────────── -->
+  <!-- âââ SiteFooter ââââââââââââââââââââââââââââââââââââââââââââââââââââââ -->
   <footer class="border-t border-brand-border pt-16 pb-8 px-6" style="background:#ffffff;">
     <div class="max-w-6xl mx-auto">
 
       <div class="grid grid-cols-2 md:grid-cols-4 gap-10 mb-14">
         <div class="col-span-2 space-y-3">
           <a href="/" class="flex items-center gap-2 font-semibold text-brand-ink text-sm">
-            <span class="flex items-center justify-center w-7 h-7 rounded-md bg-brand-green text-brand-ink font-bold text-base">♟</span>
+            <span class="flex items-center justify-center w-7 h-7 rounded-md bg-brand-green text-brand-ink font-bold text-base">â</span>
             Synapchess
           </a>
           <p class="text-brand-muted text-sm leading-relaxed max-w-xs">
@@ -664,7 +665,7 @@
       </div>
 
       <div class="border-t border-brand-border pt-6 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-brand-muted">
-        <span>© 2026 Synapchess. All rights reserved.</span>
+        <span>Â© 2026 Synapchess. All rights reserved.</span>
         <div class="flex gap-5">
           <a href="#" class="hover:text-brand-ink transition-colors">Privacy</a>
           <a href="#" class="hover:text-brand-ink transition-colors">Terms</a>
@@ -673,7 +674,7 @@
     </div>
   </footer>
 
-  <!-- ─── Board Initialization ─────────────────────────────────────────── -->
+  <!-- âââ Board Initialization âââââââââââââââââââââââââââââââââââââââââââ -->
   <script>
     document.addEventListener('DOMContentLoaded', function() {
       var cfg = {
@@ -682,55 +683,55 @@
         pieceTheme:  '/static/img/chesspieces/wikipedia/{piece}.png'
       };
 
-      // ── Rule 1: Check ─────────────────────────────────────────────────
+      // ââ Rule 1: Check âââââââââââââââââââââââââââââââââââââââââââââââââ
       // Black king d8 in check from white rook d1; white king a1 for legality
       Chessboard('board-check', Object.assign({}, cfg, {
         position: { d8: 'bK', d1: 'wR', a1: 'wK' }
       }));
 
-      // ── Rule 2: Checkmate ─────────────────────────────────────────────
+      // ââ Rule 2: Checkmate âââââââââââââââââââââââââââââââââââââââââââââ
       // Two-rook ladder mate: bK h8, wR a8 (check along 8th rank), wR b7 (seals 7th), wK a1
       Chessboard('board-checkmate', Object.assign({}, cfg, {
         position: { h8: 'bK', a8: 'wR', b7: 'wR', a1: 'wK' }
       }));
 
-      // ── Rule 3: Stalemate ─────────────────────────────────────────────
-      // bK h8, wQ f7 (covers g8 diagonally and h7 along 7th rank — not checking h8), wK g1
+      // ââ Rule 3: Stalemate âââââââââââââââââââââââââââââââââââââââââââââ
+      // bK h8, wQ f7 (covers g8 diagonally and h7 along 7th rank â not checking h8), wK g1
       Chessboard('board-stalemate', Object.assign({}, cfg, {
         position: { h8: 'bK', f7: 'wQ', g1: 'wK' }
       }));
 
-      // ── Rule 4: En Passant — Before ───────────────────────────────────
+      // ââ Rule 4: En Passant â Before âââââââââââââââââââââââââââââââââââ
       // White pawn e5, black pawn just arrived on d5 (from d7)
       Chessboard('board-ep-before', Object.assign({}, cfg, {
         position: { e5: 'wP', d5: 'bP', e1: 'wK', e8: 'bK' }
       }));
 
-      // ── Rule 4: En Passant — After ────────────────────────────────────
+      // ââ Rule 4: En Passant â After ââââââââââââââââââââââââââââââââââââ
       // White pawn captured to d6; black pawn on d5 removed
       Chessboard('board-ep-after', Object.assign({}, cfg, {
         position: { d6: 'wP', e1: 'wK', e8: 'bK' }
       }));
 
-      // ── Rule 5: Castling Kingside — Before ───────────────────────────
+      // ââ Rule 5: Castling Kingside â Before âââââââââââââââââââââââââââ
       Chessboard('board-ks-before', Object.assign({}, cfg, {
         position: { e1: 'wK', h1: 'wR', e8: 'bK',
                     a2: 'wP', b2: 'wP', c2: 'wP', d2: 'wP', f2: 'wP', g2: 'wP', h2: 'wP' }
       }));
 
-      // ── Rule 5: Castling Kingside — After ────────────────────────────
+      // ââ Rule 5: Castling Kingside â After ââââââââââââââââââââââââââââ
       Chessboard('board-ks-after', Object.assign({}, cfg, {
         position: { g1: 'wK', f1: 'wR', e8: 'bK',
                     a2: 'wP', b2: 'wP', c2: 'wP', d2: 'wP', f2: 'wP', g2: 'wP', h2: 'wP' }
       }));
 
-      // ── Rule 5: Castling Queenside — Before ──────────────────────────
+      // ââ Rule 5: Castling Queenside â Before ââââââââââââââââââââââââââ
       Chessboard('board-qs-before', Object.assign({}, cfg, {
         position: { e1: 'wK', a1: 'wR', e8: 'bK',
                     a2: 'wP', b2: 'wP', c2: 'wP', d2: 'wP', e2: 'wP', f2: 'wP', g2: 'wP', h2: 'wP' }
       }));
 
-      // ── Rule 5: Castling Queenside — After ───────────────────────────
+      // ââ Rule 5: Castling Queenside â After âââââââââââââââââââââââââââ
       Chessboard('board-qs-after', Object.assign({}, cfg, {
         position: { c1: 'wK', d1: 'wR', e8: 'bK',
                     a2: 'wP', b2: 'wP', c2: 'wP', d2: 'wP', e2: 'wP', f2: 'wP', g2: 'wP', h2: 'wP' }
