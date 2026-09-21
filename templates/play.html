@@ -63,6 +63,46 @@
     }
     html.dark body { background-color: var(--color-bg); color: var(--color-ink); }
     body { transition: background-color .25s ease, color .25s ease; }
+    html.dark [style*="background:#ffffff"],
+    html.dark [style*="background: #ffffff"],
+    html.dark [style*="background-color: #ffffff"],
+    html.dark [style*="background-color:#ffffff"] { background-color: var(--color-bg) !important; }
+    html.dark [style*="background:#f6faf8"] { background-color: var(--color-surface) !important; }
+    html.dark [style*="rgba(255,255,255,0.92)"] { background: var(--color-header) !important; }
+    html.dark .bg-white { background-color: var(--color-surface) !important; }
+
+    /* Learn / Train dropdown */
+    .nav-dropdown { position: relative; }
+    .nav-dropdown-trigger {
+      display: flex; align-items: center; gap: 4px; cursor: pointer;
+      background: none; border: none; font: inherit; padding: 0;
+    }
+    .nav-dropdown-trigger svg { width: 11px; height: 11px; transition: transform .18s ease; }
+    .nav-dropdown-panel {
+      position: absolute; top: 100%; left: 50%; transform: translate(-50%, 6px);
+      min-width: 200px; margin-top: 10px; padding: 8px; border-radius: 12px;
+      background: var(--color-bg); border: 1px solid var(--color-border);
+      box-shadow: 0 12px 32px rgba(0,0,0,0.14);
+      opacity: 0; visibility: hidden; pointer-events: none;
+      transition: opacity .18s ease, transform .18s ease;
+      z-index: 60;
+    }
+    .nav-dropdown-panel a {
+      display: flex; align-items: center; gap: 8px;
+      padding: 9px 12px; border-radius: 8px; font-size: 13px; font-weight: 500;
+      color: var(--color-muted); white-space: nowrap; transition: background .15s, color .15s;
+    }
+    .nav-dropdown-panel a:hover { background: var(--color-surface); color: var(--color-ink); }
+    .nav-dropdown.open .nav-dropdown-trigger svg { transform: rotate(180deg); }
+    .nav-dropdown.open .nav-dropdown-panel {
+      opacity: 1; visibility: visible; pointer-events: auto; transform: translate(-50%, 2px);
+    }
+    @media (hover: hover) {
+      .nav-dropdown:hover .nav-dropdown-trigger svg { transform: rotate(180deg); }
+      .nav-dropdown:hover .nav-dropdown-panel {
+        opacity: 1; visibility: visible; pointer-events: auto; transform: translate(-50%, 2px);
+      }
+    }
 
     /* Dark mode toggle */
     .theme-toggle {
@@ -125,10 +165,31 @@
       </a>
 
       <nav class="hidden md:flex items-center gap-8 text-sm font-medium">
-        <a href="/trainer" class="text-brand-muted hover:text-brand-ink transition-colors">Puzzle Trainer</a>
-        <a href="/play"    class="text-brand-ink font-semibold transition-colors">Play Live</a>
-        <a href="/join"    class="text-brand-muted hover:text-brand-ink transition-colors">Join</a>
-        <a href="/donate"  class="text-brand-muted hover:text-brand-ink transition-colors">Donate</a>
+        <div class="nav-dropdown">
+          <button type="button" class="nav-dropdown-trigger text-brand-muted hover:text-brand-ink transition-colors" aria-haspopup="true" aria-expanded="false">
+            Learn
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 9l6 6 6-6"/></svg>
+          </button>
+          <div class="nav-dropdown-panel" role="menu">
+            <a href="/curriculum" role="menuitem">Lessons</a>
+            <a href="/basics" role="menuitem">Chess Basics</a>
+            <a href="/special-rules" role="menuitem">Special Rules</a>
+          </div>
+        </div>
+        <div class="nav-dropdown">
+          <button type="button" class="nav-dropdown-trigger text-brand-ink" aria-haspopup="true" aria-expanded="false">
+            Train
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 9l6 6 6-6"/></svg>
+          </button>
+          <div class="nav-dropdown-panel" role="menu">
+            <a href="/trainer" role="menuitem">Puzzle Trainer</a>
+            <a href="/trainer?rush=1" role="menuitem">Puzzle Rush</a>
+            <a href="/play" role="menuitem">Play Live ⚡</a>
+            <a href="/analysis" role="menuitem">Game Analyzer</a>
+          </div>
+        </div>
+        <a href="/join"   class="text-brand-muted hover:text-brand-ink transition-colors">Join</a>
+        <a href="/donate" class="text-brand-muted hover:text-brand-ink transition-colors">Donate</a>
       </nav>
 
       <div class="flex items-center gap-4 text-sm">
@@ -313,6 +374,34 @@
         fetch('/logout').then(function() { window.location.reload(); });
       });
 
+      document.querySelectorAll('.nav-dropdown').forEach(function(dd) {
+        var trigger = dd.querySelector('.nav-dropdown-trigger');
+        if (!trigger) return;
+        trigger.addEventListener('click', function(e) {
+          e.stopPropagation();
+          var willOpen = !dd.classList.contains('open');
+          document.querySelectorAll('.nav-dropdown.open').forEach(function(o) { o.classList.remove('open'); });
+          if (willOpen) {
+            dd.classList.add('open');
+            trigger.setAttribute('aria-expanded', 'true');
+          } else {
+            trigger.setAttribute('aria-expanded', 'false');
+          }
+        });
+      });
+      document.addEventListener('click', function() {
+        document.querySelectorAll('.nav-dropdown.open').forEach(function(o) {
+          o.classList.remove('open');
+          var t = o.querySelector('.nav-dropdown-trigger');
+          if (t) t.setAttribute('aria-expanded', 'false');
+        });
+      });
+      document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+          document.querySelectorAll('.nav-dropdown.open').forEach(function(o) { o.classList.remove('open'); });
+        }
+      });
+
       var err = new URLSearchParams(window.location.search).get('lichess_error');
       if (err) showError('Lichess connection failed (' + err + '). Please try again.');
 
@@ -445,14 +534,32 @@
     }
 
     // ── Lichess status polling ────────────────────────────────────────────
-    var pollTimer   = null;
-    var playBoard   = null;
-    var localGame   = null;
-    var boardFen    = null;
-    var myColor     = null;
-    var gameStatus  = null;   // mirrors server 'status'
-    var currentTurn = null;
-    var moveGuardUntil = 0;   // briefly ignore stale polls right after our own move
+    var pollTimer     = null;
+    var playBoard     = null;
+    var localGame     = null;
+    var boardFen      = null;
+    var myColor       = null;
+    var gameStatus    = null;   // mirrors server 'status'
+    var currentTurn   = null;
+    var currentGameId = null;
+    var lastPly       = -1;     // highest ply we've displayed — updates only ever move forward
+
+    // A poll's fen only ever gets applied to the board if it represents at
+    // least as much progress as what's already on screen (by ply count, read
+    // straight out of the FEN's turn + fullmove fields). That one rule
+    // replaces an earlier time-based "ignore polls for 1.5s after my own
+    // move" guard, which had two real bugs: a poll that happened to arrive
+    // late still won by clobbering the board back to an older position once
+    // the guard window lapsed, and a fast opponent reply arriving inside
+    // that window got silently dropped. Ply-only-moves-forward has neither
+    // failure mode, and also means onPlayDrop doesn't need any special-case
+    // bookkeeping beyond updating boardFen/lastPly optimistically.
+    function plyFromFen(fen) {
+      var parts = fen.split(' ');
+      var turn = parts[1];
+      var fullmove = parseInt(parts[5], 10) || 1;
+      return (fullmove - 1) * 2 + (turn === 'b' ? 1 : 0);
+    }
 
     function startPolling() {
       if (pollTimer) return;
@@ -563,9 +670,17 @@
 
       syncClocks(data);
 
-      var skipBoardUpdate = Date.now() < moveGuardUntil && data.fen !== boardFen;
+      if (data.game_id !== currentGameId) {
+        // A different game than whatever we were last tracking (fresh
+        // match) — don't compare ply against the previous game's progress.
+        currentGameId = data.game_id;
+        lastPly = -1;
+      }
+
+      var newPly = plyFromFen(data.fen);
       if (!playBoard) {
         boardFen  = data.fen;
+        lastPly   = newPly;
         localGame = new Chess(data.fen);
         playBoard = Chessboard('play-board', {
           position:    data.fen,
@@ -577,8 +692,9 @@
           },
           onDrop: onPlayDrop
         });
-      } else if (data.fen !== boardFen && !skipBoardUpdate) {
+      } else if (data.fen !== boardFen && newPly >= lastPly) {
         boardFen  = data.fen;
+        lastPly   = newPly;
         localGame = new Chess(data.fen);
         playBoard.position(data.fen);
       }
@@ -604,7 +720,7 @@
 
       var uci = source + target + (move.promotion || '');
       boardFen = localGame.fen();
-      moveGuardUntil = Date.now() + 1500;
+      lastPly  = plyFromFen(boardFen);
 
       fetch('/api/lichess/move', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -644,7 +760,9 @@
     function renderFinished(data) {
       setScreen('finished');
       if (playBoard) { playBoard.destroy(); playBoard = null; }
-      gameStatus = 'finished';
+      gameStatus    = 'finished';
+      currentGameId = null;
+      lastPly       = -1;
 
       document.getElementById('finished-text').textContent = data.result_text || 'Game over.';
       var won = data.result_text && data.result_text.indexOf('You won') === 0;

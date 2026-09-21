@@ -15,6 +15,7 @@ import os
 import psycopg2
 import psycopg2.errors
 import psycopg2.extras
+import psycopg2.pool
 
 DATABASE_URL = os.environ.get('DATABASE_URL')
 if not DATABASE_URL:
@@ -27,6 +28,16 @@ if not DATABASE_URL:
 # Alias so callers can keep writing `except db.IntegrityError:` the same way
 # they wrote `except sqlite3.IntegrityError:`.
 IntegrityError = psycopg2.IntegrityError
+
+# Every route was opening a brand-new TCP+TLS+auth connection to Postgres
+# and tearing it down again — that handshake (worse yet against a
+# serverless host like Neon) was the single biggest per-request latency
+# cost in the app, paid even by routes that run one cheap SELECT. A pool
+# keeps a handful of connections open and hands them out instead.
+# `minconn` opens eagerly at import time; `maxconn` is sized comfortably
+# above gunicorn's --threads count (see Procfile) so concurrent requests
+# don't contend for a connection.
+_pool = psycopg2.pool.ThreadedConnectionPool(1, 10, DATABASE_URL)
 
 
 class _Cursor:
@@ -79,8 +90,26 @@ class Connection:
         self._conn.commit()
 
     def close(self):
-        self._conn.close()
+        """Returns the connection to the pool rather than closing the
+        socket. Always rolls back first — a no-op if the caller already
+        committed, but it clears the implicit transaction any read-only
+        caller left open (every statement starts one until commit/rollback)
+        so the next borrower starts clean. If Neon has silently dropped
+        this connection while it sat idle — its serverless compute can
+        suspend independently of this pool's own lifetime — the rollback
+        itself will raise, and the dead connection is discarded instead of
+        being handed to the next request broken.
+        """
+        try:
+            self._conn.rollback()
+        except (psycopg2.OperationalError, psycopg2.InterfaceError):
+            try:
+                _pool.putconn(self._conn, close=True)
+            except Exception:
+                pass
+            return
+        _pool.putconn(self._conn)
 
 
 def connect():
-    return Connection(psycopg2.connect(DATABASE_URL))
+    return Connection(_pool.getconn())

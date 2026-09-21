@@ -167,6 +167,21 @@ def init_db():
             CREATE INDEX IF NOT EXISTS idx_personal_blunders_rating
             ON personal_blunders (rating)
         ''')
+        # primary_theme drives every theme filter (Improve Mode, Assessment
+        # Mode) and the GROUP BY in get_common_themes — with millions of
+        # puzzle rows and no index here, every one of those was a full
+        # table scan.
+        conn.execute('''
+            CREATE INDEX IF NOT EXISTS idx_personal_blunders_theme
+            ON personal_blunders (primary_theme)
+        ''')
+        # student_analytics had no index on user_id at all, despite being
+        # filtered by it in /get-analytics on every page load for a signed
+        # in user, and in the admin dashboard's engagement query.
+        conn.execute('''
+            CREATE INDEX IF NOT EXISTS idx_student_analytics_user
+            ON student_analytics (user_id)
+        ''')
         conn.commit()
     finally:
         conn.close()
