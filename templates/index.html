@@ -255,6 +255,7 @@
             <a href="/curriculum" role="menuitem">Lessons</a>
             <a href="/basics" role="menuitem">Chess Basics</a>
             <a href="/special-rules" role="menuitem">Special Rules</a>
+            <a href="/blog" role="menuitem">Blog</a>
           </div>
         </div>
         <div class="nav-dropdown">
@@ -522,6 +523,63 @@
     </div>
   </section>
 
+  <!-- ─── Partnerships ─────────────────────────────────────────────────── -->
+  {% if partners %}
+  <section id="partners" class="py-24 px-6 border-t border-brand-border text-center" style="background:#f6faf8;">
+    <div class="max-w-5xl mx-auto">
+      <p class="text-brand-gdark text-xs font-semibold tracking-widest uppercase mb-12">Our Partners</p>
+      <div class="grid sm:grid-cols-2 md:grid-cols-3 gap-6">
+        {% for partner in partners %}
+        <div class="rounded-2xl border border-brand-border p-6 flex flex-col items-center gap-3 text-center" style="background:#ffffff;">
+          {% if partner.logo_url %}
+          <img src="{{ partner.logo_url }}" alt="{{ partner.name }}" class="h-10 object-contain" loading="lazy" />
+          {% endif %}
+          <h3 class="font-bold text-brand-ink text-base">
+            {% if partner.url %}
+            <a href="{{ partner.url }}" target="_blank" rel="noopener noreferrer" class="hover:text-brand-gdark transition-colors">{{ partner.name }}</a>
+            {% else %}
+            {{ partner.name }}
+            {% endif %}
+          </h3>
+          {% if partner.description %}
+          <p class="text-brand-muted text-sm leading-relaxed">{{ partner.description }}</p>
+          {% endif %}
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+  {% endif %}
+
+  <!-- ─── Blog ─────────────────────────────────────────────────────────── -->
+  {% if blog_posts %}
+  <section id="blog" class="py-24 px-6 border-t border-brand-border" style="background:#ffffff;">
+    <div class="max-w-5xl mx-auto">
+      <div class="text-center mb-12">
+        <p class="text-brand-gdark text-xs font-semibold tracking-widest uppercase mb-4">From the Blog</p>
+        <h2 class="text-4xl font-bold text-brand-ink leading-tight">Updates from Synapchess</h2>
+      </div>
+
+      <div class="grid md:grid-cols-3 gap-6">
+        {% for post in blog_posts %}
+        <a href="/blog/{{ post.slug }}"
+           class="group rounded-2xl border border-brand-border p-6 flex flex-col gap-3 hover:border-brand-green/50 hover:shadow-md transition-all"
+           style="background:#f6faf8;">
+          <span class="text-brand-muted text-xs">{{ post.created_at.strftime('%B %d, %Y') if post.created_at else '' }}</span>
+          <h3 class="font-bold text-lg text-brand-ink group-hover:text-brand-gdark transition-colors leading-snug">{{ post.title }}</h3>
+          {% if post.excerpt %}<p class="text-brand-muted text-sm leading-relaxed line-clamp-3">{{ post.excerpt }}</p>{% endif %}
+          <span class="text-brand-green text-sm font-medium mt-auto">Read more →</span>
+        </a>
+        {% endfor %}
+      </div>
+
+      <div class="text-center mt-10">
+        <a href="/blog" class="text-brand-gdark hover:text-brand-green font-medium text-sm">View all posts →</a>
+      </div>
+    </div>
+  </section>
+  {% endif %}
+
   <!-- ─── Closing CTA ──────────────────────────────────────────────────── -->
   <section id="foundation" class="relative py-28 px-6 border-t border-brand-border overflow-hidden">
     <img src="/static/img/photos/hands-chess-cta.jpg" alt=""
@@ -561,6 +619,7 @@
           <h4 class="text-brand-ink text-sm font-semibold">Site</h4>
           <ul class="space-y-2 text-sm text-brand-muted">
             <li><a href="/learn"  class="hover:text-brand-ink transition-colors">Learn</a></li>
+            <li><a href="/blog"   class="hover:text-brand-ink transition-colors">Blog</a></li>
             <li><a href="/join"   class="hover:text-brand-ink transition-colors">Join</a></li>
             <li><a href="/donate" class="hover:text-brand-ink transition-colors">Donate</a></li>
           </ul>

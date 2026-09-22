@@ -235,6 +235,12 @@ from lichess_play import lichess_bp, init_lichess_db  # noqa: E402
 init_lichess_db()
 app.register_blueprint(lichess_bp)
 
+# ── Blog + partnerships (homepage content, admin-only to write) ────────────────
+from content import content_bp, init_content_db, get_homepage_content  # noqa: E402
+
+init_content_db()
+app.register_blueprint(content_bp)
+
 
 # ── SM-2 spaced-repetition ────────────────────────────────────────────────────
 
@@ -370,7 +376,8 @@ def _random_row(conn, where: str, params: tuple = ()):
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    blog_posts, partners = get_homepage_content()
+    return render_template('index.html', blog_posts=blog_posts, partners=partners)
 
 
 @app.route('/learn')

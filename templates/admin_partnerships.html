@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Manage Partnerships: Synapchess</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root {
+      --color-bg: #ffffff;
+      --color-surface: #f6faf8;
+      --color-border: #e7ebe9;
+      --color-ink: #0b0c10;
+      --color-muted: #64748b;
+      --color-accent: #00dc82;
+      --color-accent-dark: #00aa63;
+    }
+    body { background-color: var(--color-bg); color: var(--color-ink); }
+    input {
+      width: 100%; font-size: 14px; border-radius: 8px; padding: 10px 12px;
+      border: 1px solid var(--color-border); background: var(--color-surface); outline: none;
+    }
+    input:focus { border-color: var(--color-accent); }
+    label { font-size: 12px; font-weight: 600; color: var(--color-muted); display: block; margin-bottom: 6px; }
+  </style>
+</head>
+<body class="antialiased min-h-screen" style="font-family: Inter, system-ui, sans-serif;">
+
+  <header class="border-b" style="border-color: var(--color-border);">
+    <div class="max-w-4xl mx-auto px-6 h-16 flex items-center justify-between">
+      <a href="/" class="flex items-center gap-2 font-semibold text-sm" style="color: var(--color-ink);">
+        <span class="flex items-center justify-center w-7 h-7 rounded-md font-bold text-base"
+              style="background: var(--color-accent); color: var(--color-ink);">♟</span>
+        Synapchess Admin
+      </a>
+      <a href="/admin" class="text-sm" style="color: var(--color-muted);">← Back to dashboard</a>
+    </div>
+  </header>
+
+  <main class="max-w-4xl mx-auto px-6 py-14 space-y-14">
+
+    <!-- ── New partnership ──────────────────────────────────────────────── -->
+    <div>
+      <h1 class="text-2xl font-extrabold mb-1">Manage Partnerships</h1>
+      <p class="text-sm mb-8" style="color: var(--color-muted);">
+        Everything here appears in the Partners section on the homepage.
+      </p>
+
+      <form method="POST" action="/admin/partnerships" class="space-y-4 rounded-xl border p-6" style="border-color: var(--color-border); background: var(--color-surface);">
+        <div class="grid md:grid-cols-2 gap-4">
+          <div>
+            <label for="name">Name</label>
+            <input type="text" id="name" name="name" required maxlength="150" />
+          </div>
+          <div>
+            <label for="url">Link (optional)</label>
+            <input type="url" id="url" name="url" placeholder="https://" />
+          </div>
+        </div>
+        <div>
+          <label for="description">Short description (optional)</label>
+          <input type="text" id="description" name="description" maxlength="300" />
+        </div>
+        <div class="grid md:grid-cols-2 gap-4">
+          <div>
+            <label for="logo_url">Logo image URL (optional)</label>
+            <input type="url" id="logo_url" name="logo_url" placeholder="https://" />
+          </div>
+          <div>
+            <label for="sort_order">Display order (lower shows first)</label>
+            <input type="number" id="sort_order" name="sort_order" value="0" />
+          </div>
+        </div>
+        <button type="submit"
+                class="text-sm font-semibold rounded-lg px-5 py-2.5"
+                style="background: var(--color-accent); color: var(--color-ink);">
+          Add partner
+        </button>
+      </form>
+    </div>
+
+    <!-- ── Existing partnerships ────────────────────────────────────────── -->
+    <div>
+      <p class="text-xs font-semibold uppercase tracking-wide mb-4" style="color: var(--color-muted);">
+        {{ partners|length }} partner{{ 's' if partners|length != 1 else '' }}
+      </p>
+
+      {% if not partners %}
+        <p class="text-sm" style="color: var(--color-muted);">No partnerships added yet.</p>
+      {% endif %}
+
+      <div class="space-y-3">
+        {% for partner in partners %}
+        <div class="rounded-xl border p-5 flex items-start justify-between gap-4" style="border-color: var(--color-border);">
+          <div class="min-w-0 flex items-center gap-3">
+            {% if partner.logo_url %}
+              <img src="{{ partner.logo_url }}" alt="" class="w-9 h-9 rounded object-contain flex-shrink-0" style="background: var(--color-surface);" />
+            {% endif %}
+            <div class="min-w-0">
+              <h3 class="font-semibold text-sm">{{ partner.name }}</h3>
+              <p class="text-xs mt-1" style="color: var(--color-muted);">
+                {% if partner.url %}{{ partner.url }}{% endif %}
+                {% if partner.description %} · {{ partner.description }}{% endif %}
+              </p>
+            </div>
+          </div>
+          <form method="POST" action="/admin/partnerships/{{ partner.id }}/delete" onsubmit="return confirm('Remove this partnership?');" class="flex-shrink-0">
+            <button type="submit" class="text-xs font-medium hover:underline" style="color: #ef4444;">
+              Remove
+            </button>
+          </form>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+  </main>
+
+</body>
+</html>
