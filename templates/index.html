@@ -216,16 +216,8 @@
       border: 1px solid rgba(0,220,130,0.4);
     }
 
-    .demo-badge-pulse {
-      animation: demoPulse 2.4s ease-in-out infinite;
-    }
-    @keyframes demoPulse {
-      0%, 100% { opacity: 1;   transform: scale(1); }
-      50%      { opacity: 0.7; transform: scale(1.04); }
-    }
-
     @media (prefers-reduced-motion: reduce) {
-      .gradient-text, .free-forever-badge, .demo-badge-pulse {
+      .gradient-text, .free-forever-badge {
         animation: none !important;
         transition: none !important;
       }
@@ -271,6 +263,7 @@
           </div>
         </div>
         <a href="/join"   class="text-brand-muted hover:text-brand-ink transition-colors">Join</a>
+        <a href="/impact" class="text-brand-muted hover:text-brand-ink transition-colors">Impact</a>
         <a href="/donate" class="text-brand-muted hover:text-brand-ink transition-colors">Donate</a>
       </nav>
 
@@ -492,32 +485,20 @@
   </section>
 
   <!-- ─── Outcomes ─────────────────────────────────────────────────────── -->
-  <section id="outcomes" class="py-24 px-6 border-t border-brand-border" style="background:#ffffff;">
-    <div class="max-w-4xl mx-auto text-center">
+  <section id="outcomes" class="py-24 px-6 border-t border-brand-border text-center" style="background:#ffffff;">
+    <div class="max-w-4xl mx-auto">
+      <p class="text-brand-gdark text-xs font-semibold tracking-widest uppercase mb-8">Our Impact</p>
 
-      <div class="flex items-center justify-center gap-2 flex-wrap mb-8">
-        <p class="text-brand-gdark text-xs font-semibold tracking-widest uppercase">What we're working toward</p>
-        <span class="demo-badge-pulse inline-flex items-center gap-1 border border-amber-400 text-amber-600 text-[10px] font-bold tracking-widest uppercase px-2 py-0.5 rounded-full bg-amber-50">
-          Demo Data: Not Real
-        </span>
-      </div>
-
-      <!-- 3 plain stats, no cards or charts -->
-      <div class="grid sm:grid-cols-3 gap-10 sm:gap-6">
+      <div class="grid sm:grid-cols-2 gap-10 sm:gap-6 justify-center">
         <div class="stat-card">
-          <div class="text-5xl font-extrabold text-brand-ink"><span class="stat-num" data-target="34" data-prefix="+" data-suffix="%">0%</span></div>
-          <div class="text-brand-ink text-sm font-medium mt-2">Cognitive growth index</div>
-          <div class="text-brand-muted text-xs mt-1">vs. district baseline (demo)</div>
+          <div class="text-6xl font-extrabold text-brand-ink"><span class="stat-num" data-target="1">0</span></div>
+          <div class="text-brand-ink text-base font-medium mt-2">Title I school supported so far</div>
+          <div class="text-brand-muted text-xs mt-1">and growing &mdash; help us reach the next one</div>
         </div>
         <div class="stat-card">
-          <div class="text-5xl font-extrabold text-brand-ink"><span class="stat-num" data-target="92.4" data-suffix="%">0%</span></div>
-          <div class="text-brand-ink text-sm font-medium mt-2">Problem-solving accuracy</div>
-          <div class="text-brand-muted text-xs mt-1">standardized assessments (demo)</div>
-        </div>
-        <div class="stat-card">
-          <div class="text-5xl font-extrabold text-brand-ink"><span class="stat-num" data-target="27840">0</span></div>
-          <div class="text-brand-ink text-sm font-medium mt-2">Students reached</div>
-          <div class="text-brand-muted text-xs mt-1">across 142 schools (demo)</div>
+          <div class="text-6xl font-extrabold text-brand-ink"><span class="stat-num" data-target="5">0</span></div>
+          <div class="text-brand-ink text-base font-medium mt-2">Boards donated</div>
+          <div class="text-brand-muted text-xs mt-1"><a href="/impact" class="hover:text-brand-gdark transition-colors">see the impact &rarr;</a></div>
         </div>
       </div>
     </div>
@@ -621,6 +602,7 @@
             <li><a href="/learn"  class="hover:text-brand-ink transition-colors">Learn</a></li>
             <li><a href="/blog"   class="hover:text-brand-ink transition-colors">Blog</a></li>
             <li><a href="/join"   class="hover:text-brand-ink transition-colors">Join</a></li>
+            <li><a href="/impact" class="hover:text-brand-ink transition-colors">Impact</a></li>
             <li><a href="/donate" class="hover:text-brand-ink transition-colors">Donate</a></li>
           </ul>
         </div>
@@ -1372,7 +1354,7 @@
       .catch(function() {});
   </script>
 
-  <!-- ─── Demo stat cards: count-up + grow-in bars on scroll into view ───── -->
+  <!-- ─── Stat cards: count-up + grow-in bars on scroll into view ───── -->
   <script>
     (function() {
       var cards = Array.prototype.slice.call(document.querySelectorAll('.stat-card'));

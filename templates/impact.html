@@ -13,7 +13,7 @@
       } catch (e) {}
     })();
   </script>
-  <title>Join: Synapchess</title>
+  <title>Impact: Synapchess</title>
 
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
@@ -122,6 +122,16 @@
     .theme-toggle .icon-moon { display: none; }
     html.dark .theme-toggle .icon-sun { display: none; }
     html.dark .theme-toggle .icon-moon { display: block; }
+
+    /* Gallery */
+    .gallery-card {
+      border-radius: 16px; border: 1px solid var(--color-border);
+      overflow: hidden; background: var(--color-surface);
+      transition: transform .2s ease, box-shadow .2s ease;
+    }
+    .gallery-card:hover { transform: translateY(-3px); box-shadow: 0 16px 32px rgba(0,0,0,0.08); }
+    .gallery-card img { width: 100%; height: 280px; object-fit: cover; display: block; }
+    .gallery-card figcaption { padding: 14px 18px 18px; }
   </style>
 
   <script>
@@ -202,8 +212,8 @@
             <a href="/analysis" role="menuitem">Game Analyzer</a>
           </div>
         </div>
-        <a href="/join"   class="text-brand-ink">Join</a>
-        <a href="/impact" class="text-brand-muted hover:text-brand-ink transition-colors">Impact</a>
+        <a href="/join"   class="text-brand-muted hover:text-brand-ink transition-colors">Join</a>
+        <a href="/impact" class="text-brand-ink">Impact</a>
         <a href="/donate" class="text-brand-muted hover:text-brand-ink transition-colors">Donate</a>
       </nav>
       <div class="flex items-center gap-4 text-sm">
@@ -225,114 +235,58 @@
     </div>
   </header>
 
-  <!-- ─── Hero ──────────────────────────────────────────────────────────── -->
-  <section class="py-20 px-6 text-center" style="background:#ffffff;">
-    <div class="max-w-2xl mx-auto space-y-5">
-      <p class="text-brand-green text-xs font-semibold tracking-widest uppercase">Join</p>
+  <!-- ─── Impact Hero ───────────────────────────────────────────────────── -->
+  <section class="py-24 px-6 text-center" style="background:#ffffff;">
+    <div class="max-w-2xl mx-auto space-y-6">
+      <p class="text-brand-green text-xs font-semibold tracking-widest uppercase">Impact</p>
       <h1 class="text-4xl md:text-5xl font-extrabold leading-tight">
-        Bring this to your community
+        Real boards, in real classrooms.
       </h1>
-      <p class="text-brand-muted text-lg max-w-xl mx-auto leading-relaxed">
-        Synapchess grows through people, not ad spend: coaches, teachers, and volunteers
-        who believe every kid deserves a shot at learning to think five moves ahead.
+      <p class="text-brand-muted text-lg leading-relaxed">
+        Every donation buys physical chess sets for Title I schools that couldn't otherwise afford them. Here's where they've gone so far.
       </p>
     </div>
   </section>
 
-  <!-- ─── Ways to get involved ──────────────────────────────────────────── -->
+  <!-- ─── Impact Stats ──────────────────────────────────────────────────── -->
+  <section class="pb-16 px-6">
+    <div class="max-w-4xl mx-auto grid sm:grid-cols-2 gap-10 sm:gap-6 text-center">
+      <div class="stat-card">
+        <div class="text-6xl font-extrabold text-brand-ink">1</div>
+        <div class="text-brand-ink text-base font-medium mt-2">Title I school supported so far</div>
+      </div>
+      <div class="stat-card">
+        <div class="text-6xl font-extrabold text-brand-ink">5</div>
+        <div class="text-brand-ink text-base font-medium mt-2">Boards donated</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── Gallery ───────────────────────────────────────────────────────── -->
   <section class="py-16 px-6 border-t border-brand-border" style="background:#f6faf8;">
-    <div class="max-w-5xl mx-auto">
-      <h2 class="text-2xl font-bold text-center mb-12">Three ways to help</h2>
-      <div class="grid md:grid-cols-3 gap-6">
-
-        <div class="rounded-2xl border border-brand-border p-7 space-y-3" style="background:#ffffff;">
-          <div class="w-10 h-10 rounded-lg flex items-center justify-center text-brand-green text-lg" style="background:#e6f9f0;">🧑‍🏫</div>
-          <h3 class="font-bold text-lg">Volunteer as a mentor</h3>
-          <p class="text-brand-muted text-sm leading-relaxed">
-            No coaching license required, just a willingness to sit across the board from a kid
-            for an hour a week. We provide the curriculum.
-          </p>
-        </div>
-
-        <div class="rounded-2xl border border-brand-border p-7 space-y-3" style="background:#ffffff;">
-          <div class="w-10 h-10 rounded-lg flex items-center justify-center text-brand-green text-lg" style="background:#e6f9f0;">🏫</div>
-          <h3 class="font-bold text-lg">Start a chapter</h3>
-          <p class="text-brand-muted text-sm leading-relaxed">
-            Bring the full program (puzzles, video curriculum, and progress tracking) to your
-            school or after-school site.
-          </p>
-        </div>
-
-        <div class="rounded-2xl border border-brand-border p-7 space-y-3" style="background:#ffffff;">
-          <div class="w-10 h-10 rounded-lg flex items-center justify-center text-brand-green text-lg" style="background:#e6f9f0;">📣</div>
-          <h3 class="font-bold text-lg">Spread the word</h3>
-          <p class="text-brand-muted text-sm leading-relaxed">
-            Know a Title I school, a librarian, or an after-school program that would want this?
-            An introduction is worth more than you'd think.
-          </p>
-        </div>
-
+    <div class="max-w-4xl mx-auto">
+      <p class="text-brand-gdark text-xs font-semibold tracking-widest uppercase mb-10 text-center">Gallery</p>
+      <div class="grid sm:grid-cols-2 gap-8">
+        <figure class="gallery-card">
+          <img src="/static/img/photos/rogers-elementary-donation.png" alt="Synapchess volunteer delivering donated chess sets to staff at Rogers Elementary" loading="lazy">
+          <figcaption>
+            <p class="text-brand-ink text-sm font-semibold">Our first Title I school impacted &mdash; 5 sets donated</p>
+            <p class="text-brand-muted text-xs mt-1">Rogers Elementary</p>
+          </figcaption>
+        </figure>
       </div>
     </div>
   </section>
 
-  <!-- ─── How to start a chapter ────────────────────────────────────────── -->
-  <section class="py-24 px-6" style="background:#ffffff;">
-    <div class="max-w-3xl mx-auto">
-      <div class="text-center mb-16">
-        <p class="text-brand-green text-xs font-semibold tracking-widest uppercase mb-4">Starting a Chapter</p>
-        <h2 class="text-3xl font-bold leading-tight">Four steps to launch</h2>
-      </div>
-
-      <div class="relative pl-14">
-        <div class="absolute left-5 top-2 bottom-2 w-px bg-brand-border" aria-hidden="true"></div>
-
-        <div class="relative pb-12">
-          <span class="absolute -left-14 top-0 flex items-center justify-center w-10 h-10 rounded-full border-2 border-brand-border text-brand-muted font-bold text-sm" style="background:#ffffff;">1</span>
-          <h3 class="font-semibold text-lg mb-1">Reach out</h3>
-          <p class="text-brand-muted text-sm leading-relaxed max-w-md">
-            Tell us about your school or community: size, age group, and what resources you already have.
-          </p>
-        </div>
-
-        <div class="relative pb-12">
-          <span class="absolute -left-14 top-0 flex items-center justify-center w-10 h-10 rounded-full border-2 border-brand-border text-brand-muted font-bold text-sm" style="background:#ffffff;">2</span>
-          <h3 class="font-semibold text-lg mb-1">Get set up</h3>
-          <p class="text-brand-muted text-sm leading-relaxed max-w-md">
-            We walk you through the curriculum, the puzzle trainer, and how to onboard your first
-            group of students: free, no equipment required beyond a screen.
-          </p>
-        </div>
-
-        <div class="relative pb-12">
-          <span class="absolute -left-14 top-0 flex items-center justify-center w-10 h-10 rounded-full border-2 border-brand-border text-brand-muted font-bold text-sm" style="background:#ffffff;">3</span>
-          <h3 class="font-semibold text-lg mb-1">Launch your first cohort</h3>
-          <p class="text-brand-muted text-sm leading-relaxed max-w-md">
-            Start small: even a handful of students meeting once a week is a chapter.
-          </p>
-        </div>
-
-        <div class="relative">
-          <span class="absolute -left-14 top-0 flex items-center justify-center w-10 h-10 rounded-full border-2 border-brand-border text-brand-muted font-bold text-sm" style="background:#ffffff;">4</span>
-          <h3 class="font-semibold text-lg mb-1">Grow from there</h3>
-          <p class="text-brand-muted text-sm leading-relaxed max-w-md">
-            Track progress on the dashboard, add mentors as you go, and let us know what you need next.
-          </p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ─── Contact CTA ───────────────────────────────────────────────────── -->
-  <section class="py-24 px-6 border-t border-brand-border text-center" style="background:#f6faf8;">
+  <!-- ─── CTA ───────────────────────────────────────────────────────────── -->
+  <section class="py-24 px-6 text-center" style="background:#ffffff;">
     <div class="max-w-xl mx-auto space-y-6">
-      <h2 class="text-3xl font-bold leading-tight">Ready to get involved?</h2>
-      <p class="text-brand-muted text-base leading-relaxed">
-        Tell us a little about yourself and what you have in mind, and we'll follow up personally.
+      <h2 class="text-3xl font-extrabold leading-tight">Help us reach the next school.</h2>
+      <p class="text-brand-muted text-lg leading-relaxed">
+        Every dollar goes directly toward putting real chess sets in more classrooms.
       </p>
-      <a href="mailto:hello@synapchess.org?subject=Getting%20involved%20with%20Synapchess"
-         class="inline-block bg-brand-green hover:bg-brand-gdark text-brand-ink font-semibold px-7 py-3.5 rounded-md transition-colors text-sm">
-        Get in touch &rarr;
+      <a href="/donate" class="inline-block bg-brand-green hover:bg-brand-gdark text-brand-ink font-semibold px-6 py-3 rounded-md transition-colors text-sm">
+        Donate &rarr;
       </a>
     </div>
   </section>

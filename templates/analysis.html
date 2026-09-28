@@ -168,7 +168,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
   <link rel="stylesheet" href="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.css" />
   <script src="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.js"></script>
-  <!-- In-browser Stockfish (WASM, falls back to JS) â replaces the old server-side engine subprocess -->
+  <!-- In-browser Stockfish (WASM, falls back to JS) — replaces the old server-side engine subprocess -->
   <script src="/static/js/engine-client.js"></script>
 
   <style>
@@ -194,11 +194,11 @@
 </head>
 <body class="text-brand-ink antialiased" style="font-family: Inter, system-ui, sans-serif;">
 
-  <!-- âââ SiteHeader ââââââââââââââââââââââââââââââââââââââââââââââââââââââ -->
+  <!-- ─── SiteHeader ────────────────────────────────────────────────────── -->
   <header class="sticky top-0 z-50 border-b border-slate-200" style="background:rgba(255,255,255,0.92); backdrop-filter:blur(8px);">
     <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
       <a href="/" class="flex items-center gap-2 font-semibold text-brand-ink text-sm">
-        <span class="flex items-center justify-center w-7 h-7 rounded-md bg-brand-green text-brand-ink font-bold text-base">â</span>
+        <span class="flex items-center justify-center w-7 h-7 rounded-md bg-brand-green text-brand-ink font-bold text-base">♟</span>
         Synapchess
       </a>
       <nav class="hidden md:flex items-center gap-8 text-sm font-medium">
@@ -227,6 +227,7 @@
           </div>
         </div>
         <a href="/join"   class="text-slate-500 hover:text-brand-ink transition-colors">Join</a>
+        <a href="/impact" class="text-slate-500 hover:text-brand-ink transition-colors">Impact</a>
         <a href="/donate" class="text-slate-500 hover:text-brand-ink transition-colors">Donate</a>
       </nav>
       <div class="flex items-center gap-4 text-sm">
@@ -247,7 +248,7 @@
     </div>
   </header>
 
-  <!-- âââ Page Header âââââââââââââââââââââââââââââââââââââââââââââââââââââ -->
+  <!-- ─── Page Header ───────────────────────────────────────────────────── -->
   <section class="py-8 px-6 border-b border-slate-200" style="background:#ffffff;">
     <div class="max-w-6xl mx-auto space-y-2">
       <span class="text-brand-gdark text-xs font-semibold tracking-widest uppercase">Post-Game Review</span>
@@ -261,11 +262,11 @@
     </div>
   </section>
 
-  <!-- âââ Main Layout âââââââââââââââââââââââââââââââââââââââââââââââââââââ -->
+  <!-- ─── Main Layout ───────────────────────────────────────────────────── -->
   <section class="py-8 px-6" style="background:#ffffff;">
     <div class="max-w-6xl mx-auto flex gap-6 items-start flex-wrap xl:flex-nowrap">
 
-      <!-- ââ Left: Saved games âââââââââââââââââââââââââââââââââââââââââââ -->
+      <!-- ── Left: Saved games ─────────────────────────────────────────── -->
       <aside class="w-full xl:w-60 flex-shrink-0 space-y-4 order-3 xl:order-1">
         <div class="rounded-xl border border-brand-border p-4 space-y-3" style="background:#f6faf8;">
           <div class="flex items-center justify-between">
@@ -279,7 +280,7 @@
         </div>
       </aside>
 
-      <!-- ââ Center: Board + controls ââââââââââââââââââââââââââââââââââââ -->
+      <!-- ── Center: Board + controls ──────────────────────────────────── -->
       <div class="flex-1 flex flex-col items-center gap-4 order-1 xl:order-2 min-w-[420px]">
         <div class="rounded-lg overflow-hidden shadow-2xl shadow-brand-green/10">
           <div id="board"></div>
@@ -304,13 +305,13 @@
               <input id="chk-live-engine" type="checkbox" checked class="accent-brand-green" />
               Live engine line
             </label>
-            <span id="live-eval" class="text-brand-ink text-sm font-bold">â</span>
+            <span id="live-eval" class="text-brand-ink text-sm font-bold">—</span>
           </div>
-          <p id="live-pv" class="text-brand-muted text-xs leading-relaxed truncate">Waiting for a positionâ¦</p>
+          <p id="live-pv" class="text-brand-muted text-xs leading-relaxed truncate">Waiting for a position…</p>
         </div>
       </div>
 
-      <!-- ââ Right: Move list ââââââââââââââââââââââââââââââââââââââââââââ -->
+      <!-- ── Right: Move list ──────────────────────────────────────────── -->
       <aside class="w-full xl:w-64 flex-shrink-0 space-y-4 order-2 xl:order-3">
         <div class="rounded-xl border border-brand-border p-4 space-y-3" style="background:#f6faf8;">
           <div class="flex items-center justify-between">
@@ -324,7 +325,7 @@
     </div>
   </section>
 
-  <!-- âââ Analysis Results ââââââââââââââââââââââââââââââââââââââââââââââââ -->
+  <!-- ─── Analysis Results ──────────────────────────────────────────────── -->
   <section id="analysis-section" class="py-4 px-6 hidden" style="background:#ffffff;">
     <div class="max-w-6xl mx-auto space-y-5">
 
@@ -359,11 +360,11 @@
     </div>
   </section>
 
-  <!-- âââ Auth Modal (same pattern as trainer.html) ââââââââââââââââââââââ -->
+  <!-- ─── Auth Modal (same pattern as trainer.html) ────────────────────── -->
   <div id="auth-modal" class="fixed inset-0 z-[100] flex items-center justify-center hidden">
     <div class="absolute inset-0" style="background:rgba(15,23,20,0.5);" onclick="closeModal()"></div>
     <div class="relative z-10 w-full max-w-sm mx-4 rounded-2xl border border-brand-border p-8 space-y-6" style="background:#f6faf8;">
-      <button onclick="closeModal()" class="absolute top-4 right-4 text-brand-muted hover:text-brand-ink transition-colors text-lg leading-none cursor-pointer">â</button>
+      <button onclick="closeModal()" class="absolute top-4 right-4 text-brand-muted hover:text-brand-ink transition-colors text-lg leading-none cursor-pointer">✕</button>
       <div class="flex gap-6 border-b border-brand-border pb-4">
         <button id="tab-login" onclick="switchTab('login')" class="text-brand-ink font-semibold text-sm pb-1 border-b-2 border-brand-green cursor-pointer">Login</button>
         <button id="tab-register" onclick="switchTab('register')" class="text-brand-muted hover:text-brand-ink font-semibold text-sm pb-1 border-b-2 border-transparent cursor-pointer">Register</button>
@@ -378,18 +379,18 @@
   </div>
 
   <script>
-    // ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
-    // Classification styling (status colors â icon + label + color, never
-    // color alone) â kept in one place so the graph and move list agree.
-    // ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+    // ══════════════════════════════════════════════════════════════════════
+    // Classification styling (status colors — icon + label + color, never
+    // color alone) — kept in one place so the graph and move list agree.
+    // ══════════════════════════════════════════════════════════════════════
     var CLASS_STYLE = {
-      best:       { color: '#00dc82', bg: 'rgba(0,220,130,0.12)',  icon: 'â',  label: 'Best' },
-      excellent:  { color: '#4ade80', bg: 'rgba(74,222,128,0.12)', icon: 'â',  label: 'Excellent' },
-      good:       { color: '#86efac', bg: 'rgba(134,239,172,0.10)',icon: 'â',  label: 'Good' },
+      best:       { color: '#00dc82', bg: 'rgba(0,220,130,0.12)',  icon: '★',  label: 'Best' },
+      excellent:  { color: '#4ade80', bg: 'rgba(74,222,128,0.12)', icon: '✓',  label: 'Excellent' },
+      good:       { color: '#86efac', bg: 'rgba(134,239,172,0.10)',icon: '✓',  label: 'Good' },
       inaccuracy: { color: '#f59e0b', bg: 'rgba(245,158,11,0.14)', icon: '?!', label: 'Inaccuracy' },
       mistake:    { color: '#eb6834', bg: 'rgba(235,104,52,0.16)', icon: '?',  label: 'Mistake' },
       blunder:    { color: '#ef4444', bg: 'rgba(239,68,68,0.16)',  icon: '??', label: 'Blunder' },
-      unknown:    { color: '#94a3b8', bg: 'rgba(148,163,184,0.10)',icon: 'â',  label: 'â' }
+      unknown:    { color: '#94a3b8', bg: 'rgba(148,163,184,0.10)',icon: '—',  label: '—' }
     };
     var CPL_TIERS = [[10, 'best'], [25, 'excellent'], [50, 'good'], [100, 'inaccuracy'], [200, 'mistake'], [Infinity, 'blunder']];
     function classifyCpl(cpl) {
@@ -404,7 +405,7 @@
     var LIVE_DEPTH = 18;      // single-position live eval
     var ANALYSIS_DEPTH = 20;  // full-game move-by-move analysis
 
-    // ââ State ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+    // ── State ──────────────────────────────────────────────────────────────
     var board = null, game = null;
     var moveLog = [];              // [{ply, san, uci, fen, move_time_ms, timestamp}]
     var lastMoveAt = null;         // performance.now() snapshot after the previous move
@@ -415,7 +416,7 @@
     var liveEngineOn = true;
     var lastAnalysis = null;       // {analysis, summary} from the last run
 
-    // ââ Init âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+    // ── Init ───────────────────────────────────────────────────────────────
     document.addEventListener('DOMContentLoaded', function() {
       newGame();
       initAuth();
@@ -466,7 +467,7 @@
       }
     }
 
-    // ââ Board / game lifecycle ââââââââââââââââââââââââââââââââââââââââââââââ
+    // ── Board / game lifecycle ──────────────────────────────────────────────
     function setStatus(text, color) {
       var el = document.getElementById('status');
       el.textContent = text;
@@ -493,8 +494,8 @@
 
       renderMoveList();
       setStatus('Make a move to begin recording this game.');
-      document.getElementById('live-eval').textContent = 'â';
-      document.getElementById('live-pv').textContent = 'Waiting for a positionâ¦';
+      document.getElementById('live-eval').textContent = '—';
+      document.getElementById('live-pv').textContent = 'Waiting for a position…';
     }
 
     function onDrop(source, target) {
@@ -546,7 +547,7 @@
       return '*';
     }
 
-    // ââ Move list (Requirement 1: every move + timestamp + board state) ââââ
+    // ── Move list (Requirement 1: every move + timestamp + board state) ────
     function renderMoveList() {
       document.getElementById('move-count').textContent = moveLog.length;
       var empty = document.getElementById('moves-empty');
@@ -570,19 +571,19 @@
       list.innerHTML = rows.join('');
     }
 
-    // ââ Live engine (Requirement 3: evaluate current position + PV) ââââââââ
+    // ── Live engine (Requirement 3: evaluate current position + PV) ────────
     // Runs in-browser via EngineClient (WASM Stockfish Worker) instead of
     // calling out to a server-side engine subprocess.
     function evaluateCurrentPosition() {
       if (!game) return;
       var fen = game.fen();
-      document.getElementById('live-eval').textContent = 'â¦';
-      document.getElementById('live-pv').textContent = 'Thinkingâ¦';
+      document.getElementById('live-eval').textContent = '…';
+      document.getElementById('live-pv').textContent = 'Thinking…';
 
       EngineClient.evaluateFen(fen, { depth: LIVE_DEPTH, multipv: 1 })
         .then(function(data) {
           if (!data.lines || !data.lines.length) {
-            document.getElementById('live-eval').textContent = 'â';
+            document.getElementById('live-eval').textContent = '—';
             document.getElementById('live-pv').textContent = 'No line available.';
             return;
           }
@@ -605,12 +606,12 @@
             : 'No line available.';
         })
         .catch(function(err) {
-          document.getElementById('live-eval').textContent = 'â';
+          document.getElementById('live-eval').textContent = '—';
           document.getElementById('live-pv').textContent = 'Engine unavailable: ' + err.message;
         });
     }
 
-    // ââ Save / rename (Requirement 2) âââââââââââââââââââââââââââââââââââââââ
+    // ── Save / rename (Requirement 2) ───────────────────────────────────────
     function defaultTitle() {
       var d = new Date();
       function pad(n) { return n < 10 ? '0' + n : '' + n; }
@@ -659,7 +660,7 @@
     }
     function writeLocalGames(games) { localStorage.setItem(LOCAL_KEY, JSON.stringify(games)); }
 
-    // ââ Saved games list âââââââââââââââââââââââââââââââââââââââââââââââââââââ
+    // ── Saved games list ─────────────────────────────────────────────────────
     function loadSavedGames() {
       if (currentUser) {
         fetch('/api/games').then(function(r) { return r.json(); }).then(function(d) {
@@ -690,12 +691,12 @@
               '<button class="text-brand-ink text-xs font-semibold text-left truncate flex-1 cursor-pointer hover:text-brand-green" ' +
                 'onclick="loadGame(\'' + g.id + '\', \'' + g.source + '\')" title="Load this game">' + escapeHtml(g.title) + '</button>' +
               '<button class="text-brand-muted hover:text-brand-ink text-xs cursor-pointer flex-shrink-0" ' +
-                'onclick="renameGame(\'' + g.id + '\', \'' + g.source + '\')" title="Rename">â</button>' +
+                'onclick="renameGame(\'' + g.id + '\', \'' + g.source + '\')" title="Rename">✎</button>' +
               '<button class="text-brand-muted hover:text-red-400 text-xs cursor-pointer flex-shrink-0" ' +
-                'onclick="deleteGame(\'' + g.id + '\', \'' + g.source + '\')" title="Delete">â</button>' +
+                'onclick="deleteGame(\'' + g.id + '\', \'' + g.source + '\')" title="Delete">✕</button>' +
             '</div>' +
             '<div class="flex items-center justify-between text-[10px] text-brand-muted">' +
-              '<span>' + g.move_count + ' moves' + (g.analyzed ? ' Â· analyzed' : '') + '</span>' +
+              '<span>' + g.move_count + ' moves' + (g.analyzed ? ' · analyzed' : '') + '</span>' +
               '<span>' + when + '</span>' +
             '</div>' +
           '</div>'
@@ -781,15 +782,15 @@
       if (liveEngineOn) evaluateCurrentPosition();
     }
 
-    // ââ Full-game analysis (Requirement 3 + 4) ââââââââââââââââââââââââââââââ
+    // ── Full-game analysis (Requirement 3 + 4) ──────────────────────────────
     // Runs entirely in-browser via EngineClient now. For signed-in users the
-    // computed rows are POSTed to the server afterward purely for storage â
+    // computed rows are POSTed to the server afterward purely for storage —
     // the server no longer runs Stockfish itself.
     function analyzeGame() {
       if (!moveLog.length) { setStatus('Nothing to analyze yet. Play or load a game first.', '#ef4444'); return; }
       if (!currentGameId) { setStatus('Save the game first, then analyze it.', '#ef4444'); return; }
 
-      setStatus('Running Stockfish (in-browser) over the full gameâ¦ this can take a moment.', '#f59e0b');
+      setStatus('Running Stockfish (in-browser) over the full game… this can take a moment.', '#f59e0b');
 
       runClientAnalysis(STARTING_FEN, moveLog, ANALYSIS_DEPTH)
         .then(function(result) {
@@ -838,7 +839,7 @@
               var mateBefore = line0.mate !== undefined ? line0.mate : null;
               var cpAfterRaw = line1.cp !== undefined ? line1.cp : null;
               var mateAfterRaw = line1.mate !== undefined ? line1.mate : null;
-              // after's score is from the new side-to-move's POV â flip back to the mover's POV
+              // after's score is from the new side-to-move's POV — flip back to the mover's POV
               var cpAfter = cpAfterRaw === null ? null : -cpAfterRaw;
               var mateAfter = mateAfterRaw === null ? null : -mateAfterRaw;
 
@@ -863,7 +864,7 @@
       });
     }
 
-    // ââ Analysis summary + rendering âââââââââââââââââââââââââââââââââââââââââ
+    // ── Analysis summary + rendering ─────────────────────────────────────────
     function summarize(analysis) {
       var sides = { w: { sum: 0, n: 0, counts: {} }, b: { sum: 0, n: 0, counts: {} } };
       analysis.forEach(function(row) {
@@ -1009,7 +1010,7 @@
       if (rows[ply - 1]) rows[ply - 1].classList.add('active');
     }
 
-    // ââ Auth modal (same behavior as trainer.html) âââââââââââââââââââââââââââ
+    // ── Auth modal (same behavior as trainer.html) ───────────────────────────
     function openModal(tab) {
       activeModalTab = tab || 'login';
       switchTab(activeModalTab);
@@ -1044,7 +1045,7 @@
         return;
       }
       errorEl.classList.add('hidden');
-      submitBtn.textContent = 'Please waitâ¦';
+      submitBtn.textContent = 'Please wait…';
       var endpoint = activeModalTab === 'login' ? '/login' : '/register';
       fetch(endpoint, {
         method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username: username, password: password })

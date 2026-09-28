@@ -189,11 +189,11 @@
 </head>
 <body class="text-brand-ink antialiased" style="font-family: Inter, system-ui, sans-serif;">
 
-  <!-- âââ SiteHeader ââââââââââââââââââââââââââââââââââââââââââââââââââââââ -->
+  <!-- ─── SiteHeader ────────────────────────────────────────────────────── -->
   <header class="sticky top-0 z-50 border-b border-brand-border" style="background:rgba(255,255,255,0.92); backdrop-filter:blur(8px);">
     <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
       <a href="/" class="flex items-center gap-2 font-semibold text-brand-ink text-sm">
-        <span class="flex items-center justify-center w-7 h-7 rounded-md bg-brand-green text-brand-ink font-bold text-base">â</span>
+        <span class="flex items-center justify-center w-7 h-7 rounded-md bg-brand-green text-brand-ink font-bold text-base">♟</span>
         Synapchess
       </a>
       <nav class="hidden md:flex items-center gap-8 text-sm font-medium">
@@ -222,6 +222,7 @@
           </div>
         </div>
         <a href="/join"   class="text-brand-muted hover:text-brand-ink transition-colors">Join</a>
+        <a href="/impact" class="text-brand-muted hover:text-brand-ink transition-colors">Impact</a>
         <a href="/donate" class="text-brand-muted hover:text-brand-ink transition-colors">Donate</a>
       </nav>
       <div class="flex items-center gap-4 text-sm">
@@ -238,7 +239,7 @@
     </div>
   </header>
 
-  <!-- âââ Page Header âââââââââââââââââââââââââââââââââââââââââââââââââââââ -->
+  <!-- ─── Page Header ───────────────────────────────────────────────────── -->
   <section class="py-12 px-6 border-b border-brand-border" style="background:#ffffff;">
     <div class="max-w-6xl mx-auto space-y-6">
 
@@ -261,7 +262,7 @@
         </p>
       </div>
 
-      <!-- ââ Tier navigation (accessible tab-style links between sections) ââ -->
+      <!-- ── Tier navigation (accessible tab-style links between sections) ── -->
       <nav aria-label="Curriculum tiers" class="flex flex-wrap gap-2 pt-2">
         {% for s in all_sections %}
         <a href="/curriculum/{{ s.slug }}"
@@ -292,7 +293,7 @@
     </div>
   </section>
 
-  <!-- âââ Player + Scrollable Playlist ââââââââââââââââââââââââââââââââââââ -->
+  <!-- ─── Player + Scrollable Playlist ──────────────────────────────────── -->
   <section class="py-12 px-6" style="background:#f6faf8;">
     <div class="max-w-6xl mx-auto grid lg:grid-cols-3 gap-8 items-start">
 
@@ -312,7 +313,7 @@
         </div>
         <div class="rounded-xl border border-brand-border px-5 py-4 bg-white">
           <h2 id="player-title" class="font-bold text-brand-ink text-base leading-snug">{{ videos[0].title }}</h2>
-          <p id="player-meta" class="text-brand-muted text-xs mt-1.5">{{ videos[0].channel }} Â· {{ videos[0].duration_label }}</p>
+          <p id="player-meta" class="text-brand-muted text-xs mt-1.5">{{ videos[0].channel }} · {{ videos[0].duration_label }}</p>
         </div>
       </div>
 
@@ -335,11 +336,11 @@
                   aria-label="Play {{ v.title }} ({{ v.duration_label }}), by {{ v.channel }}">
             <span class="relative flex-shrink-0 w-24 h-14 rounded-md overflow-hidden bg-black">
               <img src="https://i.ytimg.com/vi/{{ v.id }}/mqdefault.jpg" alt="" class="w-full h-full object-cover" loading="lazy" />
-              <span class="watched-badge absolute top-1 right-1 hidden w-5 h-5 rounded-full bg-brand-green text-brand-ink items-center justify-center text-xs font-bold">â</span>
+              <span class="watched-badge absolute top-1 right-1 hidden w-5 h-5 rounded-full bg-brand-green text-brand-ink items-center justify-center text-xs font-bold">✓</span>
             </span>
             <span class="flex-1 min-w-0">
               <span class="block text-sm text-brand-ink font-medium leading-snug line-clamp-2">{{ v.title }}</span>
-              <span class="block text-xs text-brand-muted mt-1">{{ v.channel }} Â· {{ v.duration_label }}</span>
+              <span class="block text-xs text-brand-muted mt-1">{{ v.channel }} · {{ v.duration_label }}</span>
             </span>
           </button>
           {% endfor %}
@@ -349,14 +350,14 @@
     </div>
   </section>
 
-  <!-- âââ SiteFooter ââââââââââââââââââââââââââââââââââââââââââââââââââââââ -->
+  <!-- ─── SiteFooter ────────────────────────────────────────────────────── -->
   <footer class="border-t border-brand-border pt-16 pb-8 px-6" style="background:#ffffff;">
     <div class="max-w-6xl mx-auto">
 
       <div class="grid grid-cols-2 md:grid-cols-4 gap-10 mb-14">
         <div class="col-span-2 space-y-3">
           <a href="/" class="flex items-center gap-2 font-semibold text-brand-ink text-sm">
-            <span class="flex items-center justify-center w-7 h-7 rounded-md bg-brand-green text-brand-ink font-bold text-base">â</span>
+            <span class="flex items-center justify-center w-7 h-7 rounded-md bg-brand-green text-brand-ink font-bold text-base">♟</span>
             Synapchess
           </a>
           <p class="text-brand-muted text-sm leading-relaxed max-w-xs">
@@ -369,6 +370,7 @@
           <ul class="space-y-2 text-sm text-brand-muted">
             <li><a href="/learn"  class="hover:text-brand-ink transition-colors">Learn</a></li>
             <li><a href="/join"   class="hover:text-brand-ink transition-colors">Join</a></li>
+            <li><a href="/impact" class="hover:text-brand-ink transition-colors">Impact</a></li>
             <li><a href="/donate" class="hover:text-brand-ink transition-colors">Donate</a></li>
           </ul>
         </div>
@@ -383,7 +385,7 @@
       </div>
 
       <div class="border-t border-brand-border pt-6 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-brand-muted">
-        <span>Â© 2026 Synapchess. All rights reserved.</span>
+        <span>© 2026 Synapchess. All rights reserved.</span>
         <div class="flex gap-5">
           <a href="#" class="hover:text-brand-ink transition-colors">Privacy</a>
           <a href="#" class="hover:text-brand-ink transition-colors">Terms</a>
@@ -393,7 +395,7 @@
     </div>
   </footer>
 
-  <!-- âââ Playlist player + watched-progress tracking ââââââââââââââââââââââ -->
+  <!-- ─── Playlist player + watched-progress tracking ────────────────────── -->
   <script>
     (function() {
       var SECTION       = {{ section.slug|tojson }};
@@ -425,7 +427,7 @@
           var all = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
           all[SECTION] = completed;
           localStorage.setItem(STORAGE_KEY, JSON.stringify(all));
-        } catch (e) { /* localStorage unavailable â progress just won't persist */ }
+        } catch (e) { /* localStorage unavailable — progress just won't persist */ }
       }
 
       function renderWatchedState() {
@@ -460,7 +462,7 @@
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ video_id: videoId, section: SECTION, completed: true })
-          }).catch(function() { /* best-effort â local state already updated */ });
+          }).catch(function() { /* best-effort — local state already updated */ });
         } else {
           saveLocalProgress();
         }
@@ -475,7 +477,7 @@
         frame.src = 'https://www.youtube-nocookie.com/embed/' + vid + '?autoplay=1';
         frame.title = title;
         titleEl.textContent = title;
-        metaEl.textContent = channel + ' Â· ' + dur;
+        metaEl.textContent = channel + ' · ' + dur;
 
         rows.forEach(function(r) { r.setAttribute('aria-current', r === row ? 'true' : 'false'); });
         row.scrollIntoView({ block: 'nearest' });

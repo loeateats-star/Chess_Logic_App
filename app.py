@@ -395,6 +395,11 @@ def donate():
     return render_template('donate.html')
 
 
+@app.route('/impact')
+def impact():
+    return render_template('impact.html')
+
+
 @app.route('/curriculum')
 def curriculum():
     return render_template('curriculum.html', sections=ordered_sections())

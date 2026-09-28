@@ -166,7 +166,7 @@
 
   <!-- jQuery (required by Chessboard.js) -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-  <!-- Chessboard.js 1.0.0 (no Chess.js needed â basics uses custom validation) -->
+  <!-- Chessboard.js 1.0.0 (no Chess.js needed — basics uses custom validation) -->
   <link rel="stylesheet" href="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.css" />
   <script src="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.js"></script>
 
@@ -207,12 +207,12 @@
 </head>
 <body class="text-brand-ink antialiased" style="font-family: Inter, system-ui, sans-serif;">
 
-  <!-- âââ SiteHeader ââââââââââââââââââââââââââââââââââââââââââââââââââââââ -->
+  <!-- ─── SiteHeader ────────────────────────────────────────────────────── -->
   <header class="sticky top-0 z-50 border-b border-brand-border" style="background:rgba(255,255,255,0.92); backdrop-filter:blur(8px);">
     <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
 
       <a href="/" class="flex items-center gap-2 font-semibold text-brand-ink text-sm">
-        <span class="flex items-center justify-center w-7 h-7 rounded-md bg-brand-green text-brand-ink font-bold text-base">â</span>
+        <span class="flex items-center justify-center w-7 h-7 rounded-md bg-brand-green text-brand-ink font-bold text-base">♟</span>
         Synapchess
       </a>
 
@@ -242,6 +242,7 @@
           </div>
         </div>
         <a href="/join"   class="text-brand-muted hover:text-brand-ink transition-colors">Join</a>
+        <a href="/impact" class="text-brand-muted hover:text-brand-ink transition-colors">Impact</a>
         <a href="/donate" class="text-brand-muted hover:text-brand-ink transition-colors">Donate</a>
       </nav>
 
@@ -259,7 +260,7 @@
     </div>
   </header>
 
-  <!-- âââ Page Header âââââââââââââââââââââââââââââââââââââââââââââââââââââ -->
+  <!-- ─── Page Header ───────────────────────────────────────────────────── -->
   <section class="py-12 px-6 border-b border-brand-border" style="background:#ffffff;">
     <div class="max-w-6xl mx-auto space-y-4">
 
@@ -272,7 +273,7 @@
         Back to Learn
       </a>
 
-      <p class="text-brand-gdark text-xs font-semibold tracking-widest uppercase">Level 0 Â· Interactive Learning</p>
+      <p class="text-brand-gdark text-xs font-semibold tracking-widest uppercase">Level 0 · Interactive Learning</p>
 
       <h1 class="text-4xl md:text-5xl font-extrabold text-brand-ink leading-tight">
         Chess Basics:<br class="hidden md:block" /> How the Pieces Move
@@ -285,12 +286,12 @@
     </div>
   </section>
 
-  <!-- âââ Main Learning Interface âââââââââââââââââââââââââââââââââââââââ -->
+  <!-- ─── Main Learning Interface ─────────────────────────────────────── -->
   <section class="py-12 px-6" style="background:#ffffff;">
     <div class="max-w-6xl mx-auto">
     <div class="flex flex-col md:flex-row gap-8 items-stretch md:items-start">
 
-      <!-- ââ Left sidebar: module list ââââââââââââââââââââââââââââââââââ -->
+      <!-- ── Left sidebar: module list ────────────────────────────────── -->
       <aside class="w-full md:w-72 flex-shrink-0 space-y-3">
         <p class="text-xs font-semibold tracking-widest uppercase text-brand-muted mb-5">Modules</p>
 
@@ -299,12 +300,12 @@
              class="flex items-center gap-4 p-4 rounded-xl border cursor-pointer transition-all duration-200"
              style="border-color:transparent; background:transparent;">
           <div class="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 text-xl"
-               style="background:#e6f9f0; color:#00aa63;">â</div>
+               style="background:#e6f9f0; color:#00aa63;">♖</div>
           <div class="flex-1 min-w-0">
             <p class="text-sm font-semibold text-brand-ink">How the Rook Moves</p>
             <p class="text-xs text-brand-muted">Straight-line power</p>
           </div>
-          <span id="check-rook" class="text-brand-green text-sm font-bold hidden">â</span>
+          <span id="check-rook" class="text-brand-green text-sm font-bold hidden">✓</span>
         </div>
 
         <!-- Bishop module -->
@@ -312,12 +313,12 @@
              class="flex items-center gap-4 p-4 rounded-xl border cursor-pointer transition-all duration-200"
              style="border-color:transparent; background:transparent;">
           <div class="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 text-xl"
-               style="background:#e6f9f0; color:#00aa63;">â</div>
+               style="background:#e6f9f0; color:#00aa63;">♗</div>
           <div class="flex-1 min-w-0">
             <p class="text-sm font-semibold text-brand-ink">How the Bishop Moves</p>
             <p class="text-xs text-brand-muted">Diagonal strike</p>
           </div>
-          <span id="check-bishop" class="text-brand-green text-sm font-bold hidden">â</span>
+          <span id="check-bishop" class="text-brand-green text-sm font-bold hidden">✓</span>
         </div>
 
         <!-- Knight module -->
@@ -325,12 +326,12 @@
              class="flex items-center gap-4 p-4 rounded-xl border cursor-pointer transition-all duration-200"
              style="border-color:transparent; background:transparent;">
           <div class="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 text-xl"
-               style="background:#e6f9f0; color:#00aa63;">â</div>
+               style="background:#e6f9f0; color:#00aa63;">♘</div>
           <div class="flex-1 min-w-0">
             <p class="text-sm font-semibold text-brand-ink">How the Knight Moves</p>
             <p class="text-xs text-brand-muted">The L-shape leap</p>
           </div>
-          <span id="check-knight" class="text-brand-green text-sm font-bold hidden">â</span>
+          <span id="check-knight" class="text-brand-green text-sm font-bold hidden">✓</span>
         </div>
 
         <!-- King module -->
@@ -338,12 +339,12 @@
              class="flex items-center gap-4 p-4 rounded-xl border cursor-pointer transition-all duration-200"
              style="border-color:transparent; background:transparent;">
           <div class="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 text-xl"
-               style="background:#e6f9f0; color:#00aa63;">â</div>
+               style="background:#e6f9f0; color:#00aa63;">♔</div>
           <div class="flex-1 min-w-0">
             <p class="text-sm font-semibold text-brand-ink">How the King Moves</p>
             <p class="text-xs text-brand-muted">One royal step</p>
           </div>
-          <span id="check-king" class="text-brand-green text-sm font-bold hidden">â</span>
+          <span id="check-king" class="text-brand-green text-sm font-bold hidden">✓</span>
         </div>
 
         <!-- Queen module -->
@@ -351,12 +352,12 @@
              class="flex items-center gap-4 p-4 rounded-xl border cursor-pointer transition-all duration-200"
              style="border-color:transparent; background:transparent;">
           <div class="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 text-xl"
-               style="background:#e6f9f0; color:#00aa63;">â</div>
+               style="background:#e6f9f0; color:#00aa63;">♕</div>
           <div class="flex-1 min-w-0">
             <p class="text-sm font-semibold text-brand-ink">How the Queen Moves</p>
             <p class="text-xs text-brand-muted">The supreme commander</p>
           </div>
-          <span id="check-queen" class="text-brand-green text-sm font-bold hidden">â</span>
+          <span id="check-queen" class="text-brand-green text-sm font-bold hidden">✓</span>
         </div>
 
         <!-- Pawn module -->
@@ -364,12 +365,12 @@
              class="flex items-center gap-4 p-4 rounded-xl border cursor-pointer transition-all duration-200"
              style="border-color:transparent; background:transparent;">
           <div class="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 text-xl"
-               style="background:#e6f9f0; color:#00aa63;">â</div>
+               style="background:#e6f9f0; color:#00aa63;">♙</div>
           <div class="flex-1 min-w-0">
             <p class="text-sm font-semibold text-brand-ink">How the Pawn Moves</p>
             <p class="text-xs text-brand-muted">Forward march, diagonal strike</p>
           </div>
-          <span id="check-pawn" class="text-brand-green text-sm font-bold hidden">â</span>
+          <span id="check-pawn" class="text-brand-green text-sm font-bold hidden">✓</span>
         </div>
 
         <!-- Tip card -->
@@ -381,18 +382,18 @@
         </div>
       </aside>
 
-      <!-- ââ Center: instruction card + board + feedback âââââââââââââââââ -->
+      <!-- ── Center: instruction card + board + feedback ───────────────── -->
       <div class="flex-1 flex flex-col items-center gap-6">
 
         <!-- Instruction card -->
         <div class="w-full max-w-xl rounded-2xl border border-brand-border p-6 space-y-3 bg-white">
           <p class="text-brand-gdark text-xs font-semibold tracking-widest uppercase"
              id="lesson-label">Select a module to begin</p>
-          <h2 class="text-xl font-bold text-brand-ink" id="lesson-title">â</h2>
+          <h2 class="text-xl font-bold text-brand-ink" id="lesson-title">—</h2>
           <p class="text-brand-muted text-sm leading-relaxed"
              id="lesson-instruction">Click a module on the left to start your first interactive lesson.</p>
           <div id="task-row" class="hidden items-start gap-2 pt-1">
-            <span class="text-brand-green flex-shrink-0 mt-0.5 text-sm">â¶</span>
+            <span class="text-brand-green flex-shrink-0 mt-0.5 text-sm">▶</span>
             <p class="text-brand-ink text-sm font-medium" id="lesson-task"></p>
           </div>
         </div>
@@ -418,7 +419,7 @@
                   style="background:#00dc82;"></span>
             <span id="success-check"
                   class="relative inline-flex items-center justify-center w-16 h-16 rounded-full text-3xl font-bold"
-                  style="background:#00dc82; color:#0b0c10;">â</span>
+                  style="background:#00dc82; color:#0b0c10;">✓</span>
           </div>
 
           <div>
@@ -436,7 +437,7 @@
             <p class="text-brand-ink font-semibold text-base">You've completed all six basics lessons!</p>
             <a href="/special-rules"
                class="inline-flex items-center gap-2 bg-brand-green hover:bg-brand-gdark text-brand-ink font-semibold px-6 py-3 rounded-lg transition-colors text-sm">
-              Next: Special Rules of Chess â
+              Next: Special Rules of Chess →
             </a>
             <a href="/trainer"
                class="inline-flex items-center gap-2 border border-brand-border hover:border-brand-green text-brand-muted hover:text-brand-ink px-6 py-3 rounded-lg transition-colors text-sm bg-white">
@@ -450,13 +451,13 @@
     </div>
   </section>
 
-  <!-- âââ Next Chapter Navigation âââââââââââââââââââââââââââââââââââââââ -->
+  <!-- ─── Next Chapter Navigation ─────────────────────────────────────── -->
   <section class="py-12 px-6 border-t border-brand-border" style="background:#f6faf8;">
     <div class="max-w-6xl mx-auto flex items-center justify-between">
 
       <!-- Breadcrumb position indicator -->
       <div class="space-y-1">
-        <p class="text-brand-muted text-xs tracking-widest uppercase font-semibold">Level 0 Â· Foundation</p>
+        <p class="text-brand-muted text-xs tracking-widest uppercase font-semibold">Level 0 · Foundation</p>
         <p class="text-brand-ink font-semibold text-sm">How the Pieces Move</p>
       </div>
 
@@ -466,7 +467,7 @@
         <div class="text-right space-y-0.5">
           <p class="text-brand-muted text-xs font-semibold tracking-widest uppercase">Next Chapter</p>
           <p class="text-brand-ink font-bold text-base leading-tight">Special Rules of Chess</p>
-          <p class="text-brand-muted text-xs">Check Â· Checkmate Â· Stalemate Â· En Passant Â· Castling</p>
+          <p class="text-brand-muted text-xs">Check · Checkmate · Stalemate · En Passant · Castling</p>
         </div>
         <div class="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 transition-colors"
              style="background:#00dc82;">
@@ -479,14 +480,14 @@
     </div>
   </section>
 
-  <!-- âââ SiteFooter ââââââââââââââââââââââââââââââââââââââââââââââââââââââ -->
+  <!-- ─── SiteFooter ────────────────────────────────────────────────────── -->
   <footer class="border-t border-brand-border pt-16 pb-8 px-6" style="background:#ffffff;">
     <div class="max-w-6xl mx-auto">
 
       <div class="grid grid-cols-2 md:grid-cols-4 gap-10 mb-14">
         <div class="col-span-2 space-y-3">
           <a href="/" class="flex items-center gap-2 font-semibold text-brand-ink text-sm">
-            <span class="flex items-center justify-center w-7 h-7 rounded-md bg-brand-green text-brand-ink font-bold text-base">â</span>
+            <span class="flex items-center justify-center w-7 h-7 rounded-md bg-brand-green text-brand-ink font-bold text-base">♟</span>
             Synapchess
           </a>
           <p class="text-brand-muted text-sm leading-relaxed max-w-xs">
@@ -499,6 +500,7 @@
           <ul class="space-y-2 text-sm text-brand-muted">
             <li><a href="/learn"  class="hover:text-brand-ink transition-colors">Learn</a></li>
             <li><a href="/join"   class="hover:text-brand-ink transition-colors">Join</a></li>
+            <li><a href="/impact" class="hover:text-brand-ink transition-colors">Impact</a></li>
             <li><a href="/donate" class="hover:text-brand-ink transition-colors">Donate</a></li>
           </ul>
         </div>
@@ -513,7 +515,7 @@
       </div>
 
       <div class="border-t border-brand-border pt-6 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-brand-muted">
-        <span>Â© 2026 Synapchess. All rights reserved.</span>
+        <span>© 2026 Synapchess. All rights reserved.</span>
         <div class="flex gap-5">
           <a href="#" class="hover:text-brand-ink transition-colors">Privacy</a>
           <a href="#" class="hover:text-brand-ink transition-colors">Terms</a>
@@ -522,13 +524,13 @@
     </div>
   </footer>
 
-  <!-- âââ Chess Basics Engine ââââââââââââââââââââââââââââââââââââââââââââ -->
+  <!-- ─── Chess Basics Engine ──────────────────────────────────────────── -->
   <script>
-    // ââ Lesson definitions ââââââââââââââââââââââââââââââââââââââââââââââââ
+    // ── Lesson definitions ────────────────────────────────────────────────
     var LESSONS = [
       {
         id:          'rook',
-        label:       'Lesson 1 Â· Straight Lines',
+        label:       'Lesson 1 · Straight Lines',
         title:       'How the Rook Moves',
         instruction: 'Rooks move any number of squares horizontally or vertically. They are the straight-line powerhouses of chess.',
         task:        'Drag your white Rook straight up the a-file to capture the black pawn on a6!',
@@ -540,7 +542,7 @@
       },
       {
         id:          'bishop',
-        label:       'Lesson 2 Â· Diagonal Sweep',
+        label:       'Lesson 2 · Diagonal Sweep',
         title:       'How the Bishop Moves',
         instruction: 'Bishops slide diagonally, any number of squares along a diagonal. Each Bishop is permanently locked to one colour square for the entire game.',
         task:        'Drag your white Bishop diagonally from c1 to capture the black pawn on f4!',
@@ -552,7 +554,7 @@
       },
       {
         id:          'knight',
-        label:       'Lesson 3 Â· The L-Shape Leap',
+        label:       'Lesson 3 · The L-Shape Leap',
         title:       'How the Knight Moves',
         instruction: "Knights move in an 'L' shape: two squares in one direction, then one square perpendicular. They are the only pieces that can jump over other pieces.",
         task:        'Drag your white Knight from e4 (two squares up, one square right) to capture the black pawn on f6!',
@@ -564,7 +566,7 @@
       },
       {
         id:          'king',
-        label:       'Lesson 4 Â· The Royal Step',
+        label:       'Lesson 4 · The Royal Step',
         title:       'How the King Moves',
         instruction: 'The King is the most important piece: if it is checkmated, the game is over. It moves exactly one square in any direction: horizontally, vertically, or diagonally.',
         task:        'Drag your white King one square diagonally from e4 to capture the black pawn on f5!',
@@ -576,7 +578,7 @@
       },
       {
         id:          'queen',
-        label:       'Lesson 5 Â· The Supreme Commander',
+        label:       'Lesson 5 · The Supreme Commander',
         title:       'How the Queen Moves',
         instruction: 'The Queen is the most powerful piece on the board. She combines the Rook and Bishop, sliding any number of squares horizontally, vertically, or diagonally in a single move.',
         task:        'Drag your white Queen from a1 all the way diagonally across the board to capture the black pawn on h8!',
@@ -588,7 +590,7 @@
       },
       {
         id:          'pawn',
-        label:       'Lesson 6 Â· The Forward Soldier',
+        label:       'Lesson 6 · The Forward Soldier',
         title:       'How the Pawn Moves',
         instruction: 'Pawns march straight forward but capture diagonally, one square left or right. This is the most surprising rule for beginners: pawns cannot capture directly in front of them!',
         task:        'Drag your white Pawn diagonally from e4 to capture the black pawn on f5!',
@@ -603,9 +605,9 @@
     var board          = null;
     var currentLesson  = null;
     var lessonComplete = false;
-    var completedSet   = {};   // { rook: true, bishop: true, â¦ }
+    var completedSet   = {};   // { rook: true, bishop: true, … }
 
-    // ââ Sidebar styling âââââââââââââââââââââââââââââââââââââââââââââââââââ
+    // ── Sidebar styling ───────────────────────────────────────────────────
     function setModuleStyle(id, isActive) {
       var el = document.getElementById('module-' + id);
       if (!el) return;
@@ -618,7 +620,7 @@
       }
     }
 
-    // ââ Load a lesson ââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+    // ── Load a lesson ──────────────────────────────────────────────────────
     function loadLesson(id) {
       var lesson = null;
       for (var i = 0; i < LESSONS.length; i++) {
@@ -661,23 +663,23 @@
       }
     }
 
-    // ââ Drag guards ââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+    // ── Drag guards ────────────────────────────────────────────────────────
     function onDragStart(source, piece) {
       if (lessonComplete) return false;
       if (piece !== currentLesson.movingPiece) return false;
     }
 
-    // ââ Drop handler âââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+    // ── Drop handler ───────────────────────────────────────────────────────
     function onDrop(source, target) {
       if (target === 'offboard') return 'snapback';
 
       if (target !== currentLesson.target) {
-        setStatus('â Not quite, that\'s not how the ' + getPieceName() + ' moves. Try again!', '#ef4444');
+        setStatus('✗ Not quite, that\'s not how the ' + getPieceName() + ' moves. Try again!', '#ef4444');
         triggerShake();
         return 'snapback';
       }
 
-      // Correct capture â chessboard.js moves the piece visually on return;
+      // Correct capture — chessboard.js moves the piece visually on return;
       // show celebration after a short paint delay.
       var capturedId = currentLesson.id;
       setTimeout(function() {
@@ -687,7 +689,7 @@
       }, 130);
     }
 
-    // ââ Celebration ââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+    // ── Celebration ────────────────────────────────────────────────────────
     function showSuccess() {
       lessonComplete            = true;
       completedSet[currentLesson.id] = true;
@@ -716,7 +718,7 @@
         for (var i = 0; i < LESSONS.length; i++) {
           if (LESSONS[i].id === currentLesson.nextId) { nextLesson = LESSONS[i]; break; }
         }
-        nextBtn.textContent = 'Next Lesson: ' + nextLesson.title + ' â';
+        nextBtn.textContent = 'Next Lesson: ' + nextLesson.title + ' →';
         nextBtn.onclick     = function() { loadLesson(currentLesson.nextId); };
         nextBtn.classList.remove('hidden');
         completeMsg.classList.add('hidden');
@@ -726,7 +728,7 @@
       }
     }
 
-    // ââ Helpers ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+    // ── Helpers ────────────────────────────────────────────────────────────
     function getPieceName() {
       var map = { wR: 'Rook', wB: 'Bishop', wN: 'Knight', wK: 'King', wQ: 'Queen', wP: 'Pawn' };
       return currentLesson ? (map[currentLesson.movingPiece] || 'piece') : 'piece';
@@ -745,7 +747,7 @@
       el.classList.add('status-shake');
     }
 
-    // ââ Auto-load first lesson âââââââââââââââââââââââââââââââââââââââââââââ
+    // ── Auto-load first lesson ─────────────────────────────────────────────
     document.addEventListener('DOMContentLoaded', function() { loadLesson('rook'); });
   </script>
 

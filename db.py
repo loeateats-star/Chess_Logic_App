@@ -34,10 +34,24 @@ IntegrityError = psycopg2.IntegrityError
 # serverless host like Neon) was the single biggest per-request latency
 # cost in the app, paid even by routes that run one cheap SELECT. A pool
 # keeps a handful of connections open and hands them out instead.
-# `minconn` opens eagerly at import time; `maxconn` is sized comfortably
-# above gunicorn's --threads count (see Procfile) so concurrent requests
-# don't contend for a connection.
-_pool = psycopg2.pool.ThreadedConnectionPool(1, 10, DATABASE_URL)
+#
+# IMPORTANT: psycopg2's pool only *caches* a connection on putconn() if the
+# free list is below `minconn` — anything returned once that's full gets
+# closed outright (see psycopg2.pool.AbstractConnectionPool._putconn).
+# minconn is the size of the reusable pool; maxconn is just an overall
+# ceiling. An earlier version of this had minconn=1, which meant only one
+# connection was ever actually reused — every other request under any real
+# concurrency (multiple gunicorn threads, the background Lichess-game
+# threads in lichess_play.py) was silently closing its connection and
+# opening a brand-new one on the next call anyway, all the pooling
+# machinery bought nothing. Sustained connection churn like that is also
+# exactly the kind of thing that gets *slower* the longer it runs (rising
+# handshake latency from the DB host, TIME_WAIT socket buildup on this
+# side), which matches puzzle fetches getting sluggish over a long Puzzle
+# Rush session. minconn == maxconn here so every returned connection is
+# actually kept: 2 gunicorn workers × this many each (see Procfile) stays
+# comfortably under typical free-tier Postgres connection limits.
+_pool = psycopg2.pool.ThreadedConnectionPool(5, 5, DATABASE_URL)
 
 
 class _Cursor:
