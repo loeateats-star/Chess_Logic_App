@@ -437,6 +437,12 @@ def index():
     return render_template('index.html', blog_posts=blog_posts, partners=partners)
 
 
+# Browsers ask for /favicon.ico on their own, whatever the page links to.
+@app.route('/favicon.ico')
+def favicon():
+    return app.send_static_file('favicon.ico')
+
+
 @app.route('/learn')
 def learn():
     return render_template('learn.html')

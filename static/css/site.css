@@ -189,9 +189,7 @@ a, button, [role="button"] { touch-action: manipulation; -webkit-tap-highlight-c
 .site-head.is-scrolled { box-shadow: 0 1px 0 var(--surface-2); }
 .head-row { height: var(--head-h); display: flex; align-items: center; gap: 28px; }
 .brand { display: inline-flex; align-items: center; gap: 10px; font-weight: 600; font-size: 1.125rem; letter-spacing: -0.02em; }
-.brand-mark { width: 26px; height: 26px; flex: none; }
-.brand-mark .a { fill: var(--accent); }
-.brand-mark .b { fill: var(--ink); }
+.brand-mark { width: 40px; height: 40px; flex: none; }
 .nav { display: flex; align-items: center; gap: 4px; margin-left: 12px; }
 .nav > a, .dd-trigger {
   display: inline-flex; align-items: center; gap: 6px;
