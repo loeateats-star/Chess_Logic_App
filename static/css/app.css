@@ -160,10 +160,46 @@
 .error-banner { background: color-mix(in srgb, var(--danger) 14%, var(--ground)); color: var(--ink); padding: 12px 16px; font-weight: 500; margin-bottom: 12px; }
 .connected { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; padding: 12px 16px; background: var(--surface); margin-bottom: 8px; }
 
+/* ── Live game screen ───────────────────────────────────────────────────
+   A live game takes the whole screen. --bs is the board size: as big as
+   the window allows next to a 340px side column. */
+.game {
+  --bs: min(calc(100svh - 48px), calc(100vw - 340px - 24px - 2 * var(--gutter)));
+  position: fixed; inset: 0; z-index: 150; background: var(--ground);
+  display: grid; justify-content: center; align-content: center;
+  grid-template-columns: var(--bs) 340px;
+  grid-template-rows: auto 1fr auto auto;
+  grid-template-areas: "board opp" "board info" "board actions" "board me";
+  gap: 8px 24px; padding: 24px var(--gutter); overflow-y: auto;
+}
+.game[hidden] { display: none; }
+.game-board { grid-area: board; }
+.game-board .board-frame { width: var(--bs); }
+.game-opp { grid-area: opp; }
+.game-me { grid-area: me; }
+.game-info { grid-area: info; display: grid; gap: 8px; align-content: center; }
+.game-actions { grid-area: actions; }
+.game .player { min-height: 64px; }
+.game .clock { font-size: 2rem; min-width: 124px; }
+.draw-offer p { font-weight: 600; margin-bottom: 10px; }
+.draw-offer .actions .btn { width: 100%; }
+
 /* ── Phones and tablets ─────────────────────────────────────────────────
    The side panel's children join the main grid (display: contents) so they
    can be ordered around the board: the prompt sits right above it and the
    buttons right below, all inside one screen. */
+@media (max-width: 860px) {
+  .game {
+    --bs: min(100vw, calc(100svh - 300px));
+    grid-template-columns: var(--bs); grid-template-rows: none;
+    grid-template-areas: "opp" "board" "me" "info" "actions";
+    align-content: start; padding: max(8px, env(safe-area-inset-top)) 0 24px; gap: 6px;
+  }
+  .game .player, .game-info, .game-actions { margin-inline: 8px; }
+  .game .clock { font-size: 1.625rem; min-width: 104px; }
+  .game .player { min-height: 54px; }
+}
+@media (max-width: 860px) and (max-height: 700px) { .game { --bs: 100vw; } }
 @media (max-width: 1000px) {
   .app { padding-top: 16px; }
   .app-head { margin-bottom: 14px; gap: 12px; }

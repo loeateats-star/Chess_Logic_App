@@ -457,6 +457,13 @@ def _publish_game_state(user_id, seek_id, game_id, my_color, white_info, black_i
         },
         'wtime_ms':      game_state.get('wtime'),
         'btime_ms':      game_state.get('btime'),
+        # Lichess only sends clock times when something happens in the game,
+        # so record when these were received; the browser counts down from
+        # here using server_now_ms (added by the status endpoint) instead of
+        # treating every poll as a fresh reading.
+        'clock_at_ms':   int(time.time() * 1000),
+        # wdraw / bdraw are true while that side has a draw offer on the table.
+        'draw_offer_by': 'white' if game_state.get('wdraw') else ('black' if game_state.get('bdraw') else None),
         'lichess_status': status,
         'result_text':   _describe_result(status, winner, my_color) if finished else None,
     }
@@ -496,6 +503,7 @@ def lichess_status():
     payload = _get_state(user_id)
     payload['connected']        = account is not None
     payload['lichess_username'] = account['lichess_id'] if account else None
+    payload['server_now_ms']    = int(time.time() * 1000)
     return jsonify(payload)
 
 
@@ -597,3 +605,33 @@ def lichess_resign():
     except requests.RequestException:
         pass
     return jsonify({'message': 'Resigned.'})
+
+
+@lichess_bp.route('/api/lichess/draw', methods=['POST'])
+def lichess_draw():
+    """Offer a draw, or answer the opponent's offer. Lichess uses one endpoint
+    for both: 'yes' offers (or accepts an offer on the table), 'no' declines."""
+    user_id = _require_login()
+    if user_id is None:
+        return jsonify({'error': 'Not authenticated.'}), 401
+
+    state = _get_state(user_id)
+    if state.get('status') != 'playing':
+        return jsonify({'error': 'No game in progress.'}), 400
+
+    account = _get_account(user_id)
+    if account is None:
+        return jsonify({'error': 'Lichess account not connected.'}), 400
+
+    accept = 'yes' if (request.get_json(silent=True) or {}).get('accept', True) else 'no'
+    try:
+        resp = requests.post(
+            f"{LICHESS_BASE}/api/board/game/{state['game_id']}/draw/{accept}",
+            headers=_auth_header(account['access_token']), timeout=10,
+        )
+    except requests.RequestException:
+        return jsonify({'error': 'Could not reach Lichess.'}), 502
+
+    if not resp.ok:
+        return jsonify({'error': 'Lichess did not accept that.'}), 400
+    return jsonify({'message': 'Draw offered.' if accept == 'yes' else 'Draw declined.'})

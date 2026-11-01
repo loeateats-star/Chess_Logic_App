@@ -59,20 +59,6 @@
       <button type="button" class="btn btn--quiet" id="cancel-seek">Cancel</button>
     </div>
 
-    <div id="state-playing" class="play-board" hidden>
-      <div class="player">
-        <span class="who"><span id="opp-name"></span><small id="opp-rating"></small></span>
-        <span id="opp-clock" class="clock">--:--</span>
-      </div>
-      <div id="play-board" class="board-frame"></div>
-      <div class="player">
-        <span class="who" id="me-name">You</span>
-        <span id="me-clock" class="clock">--:--</span>
-      </div>
-      <p class="status" id="play-status" role="status" aria-live="polite"></p>
-      <p><button type="button" class="link-btn" id="resign-btn">Resign</button></p>
-    </div>
-
     <div id="state-finished" class="state-card" hidden>
       <h2 id="finished-text">Game over.</h2>
       <p>Good game. Want another?</p>
@@ -80,6 +66,37 @@
     </div>
   </div>
 </section>
+
+<!-- A live game gets the whole screen: the board as large as it fits, with
+     the two clocks, the status line and the game buttons beside it. -->
+<div class="game" id="state-playing" role="region" aria-label="Live game" hidden>
+  <div class="game-board">
+    <div id="play-board" class="board-frame"></div>
+  </div>
+  <div class="player game-opp">
+    <span class="who"><span id="opp-name"></span><small id="opp-rating"></small></span>
+    <span id="opp-clock" class="clock">--:--</span>
+  </div>
+  <div class="game-info">
+    <p class="status" id="play-status" role="status" aria-live="polite"></p>
+    <div class="banner banner--improve draw-offer" id="draw-offer" hidden>
+      <p>Your opponent offers a draw.</p>
+      <div class="actions">
+        <button type="button" class="btn btn--sm" id="draw-accept">Accept draw</button>
+        <button type="button" class="btn btn--sm btn--quiet" id="draw-decline">Keep playing</button>
+      </div>
+    </div>
+    <p class="error-banner" id="game-error" role="alert" hidden></p>
+  </div>
+  <div class="actions game-actions">
+    <button type="button" class="btn btn--quiet" id="draw-btn">Offer draw</button>
+    <button type="button" class="btn btn--quiet" id="resign-btn">Resign</button>
+  </div>
+  <div class="player game-me">
+    <span class="who" id="me-name">You</span>
+    <span id="me-clock" class="clock">--:--</span>
+  </div>
+</div>
 {% endblock %}
 
 {% block scripts %}
@@ -96,21 +113,27 @@
 
   function showError(msg) { $('error-banner').textContent = msg; $('error-banner').hidden = false; }
   function clearError() { $('error-banner').hidden = true; }
+  function showGameError(msg) {
+    var el = $('game-error');
+    el.textContent = msg;
+    el.hidden = false;
+    clearTimeout(showGameError.t);
+    showGameError.t = setTimeout(function () { el.hidden = true; }, 4000);
+  }
 
   var SCREENS = ['loading', 'logged-out', 'not-connected', 'idle', 'seeking', 'playing', 'finished'];
   function setScreen(name) {
     SCREENS.forEach(function (s) { $('state-' + s).hidden = s !== name; });
+    document.body.style.overflow = name === 'playing' ? 'hidden' : '';
   }
 
   // ── Polling ────────────────────────────────────────────────────────────
   // Status is polled faster while it is the opponent's move (so their reply
-  // shows up quickly) and slower otherwise. A poll only moves the board
-  // forward: its FEN is applied only if it is at least as far into the game
-  // (by ply) as what is already on screen, so a late response can never
-  // undo a move the player just made.
-  var pollTimer = null, pollDelay = 1000, inFlight = false;
+  // shows up quickly) and slower otherwise.
+  var pollTimer = null, inFlight = false;
   var playBoard = null, localGame = null, boardFen = null;
   var myColor = null, gameStatus = null, currentTurn = null, currentGameId = null, lastPly = -1;
+  var drawOfferBy = null, iOfferedDraw = false;
 
   function plyFromFen(fen) {
     var parts = fen.split(' ');
@@ -167,13 +190,56 @@
       .catch(function () { setScreen('idle'); showError('Could not start matchmaking. Try again.'); });
   }
 
-  // ── Board ──────────────────────────────────────────────────────────────
+  // ── Clocks ─────────────────────────────────────────────────────────────
+  // Lichess reports each side's remaining time only when something happens
+  // in the game. The server stamps when it received those times
+  // (clock_at_ms) and its own time when answering (server_now_ms), so the
+  // difference says how long the side to move has already been thinking.
+  // Clocks are re-based only when a poll brings a newer reading, never just
+  // because a poll arrived, which is what used to freeze them.
+  var clock = { w: null, b: null, at: 0, stampedAt: null };
+
+  function setClockFromServer(data) {
+    if (data.clock_at_ms == null || data.clock_at_ms === clock.stampedAt) return;
+    var waited = Math.max(0, (data.server_now_ms || data.clock_at_ms) - data.clock_at_ms);
+    clock = { w: data.wtime_ms, b: data.btime_ms, at: performance.now() - waited, stampedAt: data.clock_at_ms };
+  }
+  function clocksRunning() {
+    // Lichess starts the clocks only once both sides have made a move.
+    return gameStatus === 'playing' && lastPly >= 2;
+  }
+  function remaining(side) {
+    var base = clock[side === 'white' ? 'w' : 'b'];
+    if (base == null) return null;
+    if (clocksRunning() && currentTurn === side) return Math.max(0, base - (performance.now() - clock.at));
+    return base;
+  }
+  // Freeze both clocks at what they show now (after the player's own move,
+  // before Lichess confirms it), so the player's clock stops at once.
+  function rebaseClocksNow() {
+    var w = remaining('white'), b = remaining('black');
+    clock.w = w; clock.b = b; clock.at = performance.now();
+  }
   function fmtClock(ms) {
     if (ms == null) return '--:--';
-    var t = Math.max(0, Math.floor(ms / 1000)), m = Math.floor(t / 60), s = t % 60;
+    var t = ms < 10000 ? Math.max(0, ms) / 1000 : Math.ceil(ms / 1000);
+    if (ms < 10000) return '0:0' + t.toFixed(1);
+    var m = Math.floor(t / 60), s = t % 60;
     return m + ':' + (s < 10 ? '0' : '') + s;
   }
+  function paintClocks() {
+    if (!myColor) return;
+    var opp = myColor === 'white' ? 'black' : 'white';
+    [['me-clock', myColor], ['opp-clock', opp]].forEach(function (pair) {
+      var el = $(pair[0]), side = pair[1], ms = remaining(side);
+      el.textContent = fmtClock(ms);
+      el.classList.toggle('on-move', gameStatus === 'playing' && currentTurn === side);
+      el.classList.toggle('is-low', ms != null && ms < 30000);
+    });
+  }
+  setInterval(paintClocks, 100);
 
+  // ── Board ──────────────────────────────────────────────────────────────
   function lastMoveSquares(prevFen, nextFen) {
     // Compare piece placement to find the squares that changed, so the
     // opponent's last move can be highlighted without a move list.
@@ -191,22 +257,56 @@
     } catch (e) { return null; }
   }
 
+  function setStatusLine() {
+    var st = $('play-status');
+    if (gameStatus !== 'playing') return;
+    if (currentTurn === myColor) {
+      st.textContent = 'Your move.';
+      st.className = 'status is-good';
+    } else {
+      st.textContent = 'Opponent is thinking…';
+      st.className = 'status ' + (myColor === 'white' ? 'is-turn-b' : 'is-turn-w');
+    }
+  }
+
+  function renderDrawState() {
+    var opp = myColor === 'white' ? 'black' : 'white';
+    $('draw-offer').hidden = drawOfferBy !== opp;
+    // Once Lichess reports our offer, its state drives the button.
+    if (drawOfferBy === myColor) iOfferedDraw = false;
+    var offered = drawOfferBy === myColor || iOfferedDraw;
+    $('draw-btn').disabled = offered || drawOfferBy === opp;
+    $('draw-btn').textContent = offered ? 'Draw offered' : 'Offer draw';
+  }
+
   function renderPlaying(data) {
-    setScreen('playing');
-    clearError();
+    if (data.game_id !== currentGameId) {
+      // A different game than whatever we were last tracking (fresh match).
+      currentGameId = data.game_id;
+      lastPly = -1;
+      iOfferedDraw = false;
+      clock = { w: null, b: null, at: 0, stampedAt: null };
+      if (playBoard) { playBoard = null; $('play-board').innerHTML = ''; }
+    }
+
+    // A poll that left before the player's own move can land after it. Its
+    // position is older than the board, so nothing in it (turn, status line,
+    // clocks) is applied; otherwise it would flip back to "Your move".
+    var newPly = plyFromFen(data.fen);
+    if (playBoard && newPly < lastPly) return;
+
     myColor = data.my_color;
     gameStatus = data.status;
     currentTurn = data.turn;
+    drawOfferBy = data.draw_offer_by || null;
 
+    setScreen('playing');
+    clearError();
     $('opp-name').textContent = myColor === 'white' ? data.black.name : data.white.name;
     var oppRating = myColor === 'white' ? data.black.rating : data.white.rating;
     $('opp-rating').textContent = oppRating ? oppRating : '';
     $('me-name').textContent = 'You (' + data.lichess_username + ')';
-    syncClocks(data);
 
-    if (data.game_id !== currentGameId) { currentGameId = data.game_id; lastPly = -1; }
-
-    var newPly = plyFromFen(data.fen);
     if (!playBoard) {
       boardFen = data.fen;
       lastPly = newPly;
@@ -223,7 +323,7 @@
           return localGame.moves({ square: sq, verbose: true }).map(function (m) { return m.to; });
         }
       });
-    } else if (data.fen !== boardFen && newPly >= lastPly) {
+    } else if (data.fen !== boardFen) {
       var marks = lastMoveSquares(boardFen, data.fen);
       boardFen = data.fen;
       lastPly = newPly;
@@ -231,18 +331,16 @@
       playBoard.position(data.fen);
       if (marks) playBoard.markMove(marks[0], marks[1]);
     }
+    setClockFromServer(data);
+    paintClocks();
 
-    var st = $('play-status');
     if (data.opponent_gone) {
-      st.textContent = 'Your opponent has left the game.';
-      st.className = 'status is-bad';
-    } else if (currentTurn === myColor) {
-      st.textContent = 'Your move.';
-      st.className = 'status is-good';
+      $('play-status').textContent = 'Your opponent has left the game.';
+      $('play-status').className = 'status is-bad';
     } else {
-      st.textContent = 'Opponent is thinking…';
-      st.className = 'status ' + (myColor === 'white' ? 'is-turn-b' : 'is-turn-w');
+      setStatusLine();
     }
+    renderDrawState();
   }
 
   function onPlayDrop(source, target) {
@@ -252,52 +350,83 @@
     if (!move) return 'snapback';
 
     var uci = source + target + (move.promotion || '');
+    rebaseClocksNow();
     boardFen = localGame.fen();
     lastPly = plyFromFen(boardFen);
     currentTurn = myColor === 'white' ? 'black' : 'white';
     playBoard.position(boardFen, false);
     playBoard.markMove(source, target);
-    $('play-status').textContent = 'Opponent is thinking…';
-    $('play-status').className = 'status ' + (myColor === 'white' ? 'is-turn-b' : 'is-turn-w');
+    setStatusLine();
+    paintClocks();
 
     post('/api/lichess/move', { move: uci })
       .then(function (r) { return r.json().then(function (d) { return { ok: r.ok, data: d }; }); })
       .then(function (res) {
-        if (!res.ok) showError(res.data.error || 'Lichess did not accept that move.');
+        if (!res.ok) {
+          // Lichess refused the move: undo it locally and let the next poll
+          // bring the true position back.
+          showGameError(res.data.error || 'Lichess did not accept that move.');
+          lastPly = -1;
+          boardFen = null;
+          currentTurn = myColor;
+        }
         schedulePoll(res.ok ? 300 : 0);
       })
       .catch(function () { schedulePoll(0); });
   }
 
-  // ── Clocks ─────────────────────────────────────────────────────────────
-  var clockSyncedAt = 0, wtimeAtSync = null, btimeAtSync = null;
-  function syncClocks(data) {
-    wtimeAtSync = data.wtime_ms;
-    btimeAtSync = data.btime_ms;
-    clockSyncedAt = Date.now();
+  // ── Draw and resign ────────────────────────────────────────────────────
+  function sendDraw(accept) {
+    return post('/api/lichess/draw', { accept: accept })
+      .then(function (r) { return r.json().then(function (d) { return { ok: r.ok, data: d }; }); })
+      .then(function (res) {
+        if (!res.ok) showGameError(res.data.error || 'Could not send that to Lichess.');
+        schedulePoll(200);
+        return res.ok;
+      })
+      .catch(function () { showGameError('Could not reach Lichess.'); return false; });
   }
-  setInterval(function () {
-    if (gameStatus !== 'playing' || wtimeAtSync == null) return;
-    var elapsed = Date.now() - clockSyncedAt;
-    var w = currentTurn === 'white' ? Math.max(0, wtimeAtSync - elapsed) : wtimeAtSync;
-    var b = currentTurn === 'black' ? Math.max(0, btimeAtSync - elapsed) : btimeAtSync;
-    var whiteEl = myColor === 'white' ? $('me-clock') : $('opp-clock');
-    var blackEl = myColor === 'black' ? $('me-clock') : $('opp-clock');
-    whiteEl.textContent = fmtClock(w);
-    blackEl.textContent = fmtClock(b);
-    whiteEl.classList.toggle('on-move', currentTurn === 'white');
-    blackEl.classList.toggle('on-move', currentTurn === 'black');
-    whiteEl.classList.toggle('is-low', w < 30000);
-    blackEl.classList.toggle('is-low', b < 30000);
-  }, 200);
+  $('draw-btn').addEventListener('click', function () {
+    iOfferedDraw = true;
+    renderDrawState();
+    // If Lichess never reports the offer (declined straight away), free the button.
+    setTimeout(function () { iOfferedDraw = false; renderDrawState(); }, 6000);
+    sendDraw(true).then(function (ok) { if (!ok) { iOfferedDraw = false; renderDrawState(); } });
+  });
+  $('draw-accept').addEventListener('click', function () { $('draw-offer').hidden = true; sendDraw(true); });
+  $('draw-decline').addEventListener('click', function () { $('draw-offer').hidden = true; drawOfferBy = null; sendDraw(false); });
+
+  // Resign takes two taps: the first arms the button for a few seconds.
+  var resignArmed = null;
+  $('resign-btn').addEventListener('click', function () {
+    var btn = this;
+    if (!resignArmed) {
+      btn.textContent = 'Tap again to resign';
+      btn.classList.add('btn--danger');
+      resignArmed = setTimeout(function () {
+        resignArmed = null;
+        btn.textContent = 'Resign';
+        btn.classList.remove('btn--danger');
+      }, 3000);
+      return;
+    }
+    clearTimeout(resignArmed);
+    resignArmed = null;
+    btn.textContent = 'Resigning…';
+    btn.disabled = true;
+    post('/api/lichess/resign').then(function () { schedulePoll(200); });
+  });
 
   function renderFinished(data) {
-    setScreen('finished');
     gameStatus = 'finished';
     currentGameId = null;
     lastPly = -1;
-    // Drop the board; the next game builds a fresh one with its own orientation.
     if (playBoard) { playBoard = null; $('play-board').innerHTML = ''; }
+    var btn = $('resign-btn');
+    btn.disabled = false;
+    btn.textContent = 'Resign';
+    btn.classList.remove('btn--danger');
+    setScreen('finished');
     $('finished-text').textContent = data.result_text || 'Game over.';
     if (data.result_text && data.result_text.indexOf('You won') === 0) Synap.confetti({ particleCount: 140, spread: 100 });
   }
@@ -313,9 +442,6 @@
   $('disconnect-btn').addEventListener('click', function () {
     stopPolling();
     post('/lichess/disconnect').then(function () { setScreen('not-connected'); });
-  });
-  $('resign-btn').addEventListener('click', function () {
-    if (confirm('Resign this game?')) post('/api/lichess/resign');
   });
   $('again-btn').addEventListener('click', function () {
     // Clear the server's 'finished' status first, or a poll already in
