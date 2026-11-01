@@ -56,13 +56,21 @@
       dd.classList.remove('open');
       trigger.setAttribute('aria-expanded', 'false');
     }
+    // With a mouse, hovering opens the menu, so the click that usually
+    // follows must not close it again straight away.
+    var openedByHover = false;
     trigger.addEventListener('click', function (e) {
       e.stopPropagation();
-      dd.classList.contains('open') ? close() : open();
+      if (dd.classList.contains('open') && !openedByHover) close(); else open();
+      openedByHover = false;
     });
     if (global.matchMedia && global.matchMedia('(hover: hover)').matches) {
-      dd.addEventListener('mouseenter', function () { clearTimeout(hoverTimer); open(); });
-      dd.addEventListener('mouseleave', function () { hoverTimer = setTimeout(close, 120); });
+      dd.addEventListener('mouseenter', function () {
+        clearTimeout(hoverTimer);
+        if (!dd.classList.contains('open')) openedByHover = true;
+        open();
+      });
+      dd.addEventListener('mouseleave', function () { openedByHover = false; hoverTimer = setTimeout(close, 120); });
     }
   });
   doc.addEventListener('click', function (e) {

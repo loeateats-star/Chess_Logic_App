@@ -36,34 +36,43 @@
         Synapchess
       </a>
 
+      {# Two groups: everything a student does (Train) and everything about the
+         organisation (Nonprofit). Pages set `nav` to say which one they belong to. #}
+      {% set group = 'nonprofit' if nav in ['impact', 'join', 'donate', 'nonprofit'] else ('train' if nav in ['train', 'learn'] else '') %}
       <nav class="nav" aria-label="Main">
         <div class="dd">
-          <button type="button" class="dd-trigger{% if nav == 'learn' %} is-current{% endif %}" aria-expanded="false" aria-controls="dd-learn">
-            Learn
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
-          </button>
-          <div class="dd-panel" id="dd-learn">
-            <a href="/curriculum">Video lessons<span>Four tiers, beginner to advanced</span></a>
-            <a href="/basics">Chess basics<span>How every piece moves</span></a>
-            <a href="/special-rules">Special rules<span>Castling, en passant, promotion</span></a>
-            <a href="/blog">Blog<span>News from our chapters</span></a>
-          </div>
-        </div>
-        <div class="dd">
-          <button type="button" class="dd-trigger{% if nav == 'train' %} is-current{% endif %}" aria-expanded="false" aria-controls="dd-train">
+          <button type="button" class="dd-trigger{% if group == 'train' %} is-current{% endif %}" aria-expanded="false" aria-controls="dd-train">
             Train
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
           </button>
-          <div class="dd-panel" id="dd-train">
-            <a href="/trainer">Puzzle trainer<span>6.1 million real puzzles</span></a>
-            <a href="/trainer?rush=1">Puzzle Rush<span>Beat the clock</span></a>
-            <a href="/play">Play live<span>A real opponent on Lichess</span></a>
-            <a href="/analysis">Game analysis<span>Find your best and worst moves</span></a>
+          <div class="dd-panel dd-panel--cols" id="dd-train">
+            <div>
+              <h3>Practice</h3>
+              <a href="/trainer">Puzzle trainer<span>6.1 million real puzzles</span></a>
+              <a href="/trainer?rush=1">Puzzle Rush<span>Beat the clock</span></a>
+              <a href="/play">Play live<span>A real opponent on Lichess</span></a>
+              <a href="/analysis">Game analysis<span>Find your best and worst moves</span></a>
+            </div>
+            <div>
+              <h3>Learn</h3>
+              <a href="/basics">Chess basics<span>How every piece moves</span></a>
+              <a href="/special-rules">Special rules<span>Castling, en passant and more</span></a>
+              <a href="/curriculum">Video lessons<span>Four levels, beginner to advanced</span></a>
+            </div>
           </div>
         </div>
-        <a href="/impact"{% if nav == 'impact' %} aria-current="page"{% endif %}>Impact</a>
-        <a href="/join"{% if nav == 'join' %} aria-current="page"{% endif %}>Join</a>
-        <a href="/donate"{% if nav == 'donate' %} aria-current="page"{% endif %}>Donate</a>
+        <div class="dd">
+          <button type="button" class="dd-trigger{% if group == 'nonprofit' %} is-current{% endif %}" aria-expanded="false" aria-controls="dd-nonprofit">
+            Nonprofit
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
+          <div class="dd-panel" id="dd-nonprofit">
+            <a href="/impact">Our impact<span>Kids reached and boards donated</span></a>
+            <a href="/join">Get involved<span>Volunteer or start a chapter</span></a>
+            <a href="/donate">Donate<span>Keep it free for every student</span></a>
+            <a href="/blog">News<span>Updates from our chapters</span></a>
+          </div>
+        </div>
       </nav>
 
       <div class="head-actions">
@@ -78,6 +87,7 @@
           <button type="button" class="link-btn" id="stats-toggle" aria-expanded="false" aria-controls="stats-popover">My stats</button>
           <button type="button" class="link-btn" data-logout>Log out</button>
         </span>
+        <a class="btn btn--sm btn--quiet hide-sm" href="/donate">Donate</a>
         <a class="btn btn--sm hide-sm" href="/trainer">Start training</a>
         <button type="button" class="icon-btn menu-toggle" id="menu-toggle" aria-label="Open menu" aria-expanded="false" aria-controls="mobile-panel">
           <svg class="bars" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
@@ -87,20 +97,19 @@
     </div>
 
     <div class="mobile-panel" id="mobile-panel">
-      <h2>Learn</h2>
-      <a href="/curriculum">Video lessons</a>
-      <a href="/basics">Chess basics</a>
-      <a href="/special-rules">Special rules</a>
-      <a href="/blog">Blog</a>
       <h2>Train</h2>
       <a href="/trainer">Puzzle trainer</a>
       <a href="/trainer?rush=1">Puzzle Rush</a>
       <a href="/play">Play live</a>
       <a href="/analysis">Game analysis</a>
-      <h2>Synapchess</h2>
-      <a href="/impact">Impact</a>
-      <a href="/join">Join</a>
+      <a href="/basics">Chess basics</a>
+      <a href="/special-rules">Special rules</a>
+      <a href="/curriculum">Video lessons</a>
+      <h2>Nonprofit</h2>
+      <a href="/impact">Our impact</a>
+      <a href="/join">Get involved</a>
       <a href="/donate">Donate</a>
+      <a href="/blog">News</a>
       <span data-auth="out"><button type="button" class="m-action" data-open-auth="login">Log in</button></span>
       <span data-auth="in" hidden><button type="button" class="m-action" data-logout>Log out</button></span>
       <a class="btn" href="/trainer">Start training</a>

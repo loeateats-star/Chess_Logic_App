@@ -202,7 +202,7 @@ a, button, [role="button"] { touch-action: manipulation; -webkit-tap-highlight-c
 .dd-trigger svg { width: 12px; height: 12px; transition: transform .2s var(--ease-out); }
 .dd.open .dd-trigger svg { transform: rotate(180deg); }
 .dd-panel {
-  position: absolute; top: calc(100% + 6px); left: 0; min-width: 236px; padding: 8px;
+  position: absolute; top: calc(100% + 6px); left: 0; min-width: 272px; padding: 8px;
   background: var(--ground); box-shadow: 0 18px 40px rgba(8, 20, 13, .16), 0 0 0 1px var(--surface-2);
   opacity: 0; visibility: hidden; transform: translateY(-4px);
   transition: opacity .16s, transform .16s var(--ease-out), visibility .16s;
@@ -211,6 +211,8 @@ a, button, [role="button"] { touch-action: manipulation; -webkit-tap-highlight-c
 .dd-panel a { display: block; padding: 10px 12px; font-weight: 500; transition: background-color .12s; }
 .dd-panel a span { display: block; font-size: var(--step-small); font-weight: 400; color: var(--ink-soft); }
 .dd-panel a:hover { background: var(--surface); }
+.dd-panel--cols { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; min-width: 520px; }
+.dd-panel h3 { font-size: var(--step-small); font-weight: 600; color: var(--ink-soft); padding: 8px 12px 4px; }
 .head-actions { margin-left: auto; display: flex; align-items: center; gap: 10px; }
 .icon-btn {
   width: 40px; height: 40px; display: inline-flex; align-items: center; justify-content: center;

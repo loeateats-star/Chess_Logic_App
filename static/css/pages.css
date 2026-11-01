@@ -172,6 +172,24 @@
 .fig-sq:nth-child(4) { background: var(--ink); color: var(--ground); }
 .fig-sq .tile-fig { font-size: clamp(3rem, 7vw, 7.5rem); }
 
+/* Impact: event gallery. Square tiles (the page's one shape); the lead
+   photo of each event takes a 2x2 block, crowd shots run 2 wide. */
+.event { margin-top: clamp(48px, 6vw, 88px); }
+.event-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px 32px; flex-wrap: wrap; margin-bottom: 20px; }
+.event-fig { font-size: var(--step-lead); font-weight: 500; color: var(--ink-soft); }
+.event-fig span { font-size: clamp(2.5rem, 1.8rem + 2.6vw, 4.25rem); font-weight: 600; letter-spacing: -0.04em; color: var(--ink); margin-right: 6px; font-variant-numeric: tabular-nums; }
+.event-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); grid-auto-flow: dense; gap: 8px; }
+.event-grid li { aspect-ratio: 1 / 1; overflow: hidden; background: var(--surface-2); }
+.event-grid li.is-big { grid-column: span 2; grid-row: span 2; }
+.event-grid li.is-wide { grid-column: span 2; aspect-ratio: 2 / 1; }
+.event-grid a { display: block; width: 100%; height: 100%; }
+.event-grid img { width: 100%; height: 100%; object-fit: cover; transition: transform .5s var(--ease-out); }
+.event-grid a:hover img { transform: scale(1.04); }
+.event-grid--madness li { aspect-ratio: auto; }
+.event-grid--madness { grid-template-columns: 2fr 1fr 1fr; grid-template-rows: repeat(2, minmax(0, 1fr)); aspect-ratio: 2 / 1; }
+.event-grid--madness li.is-wide { grid-column: 1; grid-row: 1 / span 2; aspect-ratio: auto; }
+.event-grid--madness li:not(.is-wide) { grid-column: 2 / span 2; }
+
 /* Donate options */
 .give { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 .give a {
@@ -265,6 +283,11 @@
   .sq-steps { grid-template-columns: 1fr 1fr; row-gap: 36px; }
   .cta-band .h2, .cta-band .cta-side { grid-column: 1 / -1; }
   .fig-rank { grid-template-columns: 1fr 1fr; }
+  .event-grid { grid-template-columns: 1fr 1fr; gap: 6px; }
+  .event-grid li.is-big, .event-grid li.is-wide { grid-column: span 2; }
+  .event-grid--madness { grid-template-columns: 1fr 1fr; grid-template-rows: auto; aspect-ratio: auto; }
+  .event-grid--madness li.is-wide { grid-column: 1 / -1; grid-row: auto; aspect-ratio: 4 / 3; }
+  .event-grid--madness li:not(.is-wide) { grid-column: auto; aspect-ratio: 1 / 1; }
   .give { grid-template-columns: 1fr; }
   .give a { min-height: 220px; }
   .learn-list a { grid-template-columns: 72px 1fr; row-gap: 6px; }

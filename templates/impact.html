@@ -73,6 +73,49 @@
   </div>
 </section>
 
+<section class="section" aria-labelledby="gallery-title">
+  <div class="wrap">
+    <h2 class="h2" id="gallery-title">Out in the community.</h2>
+    <p class="lead soft" style="margin-top:20px;max-width:30em">We bring boards to local events too. Anyone can sit down, and every kid gets a game.</p>
+
+    {% set events = [
+      {'name': 'Madness Games trunk-or-treat', 'kids': 72, 'slug': 'madness', 'photos': [
+        ('madness-1', 'A volunteer plays chess with a young boy in costume at an outdoor trunk-or-treat table', 'wide'),
+        ('madness-2', 'Kids crowd around a chess table at the Madness Games trunk-or-treat', ''),
+        ('madness-3', 'Two boys play a volunteer at a chess table beside a decorated car trunk', '')]},
+      {'name': 'LTHS trunk-or-treat', 'kids': 36, 'slug': 'lths', 'photos': [
+        ('lths-1', 'A crowd of kids in costumes gathers around a chess game in the LTHS cafeteria', 'big'),
+        ('lths-2', 'Students line up along the chess tables in the LTHS commons', 'wide'),
+        ('lths-3', 'A girl in a purple shirt makes a move against a volunteer', ''),
+        ('lths-4', 'A young girl plays chess against a volunteer, with candy on the table', ''),
+        ('lths-5', 'A boy plays a volunteer while families walk past', ''),
+        ('lths-6', 'Kids in costumes watch a game across a table of candy', ''),
+        ('lths-7', 'A boy concentrates on his next move against a volunteer', ''),
+        ('lths-8', 'A volunteer plays an adult visitor at the chess table', ''),
+        ('lths-9', 'A player in a hood leans over the board to move a piece', 'wide'),
+        ('lths-10', 'A student in a black shirt plays against a volunteer', ''),
+        ('lths-11', 'A player in a white hoodie studies the board', '')]}
+    ] %}
+    {% for ev in events %}
+    <div class="event" aria-labelledby="ev-{{ ev.slug }}">
+      <div class="event-head">
+        <h3 class="h3" id="ev-{{ ev.slug }}">{{ ev.name }}</h3>
+        <p class="event-fig"><span data-count="{{ ev.kids }}">{{ ev.kids }}</span> kids impacted</p>
+      </div>
+      <ul class="event-grid event-grid--{{ ev.slug }}">
+        {% for file, alt, size in ev.photos %}
+        <li class="{{ 'is-' ~ size if size else '' }}">
+          <a href="/static/img/gallery/{{ file }}.jpg" target="_blank" rel="noopener">
+            <img src="/static/img/gallery/{{ file }}.jpg" alt="{{ alt }}" loading="lazy" />
+          </a>
+        </li>
+        {% endfor %}
+      </ul>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+
 <section class="section on-field" aria-labelledby="next-title">
   <div class="wrap cta-band">
     <h2 class="h2" id="next-title">Help us reach the next school.</h2>
