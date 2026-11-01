@@ -1,598 +1,165 @@
-<!DOCTYPE html>
-<html lang="en" class="scroll-smooth">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <script>
-    (function() {
-      try {
-        var t = localStorage.getItem('theme');
-        if (t === 'dark' || (!t && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-          document.documentElement.classList.add('dark');
-        }
-      } catch (e) {}
-    })();
-  </script>
-  <title>{{ section.label }} Curriculum: Synapchess</title>
+{% extends 'base.html' %}
+{% set nav = 'learn' %}
 
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="/static/js/offline-sync.js"></script>
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            brand: {
-              bg:     'var(--color-bg)',
-              card:   'var(--color-surface)',
-              border: 'var(--color-border)',
-              green:  'var(--color-accent)',
-              gdark:  'var(--color-accent-dark)',
-              muted:  'var(--color-muted)',
-              ink:    'var(--color-ink)',
-            }
-          }
-        }
-      }
-    }
-  </script>
-  <style>
-    :root {
-      --color-bg: #ffffff;
-      --color-surface: #f6faf8;
-      --color-border: #e7ebe9;
-      --color-chip: #e6f9f0;
-      --color-ink: #0b0c10;
-      --color-muted: #64748b;
-      --color-accent: #00dc82;
-      --color-accent-dark: #00aa63;
-      --color-header: rgba(255,255,255,0.92);
-      --color-overlay: rgba(255,255,255,0.96);
-    }
-    html.dark {
-      color-scheme: dark;
-      --color-bg: #0A0A0F;
-      --color-surface: #111118;
-      --color-border: #2a2620;
-      --color-chip: rgba(212,175,55,0.12);
-      --color-ink: #F0F0F0;
-      --color-muted: #9a9690;
-      --color-accent: #D4AF37;
-      --color-accent-dark: #B8941F;
-      --color-header: rgba(10,10,15,0.88);
-      --color-overlay: rgba(10,10,15,0.92);
-    }
-    html.dark body { background-color: var(--color-bg); color: var(--color-ink); }
-    body { transition: background-color .25s ease, color .25s ease; }
-    html.dark [style*="background:#ffffff"],
-    html.dark [style*="background: #ffffff"],
-    html.dark [style*="background-color: #ffffff"],
-    html.dark [style*="background-color:#ffffff"] { background-color: var(--color-bg) !important; }
-    html.dark [style*="background:#f6faf8"] { background-color: var(--color-surface) !important; }
-    html.dark [style*="background:#e7ebe9"] { background-color: var(--color-border) !important; }
-    html.dark [style*="background:#e6f9f0"] { background-color: var(--color-chip) !important; }
-    html.dark [style*="rgba(255,255,255,0.92)"] { background: var(--color-header) !important; }
-    html.dark [style*="rgba(255,255,255,0.96)"] { background: var(--color-overlay) !important; }
-    html.dark .text-slate-500 { color: var(--color-muted) !important; }
-    html.dark .text-slate-300 { color: var(--color-border) !important; }
-    html.dark .border-slate-200 { border-color: var(--color-border) !important; }
-    html.dark .bg-white { background-color: var(--color-surface) !important; }
+{% block title %}{{ section.label }} lessons: Synapchess{% endblock %}
+{% block description %}{{ section.description }}{% endblock %}
+{% block head %}
+<link rel="stylesheet" href="{{ asset('css/pages.css') }}" />
+<link rel="preconnect" href="https://i.ytimg.com" />
+<style>
+  .player { position: relative; aspect-ratio: 16 / 9; background: #000; overflow: hidden; }
+  .player iframe, .player .poster { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+  .player .poster img { width: 100%; height: 100%; object-fit: cover; opacity: .85; transition: opacity .2s; }
+  .player .poster:hover img { opacity: 1; }
+  .player .play {
+    position: absolute; left: 50%; top: 50%; width: 88px; height: 88px; margin: -44px 0 0 -44px;
+    background: var(--accent); display: flex; align-items: center; justify-content: center;
+    transition: transform .2s var(--ease-out);
+  }
+  .player .poster:hover .play { transform: scale(1.08); }
+  .player .play svg { width: 34px; height: 34px; fill: var(--accent-ink); margin-left: 4px; }
+  .now { background: var(--surface); padding: 18px 20px; }
+  .now h2 { font-size: 1.25rem; font-weight: 600; letter-spacing: -0.01em; line-height: 1.25; }
+  .lesson-grid { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); gap: 8px; align-items: start; }
+  .playlist { background: var(--surface); max-height: min(640px, 80svh); overflow-y: auto; }
+  .playlist h2 { position: sticky; top: 0; z-index: 1; background: var(--surface); padding: 16px 18px; font-size: 1rem; font-weight: 600; }
+  .video-row { display: grid; grid-template-columns: 104px 1fr; gap: 12px; width: 100%; text-align: left; padding: 10px 18px; transition: background-color .15s; }
+  .video-row:hover { background: var(--surface-2); }
+  .video-row[aria-current="true"] { background: var(--ground); box-shadow: inset 5px 0 0 var(--accent); }
+  .video-row .thumb { position: relative; width: 104px; aspect-ratio: 16 / 9; background: #000; overflow: hidden; }
+  .video-row .thumb img { width: 100%; height: 100%; object-fit: cover; }
+  .video-row .done { position: absolute; right: 4px; top: 4px; width: 18px; height: 18px; background: var(--accent); display: none; }
+  .video-row.is-done .done { display: block; animation: pop .3s var(--ease-out); }
+  .video-row .t { font-weight: 500; font-size: 0.9375rem; line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .video-row .m { font-size: var(--step-small); color: var(--ink-soft); margin-top: 4px; }
+  .progress-row { display: flex; justify-content: space-between; font-size: 0.9375rem; color: var(--ink-soft); margin-top: 28px; max-width: 420px; }
+  .progress-row + .bar { max-width: 420px; height: 8px; background: var(--surface-2); margin-top: 8px; }
+  .progress-row + .bar i { display: block; height: 100%; width: 0; background: var(--accent); transition: width .5s var(--ease-out); }
+  .tier-nav { margin-top: 28px; }
+  @media (max-width: 900px) { .lesson-grid { grid-template-columns: 1fr; } }
+</style>
+{% endblock %}
 
-    /* Learn dropdown */
-    .nav-dropdown { position: relative; }
-    .nav-dropdown-trigger {
-      display: flex; align-items: center; gap: 4px; cursor: pointer;
-      background: none; border: none; font: inherit; padding: 0;
-    }
-    .nav-dropdown-trigger svg { width: 11px; height: 11px; transition: transform .18s ease; }
-    .nav-dropdown-panel {
-      position: absolute; top: 100%; left: 50%; transform: translate(-50%, 6px);
-      min-width: 200px; margin-top: 10px; padding: 8px; border-radius: 12px;
-      background: var(--color-bg); border: 1px solid var(--color-border);
-      box-shadow: 0 12px 32px rgba(0,0,0,0.14);
-      opacity: 0; visibility: hidden; pointer-events: none;
-      transition: opacity .18s ease, transform .18s ease;
-      z-index: 60;
-    }
-    .nav-dropdown-panel a {
-      display: flex; align-items: center; gap: 8px;
-      padding: 9px 12px; border-radius: 8px; font-size: 13px; font-weight: 500;
-      color: var(--color-muted); white-space: nowrap; transition: background .15s, color .15s;
-    }
-    .nav-dropdown-panel a:hover { background: var(--color-surface); color: var(--color-ink); }
-    .nav-dropdown.open .nav-dropdown-trigger svg { transform: rotate(180deg); }
-    .nav-dropdown.open .nav-dropdown-panel {
-      opacity: 1; visibility: visible; pointer-events: auto; transform: translate(-50%, 2px);
-    }
-    @media (hover: hover) {
-      .nav-dropdown:hover .nav-dropdown-trigger svg { transform: rotate(180deg); }
-      .nav-dropdown:hover .nav-dropdown-panel {
-        opacity: 1; visibility: visible; pointer-events: auto; transform: translate(-50%, 2px);
-      }
-    }
+{% block content %}
+<section class="page-head" style="padding-bottom:clamp(32px,4vw,56px)">
+  <div class="wrap">
+    <p><a class="text-link" href="/curriculum">All levels</a></p>
+    <h1 class="display" style="margin-top:20px;max-width:none;font-size:clamp(2.75rem,1.5rem + 5vw,6rem)">{{ section.label }}</h1>
+    <p class="lead">{{ section.tagline }} {{ section.description }}</p>
+    <nav class="seg tier-nav" aria-label="Lesson levels" style="display:inline-flex;background:var(--surface);padding:4px;gap:4px;flex-wrap:wrap">
+      {% for s in all_sections %}
+      <a href="/curriculum/{{ s.slug }}" class="btn btn--sm {% if s.slug != section.slug %}btn--quiet{% endif %}"{% if s.slug == section.slug %} aria-current="page"{% endif %}>{{ s.label }}</a>
+      {% endfor %}
+    </nav>
+    <div class="progress-row"><span id="progress-label">0 of {{ videos|length }} watched</span><span id="progress-pct">0%</span></div>
+    <div class="bar"><i id="progress-bar"></i></div>
+    <p id="progress-status" class="sr-only" role="status" aria-live="polite"></p>
+  </div>
+</section>
 
-    /* Dark mode toggle */
-    .theme-toggle {
-      display: flex; align-items: center; justify-content: center;
-      width: 32px; height: 32px; border-radius: 8px; flex-shrink: 0;
-      border: 1px solid var(--color-border); background: var(--color-surface);
-      color: var(--color-muted); cursor: pointer;
-      transition: color .15s, border-color .15s, background .15s;
-    }
-    .theme-toggle:hover { color: var(--color-ink); border-color: var(--color-accent); }
-    .theme-toggle .icon-moon { display: none; }
-    html.dark .theme-toggle .icon-sun { display: none; }
-    html.dark .theme-toggle .icon-moon { display: block; }
-  </style>
-
-  <script>
-    document.addEventListener('DOMContentLoaded', function() {
-      var toggle = document.getElementById('theme-toggle');
-      if (toggle) {
-        toggle.addEventListener('click', function() {
-          var isDark = document.documentElement.classList.toggle('dark');
-          try { localStorage.setItem('theme', isDark ? 'dark' : 'light'); } catch (e) {}
-        });
-      }
-
-      document.querySelectorAll('.nav-dropdown').forEach(function(dd) {
-        var trigger = dd.querySelector('.nav-dropdown-trigger');
-        if (!trigger) return;
-        trigger.addEventListener('click', function(e) {
-          e.stopPropagation();
-          var willOpen = !dd.classList.contains('open');
-          document.querySelectorAll('.nav-dropdown.open').forEach(function(o) { o.classList.remove('open'); });
-          if (willOpen) {
-            dd.classList.add('open');
-            trigger.setAttribute('aria-expanded', 'true');
-          } else {
-            trigger.setAttribute('aria-expanded', 'false');
-          }
-        });
-      });
-      document.addEventListener('click', function() {
-        document.querySelectorAll('.nav-dropdown.open').forEach(function(o) {
-          o.classList.remove('open');
-          var t = o.querySelector('.nav-dropdown-trigger');
-          if (t) t.setAttribute('aria-expanded', 'false');
-        });
-      });
-      document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') {
-          document.querySelectorAll('.nav-dropdown.open').forEach(function(o) { o.classList.remove('open'); });
-        }
-      });
-    });
-  </script>
-
-  <style>
-    body { background-color: var(--color-bg); color: var(--color-ink); }
-
-    /* Custom slim scrollbar for the video list */
-    #video-list::-webkit-scrollbar { width: 8px; }
-    #video-list::-webkit-scrollbar-track { background: #ffffff; }
-    #video-list::-webkit-scrollbar-thumb { background: #d5ddd9; border-radius: 8px; }
-    #video-list::-webkit-scrollbar-thumb:hover { background: #00aa63; }
-    #video-list { scrollbar-width: thin; scrollbar-color: #d5ddd9 #ffffff; }
-
-    .video-row[aria-current="true"] {
-      border-color: #00dc82;
-      background: #e6f9f0;
-    }
-    .video-row:hover {
-      background: #f6faf8;
-    }
-    .video-row:focus-visible {
-      outline: 2px solid #00dc82;
-      outline-offset: 2px;
-    }
-  </style>
-</head>
-<body class="text-brand-ink antialiased" style="font-family: Inter, system-ui, sans-serif;">
-
-  <!-- ─── SiteHeader ────────────────────────────────────────────────────── -->
-  <header class="sticky top-0 z-50 border-b border-brand-border" style="background:rgba(255,255,255,0.92); backdrop-filter:blur(8px);">
-    <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-      <a href="/" class="flex items-center gap-2 font-semibold text-brand-ink text-sm">
-        <span class="flex items-center justify-center w-7 h-7 rounded-md bg-brand-green text-brand-ink font-bold text-base">♟</span>
-        Synapchess
-      </a>
-      <nav class="hidden md:flex items-center gap-8 text-sm font-medium">
-        <div class="nav-dropdown">
-          <button type="button" class="nav-dropdown-trigger text-brand-ink" aria-haspopup="true" aria-expanded="false">
-            Learn
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 9l6 6 6-6"/></svg>
-          </button>
-          <div class="nav-dropdown-panel" role="menu">
-            <a href="/curriculum" role="menuitem">Lessons</a>
-            <a href="/basics" role="menuitem">Chess Basics</a>
-            <a href="/special-rules" role="menuitem">Special Rules</a>
-            <a href="/blog" role="menuitem">Blog</a>
-          </div>
-        </div>
-        <div class="nav-dropdown">
-          <button type="button" class="nav-dropdown-trigger text-brand-muted hover:text-brand-ink transition-colors" aria-haspopup="true" aria-expanded="false">
-            Train
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 9l6 6 6-6"/></svg>
-          </button>
-          <div class="nav-dropdown-panel" role="menu">
-            <a href="/trainer" role="menuitem">Puzzle Trainer</a>
-            <a href="/trainer?rush=1" role="menuitem">Puzzle Rush</a>
-            <a href="/play" role="menuitem">Play Live ⚡</a>
-            <a href="/analysis" role="menuitem">Game Analyzer</a>
-          </div>
-        </div>
-        <a href="/join"   class="text-brand-muted hover:text-brand-ink transition-colors">Join</a>
-        <a href="/impact" class="text-brand-muted hover:text-brand-ink transition-colors">Impact</a>
-        <a href="/donate" class="text-brand-muted hover:text-brand-ink transition-colors">Donate</a>
-      </nav>
-      <div class="flex items-center gap-4 text-sm">
-        <button id="mobile-nav-toggle" class="mobile-nav-toggle md:hidden" type="button" aria-label="Toggle menu" aria-expanded="false" aria-controls="mobile-nav-panel">
-          <svg class="icon-menu" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
-          <svg class="icon-close" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 6l12 12M18 6L6 18"/></svg>
+<section class="section--tight" style="padding-top:0" aria-label="Lessons">
+  <div class="wrap lesson-grid">
+    <div>
+      <div class="player" id="player">
+        <button type="button" class="poster" id="player-poster" aria-label="Play {{ videos[0].title }}">
+          <img id="poster-img" src="https://i.ytimg.com/vi/{{ videos[0].id }}/hqdefault.jpg" alt="" />
+          <span class="play"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4l14 8-14 8z"/></svg></span>
         </button>
-        <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Toggle dark mode" title="Toggle dark mode">
-          <svg class="icon-sun" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path stroke-linecap="round" d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
-          <svg class="icon-moon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
-        </button>
-        <a href="/#train" class="text-brand-muted hover:text-brand-ink transition-colors">Sign in</a>
-        <a href="/trainer"
-           class="bg-brand-green hover:bg-brand-gdark text-brand-ink font-semibold px-4 py-2 rounded-md transition-colors">
-          Start Training
-        </a>
+      </div>
+      <div class="now">
+        <h2 id="player-title">{{ videos[0].title }}</h2>
+        <p class="small soft" id="player-meta" style="margin-top:6px">{{ videos[0].channel }} &middot; {{ videos[0].duration_label }}</p>
       </div>
     </div>
-  </header>
 
-  <!-- ─── Mobile nav panel ────────────────────────────────────────────── -->
-  <style>
-    .mobile-nav-toggle {
-      display: flex; align-items: center; justify-content: center;
-      width: 32px; height: 32px; border-radius: 8px; flex-shrink: 0;
-      border: 1px solid var(--color-border); background: var(--color-surface);
-      color: var(--color-muted); cursor: pointer;
-      transition: color .15s, border-color .15s, background .15s;
-    }
-    .mobile-nav-toggle:hover { color: var(--color-ink); border-color: var(--color-accent); }
-    .mobile-nav-toggle .icon-close { display: none; }
-    .mobile-nav-toggle.open .icon-menu  { display: none; }
-    .mobile-nav-toggle.open .icon-close { display: block; }
-    @media (min-width: 768px) { .mobile-nav-toggle, #mobile-nav-panel { display: none !important; } }
-
-    #mobile-nav-panel {
-      display: none; position: fixed; top: 64px; left: 0; right: 0; z-index: 49;
-      border-bottom: 1px solid var(--color-border);
-      background: var(--color-bg); max-height: calc(100vh - 64px); overflow-y: auto;
-      box-shadow: 0 12px 24px rgba(0,0,0,0.12);
-    }
-    #mobile-nav-panel.open { display: block; }
-    #mobile-nav-panel .mnp-section { padding: 14px 20px; border-bottom: 1px solid var(--color-border); }
-    #mobile-nav-panel .mnp-section:last-child { border-bottom: none; }
-    #mobile-nav-panel .mnp-label {
-      font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
-      color: var(--color-muted); margin-bottom: 8px;
-    }
-    #mobile-nav-panel a {
-      display: block; padding: 10px 4px; font-size: 15px; font-weight: 500;
-      color: var(--color-ink);
-    }
-    #mobile-nav-panel a:active { color: var(--color-accent-dark); }
-  </style>
-  <div id="mobile-nav-panel" role="menu" aria-label="Mobile navigation">
-    <div class="mnp-section">
-      <div class="mnp-label">Learn</div>
-      <a href="/curriculum" role="menuitem">Lessons</a>
-      <a href="/basics" role="menuitem">Chess Basics</a>
-      <a href="/special-rules" role="menuitem">Special Rules</a>
-      <a href="/blog" role="menuitem">Blog</a>
-    </div>
-    <div class="mnp-section">
-      <div class="mnp-label">Train</div>
-      <a href="/trainer" role="menuitem">Puzzle Trainer</a>
-      <a href="/trainer?rush=1" role="menuitem">Puzzle Rush</a>
-      <a href="/play" role="menuitem">Play Live ⚡</a>
-      <a href="/analysis" role="menuitem">Game Analyzer</a>
-    </div>
-    <div class="mnp-section">
-      <a href="/join" role="menuitem">Join</a>
-      <a href="/impact" role="menuitem">Impact</a>
-      <a href="/donate" role="menuitem">Donate</a>
+    <div class="playlist" id="video-list" aria-label="{{ section.label }} videos">
+      <h2>Playlist &middot; {{ videos|length }} videos</h2>
+      {% for v in videos %}
+      <button type="button" class="video-row"
+              data-video-id="{{ v.id }}" data-video-title="{{ v.title|e }}"
+              data-video-channel="{{ v.channel|e }}" data-video-duration="{{ v.duration_label }}"
+              aria-current="{{ 'true' if loop.first else 'false' }}"
+              aria-label="Play {{ v.title }} ({{ v.duration_label }}), by {{ v.channel }}">
+        <span class="thumb"><img src="https://i.ytimg.com/vi/{{ v.id }}/mqdefault.jpg" alt="" loading="lazy" /><span class="done" aria-hidden="true"></span></span>
+        <span><span class="t">{{ v.title }}</span><span class="m">{{ v.channel }} &middot; {{ v.duration_label }}</span></span>
+      </button>
+      {% endfor %}
     </div>
   </div>
-  <script>
-    (function() {
-      var toggle = document.getElementById('mobile-nav-toggle');
-      var panel  = document.getElementById('mobile-nav-panel');
-      if (!toggle || !panel) return;
-      function setOpen(open) {
-        toggle.classList.toggle('open', open);
-        panel.classList.toggle('open', open);
-        toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
-        document.documentElement.classList.toggle('mobile-nav-open', open);
-      }
-      toggle.addEventListener('click', function(e) {
-        e.stopPropagation();
-        setOpen(!panel.classList.contains('open'));
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  // The YouTube player is only embedded when a video is actually played; until
+  // then a thumbnail stands in, which keeps YouTube's ~1MB of scripts off the
+  // initial page load.
+  (function () {
+    var SECTION = {{ section.slug|tojson }};
+    var STORAGE_KEY = 'curriculum_progress_v1';
+    var rows = Array.prototype.slice.call(document.querySelectorAll('.video-row'));
+    var player = document.getElementById('player');
+    var titleEl = document.getElementById('player-title');
+    var metaEl = document.getElementById('player-meta');
+    var total = rows.length, loggedIn = false, completed = {};
+    var current = rows[0];
+
+    function loadLocal() {
+      try { return (JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'))[SECTION] || {}; } catch (e) { return {}; }
+    }
+    function saveLocal() {
+      try {
+        var all = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+        all[SECTION] = completed;
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(all));
+      } catch (e) {}
+    }
+    function render() {
+      var count = 0;
+      rows.forEach(function (row) {
+        var done = !!completed[row.getAttribute('data-video-id')];
+        row.classList.toggle('is-done', done);
+        if (done) count++;
       });
-      panel.addEventListener('click', function(e) {
-        if (e.target.closest('a')) setOpen(false);
-      });
-      document.addEventListener('click', function(e) {
-        if (panel.classList.contains('open') && !panel.contains(e.target) && e.target !== toggle) setOpen(false);
-      });
-      document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') setOpen(false);
-      });
-      window.addEventListener('resize', function() {
-        if (window.innerWidth >= 768) setOpen(false);
-      });
-    })();
-  </script>
+      var pct = total ? Math.round((count / total) * 100) : 0;
+      document.getElementById('progress-label').textContent = count + ' of ' + total + ' watched';
+      document.getElementById('progress-pct').textContent = pct + '%';
+      document.getElementById('progress-bar').style.width = pct + '%';
+      return count;
+    }
+    function markComplete(id) {
+      if (completed[id]) return;
+      completed[id] = true;
+      document.getElementById('progress-status').textContent = render() + ' of ' + total + ' videos watched';
+      if (loggedIn) SynapchessSync.queuedPost('/api/video-progress', { video_id: id, section: SECTION, completed: true });
+      else saveLocal();
+    }
+    function embed(row) {
+      var id = row.getAttribute('data-video-id');
+      player.innerHTML = '<iframe src="https://www.youtube-nocookie.com/embed/' + id + '?autoplay=1" title="' +
+        row.getAttribute('data-video-title').replace(/"/g, '&quot;') +
+        '" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>';
+      markComplete(id);
+    }
+    function select(row, play) {
+      current = row;
+      titleEl.textContent = row.getAttribute('data-video-title');
+      metaEl.textContent = row.getAttribute('data-video-channel') + ' · ' + row.getAttribute('data-video-duration');
+      rows.forEach(function (r) { r.setAttribute('aria-current', r === row ? 'true' : 'false'); });
+      if (play) embed(row);
+    }
+    rows.forEach(function (row) { row.addEventListener('click', function () { select(row, true); }); });
+    document.getElementById('player-poster').addEventListener('click', function () { embed(current); });
 
-
-  <!-- ─── Page Header ───────────────────────────────────────────────────── -->
-  <section class="py-12 px-6 border-b border-brand-border" style="background:#ffffff;">
-    <div class="max-w-6xl mx-auto space-y-6">
-
-      <a href="/curriculum"
-         class="inline-flex items-center gap-2 text-brand-muted hover:text-brand-ink transition-colors text-sm group">
-        <svg class="w-4 h-4 transition-transform group-hover:-translate-x-1"
-             fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
-        </svg>
-        Back to Curriculum
-      </a>
-
-      <div>
-        <p class="text-brand-gdark text-xs font-semibold tracking-widest uppercase">{{ section.tagline }}</p>
-        <h1 class="text-3xl md:text-4xl font-extrabold text-brand-ink leading-tight mt-1">
-          {{ section.label }} Curriculum
-        </h1>
-        <p class="text-brand-muted text-base max-w-2xl leading-relaxed mt-3">
-          {{ section.description }}
-        </p>
-      </div>
-
-      <!-- ── Tier navigation (accessible tab-style links between sections) ── -->
-      <nav aria-label="Curriculum tiers" class="flex flex-wrap gap-2 pt-2">
-        {% for s in all_sections %}
-        <a href="/curriculum/{{ s.slug }}"
-           {% if s.slug == section.slug %}aria-current="page"{% endif %}
-           class="px-4 py-2 rounded-md text-sm font-semibold border transition-colors
-                  {% if s.slug == section.slug %}
-                  bg-brand-green text-brand-ink border-brand-green
-                  {% else %}
-                  text-brand-muted border-brand-border hover:text-brand-ink hover:border-brand-green/50 bg-white
-                  {% endif %}">
-          {{ s.label }}
-        </a>
-        {% endfor %}
-      </nav>
-
-      <!-- Progress -->
-      <div class="max-w-md">
-        <div class="flex items-center justify-between text-xs text-brand-muted mb-1.5">
-          <span id="progress-label">0 of {{ videos|length }} watched</span>
-          <span id="progress-pct">0%</span>
-        </div>
-        <div class="h-2 rounded-full border border-brand-border overflow-hidden bg-white">
-          <div id="progress-bar" class="h-full bg-brand-green transition-all" style="width:0%;"></div>
-        </div>
-        <p id="progress-status" class="sr-only" role="status" aria-live="polite"></p>
-      </div>
-
-    </div>
-  </section>
-
-  <!-- ─── Player + Scrollable Playlist ──────────────────────────────────── -->
-  <section class="py-12 px-6" style="background:#f6faf8;">
-    <div class="max-w-6xl mx-auto grid lg:grid-cols-3 gap-8 items-start">
-
-      <!-- Player (main) -->
-      <div class="lg:col-span-2 flex flex-col gap-4">
-        <div class="rounded-2xl border border-brand-border overflow-hidden shadow-lg bg-white">
-          <div style="aspect-ratio:16/9;">
-            <iframe id="player-frame"
-                    class="w-full h-full"
-                    src="https://www.youtube-nocookie.com/embed/{{ videos[0].id }}"
-                    title="{{ videos[0].title }}"
-                    frameborder="0"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowfullscreen>
-            </iframe>
-          </div>
-        </div>
-        <div class="rounded-xl border border-brand-border px-5 py-4 bg-white">
-          <h2 id="player-title" class="font-bold text-brand-ink text-base leading-snug">{{ videos[0].title }}</h2>
-          <p id="player-meta" class="text-brand-muted text-xs mt-1.5">{{ videos[0].channel }} · {{ videos[0].duration_label }}</p>
-        </div>
-      </div>
-
-      <!-- Scrollable playlist (side) -->
-      <div class="rounded-2xl border border-brand-border flex flex-col overflow-hidden bg-white" style="max-height: 640px;">
-        <div class="px-5 py-4 border-b border-brand-border flex items-center justify-between">
-          <h3 class="text-brand-ink font-semibold text-sm">Playlist</h3>
-          <span class="text-brand-muted text-xs">{{ videos|length }} videos</span>
-        </div>
-        <div id="video-list" class="flex-1 overflow-y-auto divide-y divide-brand-border" role="list" aria-label="{{ section.label }} videos">
-          {% for v in videos %}
-          <button type="button"
-                  class="video-row w-full text-left flex gap-3 px-4 py-3 border-l-2 border-transparent transition-colors cursor-pointer"
-                  role="listitem"
-                  data-video-id="{{ v.id }}"
-                  data-video-title="{{ v.title|e }}"
-                  data-video-channel="{{ v.channel|e }}"
-                  data-video-duration="{{ v.duration_label }}"
-                  aria-current="{{ 'true' if loop.first else 'false' }}"
-                  aria-label="Play {{ v.title }} ({{ v.duration_label }}), by {{ v.channel }}">
-            <span class="relative flex-shrink-0 w-24 h-14 rounded-md overflow-hidden bg-black">
-              <img src="https://i.ytimg.com/vi/{{ v.id }}/mqdefault.jpg" alt="" class="w-full h-full object-cover" loading="lazy" />
-              <span class="watched-badge absolute top-1 right-1 hidden w-5 h-5 rounded-full bg-brand-green text-brand-ink items-center justify-center text-xs font-bold">✓</span>
-            </span>
-            <span class="flex-1 min-w-0">
-              <span class="block text-sm text-brand-ink font-medium leading-snug line-clamp-2">{{ v.title }}</span>
-              <span class="block text-xs text-brand-muted mt-1">{{ v.channel }} · {{ v.duration_label }}</span>
-            </span>
-          </button>
-          {% endfor %}
-        </div>
-      </div>
-
-    </div>
-  </section>
-
-  <!-- ─── SiteFooter ────────────────────────────────────────────────────── -->
-  <footer class="border-t border-brand-border pt-16 pb-8 px-6" style="background:#ffffff;">
-    <div class="max-w-6xl mx-auto">
-
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-10 mb-14">
-        <div class="col-span-2 space-y-3">
-          <a href="/" class="flex items-center gap-2 font-semibold text-brand-ink text-sm">
-            <span class="flex items-center justify-center w-7 h-7 rounded-md bg-brand-green text-brand-ink font-bold text-base">♟</span>
-            Synapchess
-          </a>
-          <p class="text-brand-muted text-sm leading-relaxed max-w-xs">
-            Synapchess is fiscally sponsored by HCB Foundation, closing the cognitive equity gap in Title I schools.
-          </p>
-        </div>
-
-        <div class="space-y-3">
-          <h4 class="text-brand-ink text-sm font-semibold">Site</h4>
-          <ul class="space-y-2 text-sm text-brand-muted">
-            <li><a href="/learn"  class="hover:text-brand-ink transition-colors">Learn</a></li>
-            <li><a href="/join"   class="hover:text-brand-ink transition-colors">Join</a></li>
-            <li><a href="/impact" class="hover:text-brand-ink transition-colors">Impact</a></li>
-            <li><a href="/donate" class="hover:text-brand-ink transition-colors">Donate</a></li>
-          </ul>
-        </div>
-
-        <div class="space-y-3">
-          <h4 class="text-brand-ink text-sm font-semibold">Resources</h4>
-          <ul class="space-y-2 text-sm text-brand-muted">
-            <li><a href="/trainer"  class="hover:text-brand-ink transition-colors">Puzzle Trainer</a></li>
-            <li><a href="/analysis" class="hover:text-brand-ink transition-colors">Game Analysis</a></li>
-          </ul>
-        </div>
-      </div>
-
-      <div class="border-t border-brand-border pt-6 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-brand-muted">
-        <span>© 2026 Synapchess. All rights reserved.</span>
-        <div class="flex gap-5">
-          <a href="#" class="hover:text-brand-ink transition-colors">Privacy</a>
-          <a href="#" class="hover:text-brand-ink transition-colors">Terms</a>
-        </div>
-      </div>
-
-    </div>
-  </footer>
-
-  <!-- ─── Playlist player + watched-progress tracking ────────────────────── -->
-  <script>
-    (function() {
-      var SECTION       = {{ section.slug|tojson }};
-      var STORAGE_KEY    = 'curriculum_progress_v1';
-      var rows            = Array.prototype.slice.call(document.querySelectorAll('.video-row'));
-      var frame            = document.getElementById('player-frame');
-      var titleEl           = document.getElementById('player-title');
-      var metaEl              = document.getElementById('player-meta');
-      var progressLabel        = document.getElementById('progress-label');
-      var progressPct           = document.getElementById('progress-pct');
-      var progressBar             = document.getElementById('progress-bar');
-      var progressStatus            = document.getElementById('progress-status');
-      var totalVideos = rows.length;
-
-      var loggedIn = false;
-      var completed = {}; // video_id -> true
-
-      function loadLocalProgress() {
-        try {
-          var all = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
-          return all[SECTION] || {};
-        } catch (e) {
-          return {};
-        }
-      }
-
-      function saveLocalProgress() {
-        try {
-          var all = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
-          all[SECTION] = completed;
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(all));
-        } catch (e) { /* localStorage unavailable — progress just won't persist */ }
-      }
-
-      function renderWatchedState() {
-        var count = 0;
-        rows.forEach(function(row) {
-          var vid = row.getAttribute('data-video-id');
-          var badge = row.querySelector('.watched-badge');
-          if (completed[vid]) {
-            count++;
-            badge.classList.remove('hidden');
-            badge.classList.add('flex');
-          } else {
-            badge.classList.add('hidden');
-            badge.classList.remove('flex');
-          }
-        });
-        var pct = totalVideos ? Math.round((count / totalVideos) * 100) : 0;
-        progressLabel.textContent = count + ' of ' + totalVideos + ' watched';
-        progressPct.textContent = pct + '%';
-        progressBar.style.width = pct + '%';
-        return count;
-      }
-
-      function markComplete(videoId) {
-        if (completed[videoId]) return;
-        completed[videoId] = true;
-        var count = renderWatchedState();
-        progressStatus.textContent = count + ' of ' + totalVideos + ' videos watched';
-
-        if (loggedIn) {
-          SynapchessSync.queuedPost('/api/video-progress', { video_id: videoId, section: SECTION, completed: true });
-        } else {
-          saveLocalProgress();
-        }
-      }
-
-      function playVideo(row) {
-        var vid     = row.getAttribute('data-video-id');
-        var title   = row.getAttribute('data-video-title');
-        var channel = row.getAttribute('data-video-channel');
-        var dur     = row.getAttribute('data-video-duration');
-
-        frame.src = 'https://www.youtube-nocookie.com/embed/' + vid + '?autoplay=1';
-        frame.title = title;
-        titleEl.textContent = title;
-        metaEl.textContent = channel + ' · ' + dur;
-
-        rows.forEach(function(r) { r.setAttribute('aria-current', r === row ? 'true' : 'false'); });
-        row.scrollIntoView({ block: 'nearest' });
-
-        markComplete(vid);
-      }
-
-      rows.forEach(function(row) {
-        row.addEventListener('click', function() { playVideo(row); });
-      });
-
-      function init(serverCompleted, isLoggedIn) {
-        loggedIn = isLoggedIn;
-        if (loggedIn) {
-          completed = {};
-          serverCompleted.forEach(function(vid) { completed[vid] = true; });
-        } else {
-          completed = loadLocalProgress();
-        }
-        renderWatchedState();
-      }
-
-      fetch('/api/video-progress')
-        .then(function(r) { return r.json(); })
-        .then(function(data) { init(data.completed || [], !!data.logged_in); })
-        .catch(function() { init([], false); });
-    })();
-  </script>
-
-</body>
-</html>
+    fetch('/api/video-progress', { credentials: 'same-origin' })
+      .then(function (r) { return r.json(); })
+      .then(function (d) {
+        loggedIn = !!d.logged_in;
+        if (loggedIn) (d.completed || []).forEach(function (id) { completed[id] = true; });
+        else completed = loadLocal();
+        render();
+      })
+      .catch(function () { completed = loadLocal(); render(); });
+  })();
+</script>
+{% endblock %}

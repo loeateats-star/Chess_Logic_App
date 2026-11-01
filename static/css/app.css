@@ -1,0 +1,207 @@
+/* App screens: puzzle trainer, Puzzle Rush and live play.
+ * Same tokens as the rest of the site (site.css); denser layout, the board
+ * is always the biggest thing on screen. */
+
+.app { padding: clamp(20px, 3vw, 40px) 0 clamp(48px, 6vw, 80px); }
+.app-head { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 16px 32px; margin-bottom: clamp(20px, 2.6vw, 32px); }
+.app-head h1 { font-size: clamp(2rem, 1.5rem + 2vw, 3.25rem); font-weight: 600; letter-spacing: -0.035em; line-height: 1; }
+.app-head p { color: var(--ink-soft); margin-top: 10px; max-width: 40em; }
+
+/* Segmented control: a rank of squares, one lit */
+.seg { display: inline-flex; background: var(--surface); padding: 4px; gap: 4px; }
+.seg a, .seg button {
+  display: inline-flex; align-items: center; gap: 8px; height: 40px; padding: 0 16px;
+  font-weight: 600; font-size: 0.9375rem; color: var(--ink-soft); white-space: nowrap;
+  transition: background-color .15s, color .15s;
+}
+.seg a:hover, .seg button:hover { color: var(--ink); background: var(--surface-2); }
+.seg [aria-current="true"], .seg [aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); }
+.seg [aria-disabled="true"] { opacity: .5; cursor: not-allowed; }
+.seg .lock { width: 12px; height: 12px; }
+.app-controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+
+.app-grid { display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: clamp(20px, 2.6vw, 40px); align-items: start; }
+.board-col { display: flex; justify-content: flex-start; }
+.board-col .board-frame { width: min(100%, calc(100svh - var(--head-h) - 150px)); min-width: 280px; }
+.side { display: grid; gap: 8px; }
+.panel { background: var(--surface); padding: 20px; }
+.panel h2 { font-size: 1rem; font-weight: 600; margin-bottom: 12px; }
+.panel .soft { font-size: 0.9375rem; }
+
+/* The status line is the loudest text next to the board */
+.status {
+  position: relative; padding: 18px 20px 18px 52px; background: var(--surface);
+  font-size: 1.125rem; font-weight: 600; letter-spacing: -0.01em; min-height: 64px; display: flex; align-items: center;
+}
+.status::before { content: ""; position: absolute; left: 20px; top: 50%; width: 18px; height: 18px; margin-top: -9px; background: var(--surface-2); }
+.status.is-turn-w::before { background: #fff; box-shadow: inset 0 0 0 2px var(--ink); }
+.status.is-turn-b::before { background: var(--ink); }
+.status.is-good { background: var(--accent); color: var(--accent-ink); }
+.status.is-good::before { background: var(--accent-ink); animation: pop .3s var(--ease-out); }
+.status.is-bad::before { background: var(--danger); animation: pop .3s var(--ease-out); }
+.status.is-practice::before { background: var(--practice); }
+
+.actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.actions .btn { width: 100%; padding: 0 12px; }
+.kbd { font-size: var(--step-small); color: var(--ink-soft); }
+.kbd kbd { font-family: var(--font); font-weight: 600; background: var(--surface-2); padding: 1px 7px; }
+
+.info-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.metric { background: var(--surface); padding: 16px 18px; }
+.metric dt { font-size: var(--step-small); color: var(--ink-soft); }
+.metric dd { margin: 6px 0 0; font-size: 1.75rem; font-weight: 600; letter-spacing: -0.03em; line-height: 1; font-variant-numeric: tabular-nums; }
+.metric dd small { font-size: 0.9375rem; font-weight: 500; color: var(--ink-soft); letter-spacing: 0; }
+.metric .theme-name { font-size: 1.0625rem; letter-spacing: -0.01em; line-height: 1.25; }
+
+/* Difficulty: up to three filled squares */
+.pips { display: inline-flex; gap: 4px; vertical-align: middle; }
+.pips i { width: 12px; height: 12px; background: var(--surface-2); }
+.pips i.on { background: var(--accent); }
+
+.bar { height: 8px; background: var(--surface-2); margin-top: 10px; }
+.bar > i { display: block; height: 100%; width: 0; background: var(--accent); transition: width .5s var(--ease-out), background-color .3s; }
+.bar.is-warn > i { background: var(--warn); }
+.bar.is-over > i { background: var(--danger); }
+
+.banner { padding: 12px 16px; font-weight: 500; font-size: 0.9375rem; }
+.banner--practice { background: color-mix(in srgb, var(--practice) 16%, var(--ground)); color: var(--ink); }
+.banner--improve { background: color-mix(in srgb, var(--accent) 18%, var(--ground)); }
+.banner--assess { background: var(--surface); }
+
+/* History: one square per puzzle, newest first */
+.history { display: flex; flex-wrap: wrap; gap: 5px; max-height: 160px; overflow-y: auto; }
+.hsq {
+  width: 28px; height: 28px; flex: none; transition: transform .15s var(--ease-out);
+  animation: pop .3s var(--ease-out);
+}
+.hsq:hover { transform: scale(1.15); }
+.hsq--green { background: var(--accent); }
+.hsq--yellow { background: var(--warn); }
+.hsq--red { background: var(--danger); }
+.count-tag { float: right; font-variant-numeric: tabular-nums; color: var(--ink-soft); font-weight: 500; }
+
+.theme-bars { display: grid; gap: 10px; margin-top: 14px; }
+.theme-bars .row { display: flex; justify-content: space-between; font-size: 0.9375rem; }
+.theme-bars .bar { margin-top: 4px; height: 6px; }
+
+/* ── Puzzle Rush ───────────────────────────────────────────────────────── */
+.rush {
+  position: fixed; inset: 0; z-index: 150; background: var(--ground);
+  display: flex; flex-direction: column; overflow-y: auto;
+}
+.rush-top {
+  display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 16px;
+  padding: 12px var(--gutter); background: var(--field); color: var(--field-ink);
+}
+.rush-top .btn--quiet { justify-self: start; }
+.rush-clock { font-size: clamp(2.25rem, 1.6rem + 2.4vw, 3.5rem); font-weight: 600; letter-spacing: -0.04em; line-height: 1; font-variant-numeric: tabular-nums; }
+.rush-clock.is-low { color: #ff8a8a; animation: tick 1s steps(1) infinite; }
+@keyframes tick { 50% { opacity: .55; } }
+.rush-score { justify-self: end; text-align: right; }
+.rush-score b { display: block; font-size: clamp(2.25rem, 1.6rem + 2.4vw, 3.5rem); font-weight: 600; letter-spacing: -0.04em; line-height: 1; color: var(--accent); font-variant-numeric: tabular-nums; }
+.rush-score span { font-size: var(--step-small); color: var(--field-soft); }
+.rush-timebar { height: 6px; background: var(--field-2); }
+.rush-timebar > i { display: block; height: 100%; background: var(--accent); transform-origin: left; }
+.rush-body { flex: 1; display: grid; grid-template-columns: minmax(0, 1fr) 280px; gap: 24px; padding: clamp(16px, 2.4vw, 32px) var(--gutter); max-width: var(--max); width: 100%; margin: 0 auto; align-items: start; align-content: start; }
+.rush-body .board-frame { width: min(100%, calc(100svh - 200px)); min-width: 280px; margin: 0 auto; }
+.rush-side { display: grid; gap: 8px; }
+.rush-side .panel:has(.rush-run:empty) { display: none; }
+.rush-run { display: flex; flex-wrap: wrap; gap: 5px; }
+.rush-run i { width: 22px; height: 22px; animation: pop .25s var(--ease-out); }
+.rush-run .ok { background: var(--accent); }
+.rush-run .no { background: var(--danger); }
+.rush-turn { font-weight: 600; }
+
+.rush-pick { display: grid; gap: 8px; margin-top: 24px; }
+.rush-pick button {
+  display: flex; justify-content: space-between; align-items: baseline; padding: 18px 20px; background: var(--surface);
+  transition: background-color .15s, transform .15s var(--ease-out);
+}
+.rush-pick button:hover { background: var(--accent); color: var(--accent-ink); }
+.rush-pick button:active { transform: scale(.99); }
+.rush-pick strong { font-size: 1.5rem; font-weight: 600; letter-spacing: -0.03em; }
+.rush-pick span { font-size: 0.9375rem; }
+.result-figs { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 22px 0; }
+.result-figs .metric dd { font-size: 2.5rem; }
+.new-best { display: inline-block; margin-top: 10px; background: var(--accent); color: var(--accent-ink); font-weight: 600; padding: 4px 10px; }
+
+/* ── Live play ─────────────────────────────────────────────────────────── */
+.play-wrap { max-width: 1080px; margin: 0 auto; }
+.player {
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  padding: 12px 16px; background: var(--surface);
+}
+.player .who { font-weight: 600; }
+.player .who small { font-weight: 500; color: var(--ink-soft); margin-left: 6px; font-size: 0.9375rem; }
+.clock { font-size: 1.75rem; font-weight: 600; letter-spacing: -0.03em; font-variant-numeric: tabular-nums; padding: 4px 12px; background: var(--surface-2); min-width: 108px; text-align: center; }
+.clock.on-move { background: var(--accent); color: var(--accent-ink); }
+.clock.is-low.on-move { background: var(--danger); color: #fff; }
+.play-board { display: grid; gap: 8px; }
+.play-board .board-frame { width: min(100%, calc(100svh - var(--head-h) - 330px)); min-width: 280px; margin: 0 auto; }
+.state-card { background: var(--surface); padding: clamp(24px, 4vw, 48px); }
+.state-card h2 { font-size: clamp(1.75rem, 1.3rem + 1.6vw, 2.5rem); font-weight: 600; letter-spacing: -0.03em; line-height: 1.05; }
+.state-card p { color: var(--ink-soft); margin-top: 12px; max-width: 34em; }
+.state-card .btn { margin-top: 24px; }
+.tc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 24px; }
+.tc-grid button {
+  padding: 24px; background: var(--ground); text-align: left;
+  transition: background-color .15s, transform .15s var(--ease-out);
+}
+.tc-grid button:hover { background: var(--accent); color: var(--accent-ink); }
+.tc-grid button:active { transform: scale(.99); }
+.tc-grid strong { display: block; font-size: 2.5rem; font-weight: 600; letter-spacing: -0.04em; line-height: 1; }
+.tc-grid span { display: block; margin-top: 8px; }
+.seek-squares { display: flex; gap: 6px; margin: 4px 0 20px; }
+.seek-squares i { width: 18px; height: 18px; background: var(--surface-2); animation: seek 1.2s infinite; }
+.seek-squares i:nth-child(2) { animation-delay: .15s; }
+.seek-squares i:nth-child(3) { animation-delay: .3s; }
+.seek-squares i:nth-child(4) { animation-delay: .45s; }
+@keyframes seek { 0%, 100% { background: var(--surface-2); } 40% { background: var(--accent); } }
+.error-banner { background: color-mix(in srgb, var(--danger) 14%, var(--ground)); color: var(--ink); padding: 12px 16px; font-weight: 500; margin-bottom: 12px; }
+.connected { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; padding: 12px 16px; background: var(--surface); margin-bottom: 8px; }
+
+/* ── Phones and tablets ─────────────────────────────────────────────────
+   The side panel's children join the main grid (display: contents) so they
+   can be ordered around the board: the prompt sits right above it and the
+   buttons right below, all inside one screen. */
+@media (max-width: 1000px) {
+  .app { padding-top: 16px; }
+  .app-head { margin-bottom: 14px; gap: 12px; }
+  .app-head h1 { font-size: clamp(1.5rem, 1.2rem + 1.6vw, 2.25rem); }
+  .app-head p { display: none; }
+  .app-grid, .rush-body { grid-template-columns: 1fr; }
+  .app-grid { gap: 8px; }
+  .app-grid > .side { display: contents; }
+  .app-grid > .side > * { order: 5; }
+  .app-grid > .side > .banner, .app-grid > .side > #assessment-banner { order: 1; }
+  .app-grid > .side > .status { order: 2; min-height: 56px; padding-top: 12px; padding-bottom: 12px; font-size: 1.0625rem; }
+  .board-col { order: 3; }
+  .app-grid > .side > .actions { order: 4; }
+  .app-grid > .side > .info-row { order: 6; }
+  .board-col .board-frame, .rush-body .board-frame, .play-board .board-frame { width: 100%; }
+  .rush-top { grid-template-columns: auto 1fr auto; padding-top: max(12px, env(safe-area-inset-top)); }
+  .rush-top .rush-clock { text-align: center; }
+  .rush-body { padding-top: 12px; gap: 8px; }
+  .rush-side { order: -1; }
+  .rush-side .panel { padding: 12px 16px; }
+  .rush-side .panel h2 { display: none; }
+}
+@media (hover: none) { .kbd { display: none; } }
+@media (max-width: 560px) {
+  .app-controls { width: 100%; flex-wrap: nowrap; }
+  .app-controls .seg { flex: 1; min-width: 0; }
+  .seg { display: flex; width: 100%; }
+  .seg a, .seg button { flex: 1; justify-content: center; padding: 0 6px; font-size: 0.875rem; height: 44px; }
+  .app-controls .btn { min-height: 52px; padding: 0 16px; }
+  .hide-xs { display: none; }
+  /* Boards run edge to edge: on a 390px phone that is 48px squares instead of 44. */
+  .board-col .board-frame, .rush-body .board-frame, .play-board .board-frame {
+    width: 100vw; max-width: none; margin-inline: calc(-1 * var(--gutter));
+  }
+  .rush-body .board-frame { margin-inline: calc(-1 * var(--gutter)); }
+  .actions .btn { min-height: 56px; }
+  .tc-grid { grid-template-columns: 1fr; }
+  .player { padding: 10px 12px; }
+  .clock { font-size: 1.5rem; min-width: 92px; }
+  .result-figs .metric dd { font-size: 2rem; }
+}

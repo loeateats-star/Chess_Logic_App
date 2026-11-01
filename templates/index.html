@@ -1,1498 +1,342 @@
-<!DOCTYPE html>
-<html lang="en" class="scroll-smooth">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <script>
-    (function() {
-      try {
-        var t = localStorage.getItem('theme');
-        if (t === 'dark' || (!t && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-          document.documentElement.classList.add('dark');
-        }
-      } catch (e) {}
-    })();
-  </script>
-  <title>Synapchess</title>
+{% extends 'base.html' %}
 
-  <!-- Tailwind CSS CDN (cdn.tailwindcss.com is the correct play-CDN endpoint) -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="/static/js/offline-sync.js"></script>
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            brand: {
-              bg:     'var(--color-bg)',
-              card:   'var(--color-surface)',
-              border: 'var(--color-border)',
-              green:  'var(--color-accent)',
-              gdark:  'var(--color-accent-dark)',
-              muted:  'var(--color-muted)',
-              ink:    'var(--color-ink)',
-            }
-          }
-        }
-      }
-    }
-  </script>
-  <style>
-    :root {
-      --color-bg: #ffffff;
-      --color-surface: #f6faf8;
-      --color-border: #e7ebe9;
-      --color-chip: #e6f9f0;
-      --color-ink: #0b0c10;
-      --color-muted: #64748b;
-      --color-accent: #00dc82;
-      --color-accent-dark: #00aa63;
-      --color-header: rgba(255,255,255,0.92);
-      --color-overlay: rgba(255,255,255,0.96);
-    }
-    html.dark {
-      color-scheme: dark;
-      --color-bg: #0A0A0F;
-      --color-surface: #111118;
-      --color-border: #2a2620;
-      --color-chip: rgba(212,175,55,0.12);
-      --color-ink: #F0F0F0;
-      --color-muted: #9a9690;
-      --color-accent: #D4AF37;
-      --color-accent-dark: #B8941F;
-      --color-header: rgba(10,10,15,0.88);
-      --color-overlay: rgba(10,10,15,0.92);
-    }
-    html.dark body { background-color: var(--color-bg); color: var(--color-ink); }
-    body { transition: background-color .25s ease, color .25s ease; }
-    html.dark [style*="background:#ffffff"],
-    html.dark [style*="background: #ffffff"],
-    html.dark [style*="background-color: #ffffff"],
-    html.dark [style*="background-color:#ffffff"] { background-color: var(--color-bg) !important; }
-    html.dark [style*="background:#f6faf8"] { background-color: var(--color-surface) !important; }
-    html.dark [style*="background:#e7ebe9"] { background-color: var(--color-border) !important; }
-    html.dark [style*="background:#e6f9f0"] { background-color: var(--color-chip) !important; }
-    html.dark [style*="rgba(255,255,255,0.92)"] { background: var(--color-header) !important; }
-    html.dark [style*="rgba(255,255,255,0.96)"] { background: var(--color-overlay) !important; }
-    html.dark .text-slate-500 { color: var(--color-muted) !important; }
-    html.dark .text-slate-300 { color: var(--color-border) !important; }
-    html.dark .border-slate-200 { border-color: var(--color-border) !important; }
-    html.dark .bg-white { background-color: var(--color-surface) !important; }
+{% block title %}Synapchess: free chess for kids in Title I schools{% endblock %}
+{% block head %}<link rel="stylesheet" href="{{ asset('css/pages.css') }}" />
+<link rel="preload" as="image" href="/static/img/photos/hero-library-chess.jpg" />{% endblock %}
 
-    /* Learn dropdown */
-    .nav-dropdown { position: relative; }
-    .nav-dropdown-trigger {
-      display: flex; align-items: center; gap: 4px; cursor: pointer;
-      background: none; border: none; font: inherit; padding: 0;
-    }
-    .nav-dropdown-trigger svg { width: 11px; height: 11px; transition: transform .18s ease; }
-    .nav-dropdown-panel {
-      position: absolute; top: 100%; left: 50%; transform: translate(-50%, 6px);
-      min-width: 200px; margin-top: 10px; padding: 8px; border-radius: 12px;
-      background: var(--color-bg); border: 1px solid var(--color-border);
-      box-shadow: 0 12px 32px rgba(0,0,0,0.14);
-      opacity: 0; visibility: hidden; pointer-events: none;
-      transition: opacity .18s ease, transform .18s ease;
-      z-index: 60;
-    }
-    .nav-dropdown-panel a {
-      display: flex; align-items: center; gap: 8px;
-      padding: 9px 12px; border-radius: 8px; font-size: 13px; font-weight: 500;
-      color: var(--color-muted); white-space: nowrap; transition: background .15s, color .15s;
-    }
-    .nav-dropdown-panel a:hover { background: var(--color-surface); color: var(--color-ink); }
-    .nav-dropdown.open .nav-dropdown-trigger svg { transform: rotate(180deg); }
-    .nav-dropdown.open .nav-dropdown-panel {
-      opacity: 1; visibility: visible; pointer-events: auto; transform: translate(-50%, 2px);
-    }
-    @media (hover: hover) {
-      .nav-dropdown:hover .nav-dropdown-trigger svg { transform: rotate(180deg); }
-      .nav-dropdown:hover .nav-dropdown-panel {
-        opacity: 1; visibility: visible; pointer-events: auto; transform: translate(-50%, 2px);
-      }
-    }
+{% block content %}
 
-    /* Dark mode toggle */
-    .theme-toggle {
-      display: flex; align-items: center; justify-content: center;
-      width: 32px; height: 32px; border-radius: 8px; flex-shrink: 0;
-      border: 1px solid var(--color-border); background: var(--color-surface);
-      color: var(--color-muted); cursor: pointer;
-      transition: color .15s, border-color .15s, background .15s;
-    }
-    .theme-toggle:hover { color: var(--color-ink); border-color: var(--color-accent); }
-    .theme-toggle .icon-moon { display: none; }
-    html.dark .theme-toggle .icon-sun { display: none; }
-    html.dark .theme-toggle .icon-moon { display: block; }
-  </style>
-
-  <script>
-    document.addEventListener('DOMContentLoaded', function() {
-      var toggle = document.getElementById('theme-toggle');
-      if (toggle) {
-        toggle.addEventListener('click', function() {
-          var isDark = document.documentElement.classList.toggle('dark');
-          try { localStorage.setItem('theme', isDark ? 'dark' : 'light'); } catch (e) {}
-        });
-      }
-
-      document.querySelectorAll('.nav-dropdown').forEach(function(dd) {
-        var trigger = dd.querySelector('.nav-dropdown-trigger');
-        if (!trigger) return;
-        trigger.addEventListener('click', function(e) {
-          e.stopPropagation();
-          var willOpen = !dd.classList.contains('open');
-          document.querySelectorAll('.nav-dropdown.open').forEach(function(o) { o.classList.remove('open'); });
-          if (willOpen) {
-            dd.classList.add('open');
-            trigger.setAttribute('aria-expanded', 'true');
-          } else {
-            trigger.setAttribute('aria-expanded', 'false');
-          }
-        });
-      });
-      document.addEventListener('click', function() {
-        document.querySelectorAll('.nav-dropdown.open').forEach(function(o) {
-          o.classList.remove('open');
-          var t = o.querySelector('.nav-dropdown-trigger');
-          if (t) t.setAttribute('aria-expanded', 'false');
-        });
-      });
-      document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') {
-          document.querySelectorAll('.nav-dropdown.open').forEach(function(o) { o.classList.remove('open'); });
-        }
-      });
-    });
-  </script>
-
-  <!-- jQuery 3.7.1 -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-  <!-- Chess.js 0.10.3 -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
-  <!-- Chessboard.js 1.0.0 -->
-  <link rel="stylesheet" href="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.css" />
-  <script src="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.js"></script>
-  <!-- canvas-confetti (puzzle-solved celebration) -->
-  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
-
-  <style>
-    body  { background-color: var(--color-bg); color: var(--color-ink); }
-    /* Chessboard.js sizes itself from this width — do not remove */
-    #board { width: min(400px, 92vw); }
-    #board {
-      touch-action: none;
-      -webkit-user-select: none;
-      user-select: none;
-      -webkit-touch-callout: none;
-    }
-    .board-b72b1 { border: 2px solid #00dc82 !important; border-radius: 6px; }
-    /* Dark squares — premium mint green */
-    .black-3c85d { background-color: #66b38c !important; }
-    /* Keep coordinate labels legible against the new green tone */
-    .black-3c85d.notation-322f9 { color: #1a3d2b !important; }
-    .white-1e1d7.notation-322f9 { color: #66b38c !important; }
-
-    /* ── Gradient heading text ────────────────────────────────────────────── */
-    .gradient-text {
-      background: linear-gradient(90deg, #00dc82, #38bdf8, #00dc82);
-      background-size: 200% auto;
-      -webkit-background-clip: text;
-      background-clip: text;
-      -webkit-text-fill-color: transparent;
-      color: transparent;
-      animation: gradientShift 6s ease-in-out infinite;
-    }
-    @keyframes gradientShift {
-      0%   { background-position: 0% 50%; }
-      50%  { background-position: 100% 50%; }
-      100% { background-position: 0% 50%; }
-    }
-
-    /* ── Free Forever badge ─────────────────────────────────────────────── */
-    .free-forever-badge {
-      background: linear-gradient(120deg, rgba(0,220,130,0.16), rgba(56,189,248,0.16));
-      background-size: 200% auto;
-      animation: gradientShift 5s ease-in-out infinite;
-      border: 1px solid rgba(0,220,130,0.4);
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      .gradient-text, .free-forever-badge {
-        animation: none !important;
-        transition: none !important;
-      }
-    }
-  </style>
-</head>
-<body class="text-brand-ink antialiased" style="font-family: Inter, system-ui, sans-serif;">
-
-  <!-- ─── SiteHeader ────────────────────────────────────────────────────── -->
-  <header class="sticky top-0 z-50 border-b border-brand-border" style="background:rgba(255,255,255,0.92); backdrop-filter:blur(8px);">
-    <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-
-      <!-- Logo -->
-      <a href="/" class="flex items-center gap-2 font-semibold text-brand-ink text-sm">
-        <span class="flex items-center justify-center w-7 h-7 rounded-md bg-brand-green text-brand-ink font-bold text-base">♟</span>
-        Synapchess
-      </a>
-
-      <!-- Center nav -->
-      <nav class="hidden md:flex items-center gap-8 text-sm font-medium">
-        <div class="nav-dropdown">
-          <button type="button" class="nav-dropdown-trigger text-brand-muted hover:text-brand-ink transition-colors" aria-haspopup="true" aria-expanded="false">
-            Learn
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 9l6 6 6-6"/></svg>
-          </button>
-          <div class="nav-dropdown-panel" role="menu">
-            <a href="/curriculum" role="menuitem">Lessons</a>
-            <a href="/basics" role="menuitem">Chess Basics</a>
-            <a href="/special-rules" role="menuitem">Special Rules</a>
-            <a href="/blog" role="menuitem">Blog</a>
-          </div>
-        </div>
-        <div class="nav-dropdown">
-          <button type="button" class="nav-dropdown-trigger text-brand-muted hover:text-brand-ink transition-colors" aria-haspopup="true" aria-expanded="false">
-            Train
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 9l6 6 6-6"/></svg>
-          </button>
-          <div class="nav-dropdown-panel" role="menu">
-            <a href="/trainer" role="menuitem">Puzzle Trainer</a>
-            <a href="/trainer?rush=1" role="menuitem">Puzzle Rush</a>
-            <a href="/play" role="menuitem">Play Live ⚡</a>
-            <a href="/analysis" role="menuitem">Game Analyzer</a>
-          </div>
-        </div>
-        <a href="/join"   class="text-brand-muted hover:text-brand-ink transition-colors">Join</a>
-        <a href="/impact" class="text-brand-muted hover:text-brand-ink transition-colors">Impact</a>
-        <a href="/donate" class="text-brand-muted hover:text-brand-ink transition-colors">Donate</a>
-      </nav>
-
-      <!-- Right actions -->
-      <div class="flex items-center gap-4 text-sm">
-        <button id="mobile-nav-toggle" class="mobile-nav-toggle md:hidden" type="button" aria-label="Toggle menu" aria-expanded="false" aria-controls="mobile-nav-panel">
-          <svg class="icon-menu" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
-          <svg class="icon-close" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 6l12 12M18 6L6 18"/></svg>
-        </button>
-        <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Toggle dark mode" title="Toggle dark mode">
-          <svg class="icon-sun" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path stroke-linecap="round" d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
-          <svg class="icon-moon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
-        </button>
-
-        <!-- Logged-out state (default) -->
-        <div id="auth-logged-out" class="flex items-center gap-3">
-          <button id="btn-login"
-                  class="text-brand-muted hover:text-brand-ink transition-colors cursor-pointer">
-            Student Login
-          </button>
-          <button id="btn-register"
-                  class="border border-brand-border hover:border-brand-gdark text-brand-muted hover:text-brand-ink px-3 py-1.5 rounded-md transition-colors cursor-pointer bg-white">
-            Register
-          </button>
-        </div>
-
-        <!-- Logged-in state (hidden until authenticated) -->
-        <div id="auth-logged-in" class="hidden items-center gap-3">
-          <span id="nav-welcome" class="text-brand-muted text-xs"></span>
-          <button id="btn-telemetry"
-                  onclick="toggleTelemetry()"
-                  class="border border-brand-border hover:border-brand-gdark text-brand-gdark text-xs font-semibold px-3 py-1.5 rounded-md transition-colors cursor-pointer bg-white">
-            View Telemetry
-          </button>
-          <span class="text-brand-border text-xs">|</span>
-          <button id="btn-logout"
-                  class="text-brand-muted hover:text-brand-ink transition-colors cursor-pointer">
-            Logout
-          </button>
-        </div>
-
-        <a href="/trainer"
-           class="bg-brand-green hover:bg-brand-gdark text-brand-ink font-semibold px-4 py-2 rounded-md transition-colors">
-          Start Training
-        </a>
+<!-- Hero: the square at full scale, with the classroom photo cut into it -->
+<section class="hero">
+  <div class="wrap hero-grid">
+    <div class="hero-copy" data-reveal>
+      <h1 class="display">Every kid gets a board.</h1>
+      <p class="lead">Synapchess is a nonprofit that brings free chess lessons, 6.1 million puzzles and real chess sets to kids in Title I schools.</p>
+      <div class="hero-actions">
+        <a class="btn" href="/trainer">Start training <span class="arrow" aria-hidden="true">&rarr;</span></a>
+        <a class="btn btn--quiet" href="/donate">Donate a board</a>
       </div>
     </div>
-  </header>
-
-  <!-- ─── Mobile nav panel ────────────────────────────────────────────── -->
-  <style>
-    .mobile-nav-toggle {
-      display: flex; align-items: center; justify-content: center;
-      width: 32px; height: 32px; border-radius: 8px; flex-shrink: 0;
-      border: 1px solid var(--color-border); background: var(--color-surface);
-      color: var(--color-muted); cursor: pointer;
-      transition: color .15s, border-color .15s, background .15s;
-    }
-    .mobile-nav-toggle:hover { color: var(--color-ink); border-color: var(--color-accent); }
-    .mobile-nav-toggle .icon-close { display: none; }
-    .mobile-nav-toggle.open .icon-menu  { display: none; }
-    .mobile-nav-toggle.open .icon-close { display: block; }
-    @media (min-width: 768px) { .mobile-nav-toggle, #mobile-nav-panel { display: none !important; } }
-
-    #mobile-nav-panel {
-      display: none; position: fixed; top: 64px; left: 0; right: 0; z-index: 49;
-      border-bottom: 1px solid var(--color-border);
-      background: var(--color-bg); max-height: calc(100vh - 64px); overflow-y: auto;
-      box-shadow: 0 12px 24px rgba(0,0,0,0.12);
-    }
-    #mobile-nav-panel.open { display: block; }
-    #mobile-nav-panel .mnp-section { padding: 14px 20px; border-bottom: 1px solid var(--color-border); }
-    #mobile-nav-panel .mnp-section:last-child { border-bottom: none; }
-    #mobile-nav-panel .mnp-label {
-      font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
-      color: var(--color-muted); margin-bottom: 8px;
-    }
-    #mobile-nav-panel a {
-      display: block; padding: 10px 4px; font-size: 15px; font-weight: 500;
-      color: var(--color-ink);
-    }
-    #mobile-nav-panel a:active { color: var(--color-accent-dark); }
-  </style>
-  <div id="mobile-nav-panel" role="menu" aria-label="Mobile navigation">
-    <div class="mnp-section">
-      <div class="mnp-label">Learn</div>
-      <a href="/curriculum" role="menuitem">Lessons</a>
-      <a href="/basics" role="menuitem">Chess Basics</a>
-      <a href="/special-rules" role="menuitem">Special Rules</a>
-      <a href="/blog" role="menuitem">Blog</a>
-    </div>
-    <div class="mnp-section">
-      <div class="mnp-label">Train</div>
-      <a href="/trainer" role="menuitem">Puzzle Trainer</a>
-      <a href="/trainer?rush=1" role="menuitem">Puzzle Rush</a>
-      <a href="/play" role="menuitem">Play Live ⚡</a>
-      <a href="/analysis" role="menuitem">Game Analyzer</a>
-    </div>
-    <div class="mnp-section">
-      <a href="/join" role="menuitem">Join</a>
-      <a href="/impact" role="menuitem">Impact</a>
-      <a href="/donate" role="menuitem">Donate</a>
-    </div>
-  </div>
-  <script>
-    (function() {
-      var toggle = document.getElementById('mobile-nav-toggle');
-      var panel  = document.getElementById('mobile-nav-panel');
-      if (!toggle || !panel) return;
-      function setOpen(open) {
-        toggle.classList.toggle('open', open);
-        panel.classList.toggle('open', open);
-        toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
-        document.documentElement.classList.toggle('mobile-nav-open', open);
-      }
-      toggle.addEventListener('click', function(e) {
-        e.stopPropagation();
-        setOpen(!panel.classList.contains('open'));
-      });
-      panel.addEventListener('click', function(e) {
-        if (e.target.closest('a')) setOpen(false);
-      });
-      document.addEventListener('click', function(e) {
-        if (panel.classList.contains('open') && !panel.contains(e.target) && e.target !== toggle) setOpen(false);
-      });
-      document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') setOpen(false);
-      });
-      window.addEventListener('resize', function() {
-        if (window.innerWidth >= 768) setOpen(false);
-      });
-    })();
-  </script>
-
-
-  <!-- ─── Hero: full-bleed photo with an overlaid mission card ───────────── -->
-  <section class="relative overflow-hidden" style="min-height: 680px;">
-    <img src="/static/img/photos/hero-library-chess.jpg"
-         alt="A young student moves a chess piece during a game at a public library"
-         class="absolute inset-0 w-full h-full object-cover" loading="eager" />
-
-    <div class="relative max-w-7xl mx-auto px-6 py-16 md:py-24 flex items-center" style="min-height: 680px;">
-      <div class="w-full max-w-md rounded-2xl p-8 md:p-10 space-y-6 shadow-2xl" style="background:#ffffff;">
-
-        <!-- Free Forever + puzzle-count badges -->
-        <div class="flex flex-wrap items-center gap-2">
-          <span class="free-forever-badge inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-semibold text-brand-ink">
-            <span class="text-brand-gdark">✓</span> Free Forever: no paywalls, no tiers
-          </span>
-          <span class="free-forever-badge inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-semibold text-brand-ink">
-            <span class="text-brand-gdark">♟</span> 6.1M+ puzzles
-          </span>
-        </div>
-
-        <!-- Heading -->
-        <h1 class="text-4xl font-extrabold leading-tight text-brand-ink">
-          <span class="gradient-text">Our Mission</span>
-        </h1>
-
-        <!-- Mission copy -->
-        <p class="text-brand-muted text-base leading-relaxed">
-          <strong class="text-brand-ink">Synapchess</strong> is a nonprofit dedicated to closing the
-          cognitive equity gap for students in Title I schools. Through free chess curriculum, live
-          puzzle training, and volunteer-led chapters, we give kids the tools to think five moves
-          ahead, in chess and in life.
-        </p>
-
-        <!-- CTA pills -->
-        <div class="flex flex-wrap gap-3 pt-1">
-          <a href="/trainer"
-             class="inline-flex items-center justify-center rounded-full px-6 py-3 text-xs font-bold tracking-wide uppercase transition-colors bg-brand-green hover:bg-brand-gdark text-brand-ink">
-            Start Training
-          </a>
-          <a href="/donate"
-             class="inline-flex items-center justify-center rounded-full px-6 py-3 text-xs font-bold tracking-wide uppercase transition-colors bg-brand-green hover:bg-brand-gdark text-brand-ink">
-            Donate
-          </a>
-        </div>
-
-        <!-- Sponsorship note -->
-        <p class="text-brand-muted text-xs opacity-70">
-          Fiscally sponsored by HCB Foundation
-        </p>
-      </div>
-    </div>
-  </section>
-
-  <!-- ─── Interactive Training Board (hidden on homepage; /trainer is the primary entry point) ── -->
-  <section id="train" class="hidden py-20 px-6" style="background:#ffffff;">
-    <div class="max-w-5xl mx-auto rounded-3xl p-8 md:p-12 shadow-xl" style="background:#131419;">
-      <div class="flex flex-col lg:flex-row items-center gap-12">
-
-        <!-- Board -->
-        <div class="flex-shrink-0">
-          <div class="rounded-lg overflow-hidden shadow-2xl shadow-brand-green/10">
-            <div id="board"></div>
-          </div>
-        </div>
-
-        <!-- Controls -->
-        <div class="flex-1 space-y-6">
-          <span class="text-brand-green text-xs font-semibold tracking-widest uppercase">
-            Try It Right Now
-          </span>
-          <h2 class="text-3xl font-bold text-white leading-snug">
-            See how it feels to<br /> think five moves ahead
-          </h2>
-          <p class="text-brand-muted text-base leading-relaxed max-w-md">
-            Every position is drawn from our database of 6.1 million puzzles. Find the engine's best move.
-            If you're wrong the piece snaps back and you try again.
-          </p>
-
-          <!-- Difficulty rating — updated by JS on each puzzle load -->
-          <div id="difficulty" class="flex items-center gap-2 text-sm text-brand-muted">
-            <span>Difficulty:</span>
-            <span id="difficulty-stars" class="tracking-wide text-base"></span>
-          </div>
-
-          <!-- Level streak counter -->
-          <div class="flex items-center gap-2 text-sm text-brand-muted">
-            <span>Current Level Streak:</span>
-            <span id="streak-count" class="text-white font-semibold">0</span>
-            <span id="streak-level" class="text-base">⭐</span>
-          </div>
-
-          <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-            <button id="train-btn"
-              class="bg-brand-green hover:bg-brand-gdark text-brand-ink font-semibold px-6 py-3 rounded-md transition-colors text-sm cursor-pointer">
-              Train New Puzzle
-            </button>
-            <button id="show-btn"
-              class="border border-slate-600 hover:border-brand-green text-slate-300 hover:text-white font-semibold px-6 py-3 rounded-md transition-colors text-sm cursor-pointer"
-              style="background:#131419;">
-              Show Solution
-            </button>
-            <p id="status" class="text-sm" style="color:#94a3b8;">
-              Click "Train New Puzzle" to begin.
-            </p>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ─── The Path ─────────────────────────────────────────────────────── -->
-  <section id="mission" class="py-24 px-6 border-t border-brand-border" style="background:#f6faf8;">
-    <div class="max-w-3xl mx-auto">
-
-      <div class="mb-12 text-center">
-        <p class="text-brand-gdark text-xs font-semibold tracking-widest uppercase mb-4">The Path</p>
-        <h2 class="text-4xl font-bold text-brand-ink leading-tight">
-          First move to master-level thinking
-        </h2>
-      </div>
-
-      <div class="rounded-2xl overflow-hidden border border-brand-border mb-16">
-        <img src="/static/img/photos/classroom-group.jpg"
-             alt="Students smiling together in their classroom"
-             class="w-full object-cover" style="aspect-ratio: 21/9;" loading="lazy" />
-      </div>
-
-      <!-- Vertical journey -->
-      <div class="relative pl-14">
-        <div class="absolute left-5 top-2 bottom-2 w-px bg-brand-border" aria-hidden="true"></div>
-
-        <!-- Level 0 -->
-        <a href="/basics" class="group relative block pb-10">
-          <span class="absolute -left-14 top-0 flex items-center justify-center w-10 h-10 rounded-full border-2 border-brand-border group-hover:border-brand-green text-brand-muted group-hover:text-brand-gdark font-bold text-sm transition-colors bg-white">0</span>
-          <h3 class="text-brand-ink font-semibold text-lg group-hover:text-brand-gdark transition-colors">New to Chess</h3>
-        </a>
-
-        <!-- Level 1 -->
-        <a href="/trainer?level=1" class="group relative block pb-10">
-          <span class="absolute -left-14 top-0 flex items-center justify-center w-10 h-10 rounded-full border-2 border-brand-border group-hover:border-brand-green text-brand-muted group-hover:text-brand-gdark font-bold text-sm transition-colors bg-white">1</span>
-          <h3 class="text-brand-ink font-semibold text-lg group-hover:text-brand-gdark transition-colors">Beginner</h3>
-        </a>
-
-        <!-- Level 2 -->
-        <a href="/trainer?level=2" class="group relative block pb-10">
-          <span class="absolute -left-14 top-0 flex items-center justify-center w-10 h-10 rounded-full border-2 border-brand-border group-hover:border-brand-green text-brand-muted group-hover:text-brand-gdark font-bold text-sm transition-colors bg-white">2</span>
-          <h3 class="text-brand-ink font-semibold text-lg group-hover:text-brand-gdark transition-colors">Intermediate</h3>
-        </a>
-
-        <!-- Level 3 -->
-        <a href="/trainer?level=3" class="group relative block">
-          <span class="absolute -left-14 top-0 flex items-center justify-center w-10 h-10 rounded-full border-2 border-brand-border group-hover:border-brand-green text-brand-muted group-hover:text-brand-gdark font-bold text-sm transition-colors bg-white">3</span>
-          <h3 class="text-brand-ink font-semibold text-lg group-hover:text-brand-gdark transition-colors">Advanced</h3>
-        </a>
-      </div>
-
-      <div class="text-center mt-14">
-        <a href="/curriculum" class="text-brand-gdark hover:text-brand-green font-medium text-sm">
-          Watch the video curriculum →
-        </a>
-      </div>
-    </div>
-  </section>
-
-  <!-- ─── Real Puzzle Bank (not demo) ─────────────────────────────────── -->
-  <section class="py-14 px-6 border-t border-brand-border text-center" style="background:#f6faf8;">
-    <div class="max-w-4xl mx-auto">
-      <p class="text-brand-gdark text-xs font-semibold tracking-widest uppercase mb-6">Our Puzzle Bank</p>
-      <div class="stat-card inline-block">
-        <div class="text-6xl font-extrabold text-brand-ink"><span class="stat-num" data-target="6.1" data-suffix="M+">0</span></div>
-        <div class="text-brand-ink text-base font-medium mt-2">Real tactical puzzles, sourced from Lichess</div>
-        <div class="text-brand-muted text-xs mt-1">No synthetic data, every position is from a real game</div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ─── Outcomes ─────────────────────────────────────────────────────── -->
-  <section id="outcomes" class="py-24 px-6 border-t border-brand-border text-center" style="background:#ffffff;">
-    <div class="max-w-4xl mx-auto">
-      <p class="text-brand-gdark text-xs font-semibold tracking-widest uppercase mb-8">Our Impact</p>
-
-      <div class="grid sm:grid-cols-2 gap-10 sm:gap-6 justify-center">
-        <div class="stat-card">
-          <div class="text-6xl font-extrabold text-brand-ink"><span class="stat-num" data-target="1">0</span></div>
-          <div class="text-brand-ink text-base font-medium mt-2">Title I school supported so far</div>
-          <div class="text-brand-muted text-xs mt-1">and growing &mdash; help us reach the next one</div>
-        </div>
-        <div class="stat-card">
-          <div class="text-6xl font-extrabold text-brand-ink"><span class="stat-num" data-target="5">0</span></div>
-          <div class="text-brand-ink text-base font-medium mt-2">Boards donated</div>
-          <div class="text-brand-muted text-xs mt-1"><a href="/impact" class="hover:text-brand-gdark transition-colors">see the impact &rarr;</a></div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ─── Partnerships ─────────────────────────────────────────────────── -->
-  {% if partners %}
-  <section id="partners" class="py-24 px-6 border-t border-brand-border text-center" style="background:#f6faf8;">
-    <div class="max-w-5xl mx-auto">
-      <p class="text-brand-gdark text-xs font-semibold tracking-widest uppercase mb-12">Our Partners</p>
-      <div class="grid sm:grid-cols-2 md:grid-cols-3 gap-6">
-        {% for partner in partners %}
-        <div class="rounded-2xl border border-brand-border p-6 flex flex-col items-center gap-3 text-center" style="background:#ffffff;">
-          {% if partner.logo_url %}
-          <img src="{{ partner.logo_url }}" alt="{{ partner.name }}" class="h-10 object-contain" loading="lazy" />
-          {% endif %}
-          <h3 class="font-bold text-brand-ink text-base">
-            {% if partner.url %}
-            <a href="{{ partner.url }}" target="_blank" rel="noopener noreferrer" class="hover:text-brand-gdark transition-colors">{{ partner.name }}</a>
-            {% else %}
-            {{ partner.name }}
-            {% endif %}
-          </h3>
-          {% if partner.description %}
-          <p class="text-brand-muted text-sm leading-relaxed">{{ partner.description }}</p>
-          {% endif %}
-        </div>
-        {% endfor %}
-      </div>
-    </div>
-  </section>
-  {% endif %}
-
-  <!-- ─── Blog ─────────────────────────────────────────────────────────── -->
-  {% if blog_posts %}
-  <section id="blog" class="py-24 px-6 border-t border-brand-border" style="background:#ffffff;">
-    <div class="max-w-5xl mx-auto">
-      <div class="text-center mb-12">
-        <p class="text-brand-gdark text-xs font-semibold tracking-widest uppercase mb-4">From the Blog</p>
-        <h2 class="text-4xl font-bold text-brand-ink leading-tight">Updates from Synapchess</h2>
-      </div>
-
-      <div class="grid md:grid-cols-3 gap-6">
-        {% for post in blog_posts %}
-        <a href="/blog/{{ post.slug }}"
-           class="group rounded-2xl border border-brand-border p-6 flex flex-col gap-3 hover:border-brand-green/50 hover:shadow-md transition-all"
-           style="background:#f6faf8;">
-          <span class="text-brand-muted text-xs">{{ post.created_at.strftime('%B %d, %Y') if post.created_at else '' }}</span>
-          <h3 class="font-bold text-lg text-brand-ink group-hover:text-brand-gdark transition-colors leading-snug">{{ post.title }}</h3>
-          {% if post.excerpt %}<p class="text-brand-muted text-sm leading-relaxed line-clamp-3">{{ post.excerpt }}</p>{% endif %}
-          <span class="text-brand-green text-sm font-medium mt-auto">Read more →</span>
-        </a>
-        {% endfor %}
-      </div>
-
-      <div class="text-center mt-10">
-        <a href="/blog" class="text-brand-gdark hover:text-brand-green font-medium text-sm">View all posts →</a>
-      </div>
-    </div>
-  </section>
-  {% endif %}
-
-  <!-- ─── Closing CTA ──────────────────────────────────────────────────── -->
-  <section id="foundation" class="relative py-28 px-6 border-t border-brand-border overflow-hidden">
-    <img src="/static/img/photos/hands-chess-cta.jpg" alt=""
-         class="absolute inset-0 w-full h-full object-cover" aria-hidden="true" />
-    <div class="absolute inset-0" style="background:rgba(11,12,16,0.86);" aria-hidden="true"></div>
-    <div class="relative max-w-2xl mx-auto text-center space-y-6" style="z-index:1;">
-      <h2 class="text-4xl font-bold text-white leading-tight">
-        Join us in closing the gap.
-      </h2>
-      <a href="/trainer"
-         class="inline-block bg-brand-green hover:bg-brand-gdark text-brand-ink font-semibold px-7 py-3.5 rounded-md transition-colors text-sm">
-        Start Training &rarr;
-      </a>
-    </div>
-  </section>
-
-  <!-- ─── SiteFooter ────────────────────────────────────────────────────── -->
-  <footer class="border-t border-brand-border pt-16 pb-8 px-6" style="background:#ffffff;">
-    <div class="max-w-6xl mx-auto">
-
-      <!-- Top row: brand + columns -->
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-10 mb-14">
-
-        <!-- Brand blurb -->
-        <div class="col-span-2 space-y-3">
-          <a href="/" class="flex items-center gap-2 font-semibold text-brand-ink text-sm">
-            <span class="flex items-center justify-center w-7 h-7 rounded-md bg-brand-green text-brand-ink font-bold text-base">♟</span>
-            Synapchess
-          </a>
-          <p class="text-brand-muted text-sm leading-relaxed max-w-xs">
-            Synapchess is fiscally sponsored by HCB Foundation, closing the cognitive equity gap in Title I schools.
-          </p>
-        </div>
-
-        <!-- Column: Site -->
-        <div class="space-y-3">
-          <h4 class="text-brand-ink text-sm font-semibold">Site</h4>
-          <ul class="space-y-2 text-sm text-brand-muted">
-            <li><a href="/learn"  class="hover:text-brand-ink transition-colors">Learn</a></li>
-            <li><a href="/blog"   class="hover:text-brand-ink transition-colors">Blog</a></li>
-            <li><a href="/join"   class="hover:text-brand-ink transition-colors">Join</a></li>
-            <li><a href="/impact" class="hover:text-brand-ink transition-colors">Impact</a></li>
-            <li><a href="/donate" class="hover:text-brand-ink transition-colors">Donate</a></li>
-          </ul>
-        </div>
-
-        <!-- Column: Resources -->
-        <div class="space-y-3">
-          <h4 class="text-brand-ink text-sm font-semibold">Resources</h4>
-          <ul class="space-y-2 text-sm text-brand-muted">
-            <li><a href="/trainer"  class="hover:text-brand-ink transition-colors">Puzzle Trainer</a></li>
-            <li><a href="/analysis" class="hover:text-brand-ink transition-colors">Game Analysis</a></li>
-          </ul>
-        </div>
-
-      </div>
-
-      <!-- Bottom row -->
-      <div class="border-t border-brand-border pt-6 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-brand-muted">
-        <span>© 2026 Synapchess. All rights reserved.</span>
-        <div class="flex gap-5">
-          <a href="#" class="hover:text-brand-ink transition-colors">Privacy</a>
-          <a href="#" class="hover:text-brand-ink transition-colors">Terms</a>
-        </div>
-      </div>
-
-    </div>
-  </footer>
-
-  <!-- ─── Auth Modal ──────────────────────────────────────────────────── -->
-  <div id="auth-modal" class="fixed inset-0 z-[100] flex items-center justify-center hidden">
-    <!-- Backdrop -->
-    <div id="modal-backdrop" class="absolute inset-0" style="background:rgba(15,23,20,0.5);" onclick="closeModal()"></div>
-
-    <!-- Box -->
-    <div class="relative z-10 w-full max-w-sm mx-4 rounded-2xl border border-brand-border p-8 space-y-6 shadow-2xl"
-         style="background:#ffffff;">
-
-      <!-- Close -->
-      <button onclick="closeModal()"
-              class="absolute top-4 right-4 text-brand-muted hover:text-brand-ink transition-colors text-lg leading-none cursor-pointer">
-        ✕
-      </button>
-
-      <!-- Tabs -->
-      <div class="flex gap-6 border-b border-brand-border pb-4">
-        <button id="tab-login"
-                onclick="switchTab('login')"
-                class="text-brand-ink font-semibold text-sm pb-1 border-b-2 border-brand-green cursor-pointer transition-colors">
-          Login
-        </button>
-        <button id="tab-register"
-                onclick="switchTab('register')"
-                class="text-brand-muted hover:text-brand-ink font-semibold text-sm pb-1 border-b-2 border-transparent cursor-pointer transition-colors">
-          Register
-        </button>
-      </div>
-
-      <!-- Fields -->
-      <div class="space-y-4">
-        <input id="modal-username" type="text" placeholder="Username" autocomplete="username"
-               class="w-full px-4 py-3 rounded-lg border border-brand-border text-brand-ink text-sm outline-none focus:border-brand-green transition-colors bg-white" />
-        <input id="modal-password" type="password" placeholder="Password" autocomplete="current-password"
-               class="w-full px-4 py-3 rounded-lg border border-brand-border text-brand-ink text-sm outline-none focus:border-brand-green transition-colors bg-white" />
-        <p id="modal-error" class="text-xs hidden" style="color:#ef4444;"></p>
-        <button id="modal-submit"
-                onclick="submitModal()"
-                class="w-full bg-brand-green hover:bg-brand-gdark text-brand-ink font-semibold py-3 rounded-lg transition-colors text-sm cursor-pointer">
-          Login
-        </button>
-      </div>
+    <div class="hero-art">
+      <div class="hero-field" aria-hidden="true"></div>
+      <figure class="hero-photo sq-photo">
+        <img src="/static/img/photos/hero-library-chess.jpg" width="1400" height="934"
+             alt="A young student lifts a pawn mid-game at a library chess table" fetchpriority="high" />
+      </figure>
+      <p class="hero-tag"><strong data-count="100" data-suffix="+">100+</strong> kids playing so far</p>
     </div>
   </div>
 
-  <!-- ─── Telemetry Dropdown Panel ────────────────────────────────────── -->
-  <div id="telemetry-panel" class="fixed z-40 hidden" style="top:4.25rem; right:1.5rem;">
-    <div class="rounded-2xl border border-brand-border shadow-2xl p-5 w-72"
-         style="background:#131419;">
+  <nav class="hero-tabs wrap" aria-label="Where to start">
+    <a class="htab" href="/basics"><strong>New to chess</strong><span>How the pieces move</span></a>
+    <a class="htab" href="/trainer"><strong>Solve puzzles</strong><span>At your level</span></a>
+    <a class="htab" href="/trainer?rush=1"><strong>Puzzle Rush</strong><span>Race the clock</span></a>
+    <a class="htab" href="/play"><strong>Play live</strong><span>A real opponent</span></a>
+    <a class="htab" href="/join"><strong>Start a chapter</strong><span>At your school</span></a>
+  </nav>
+</section>
 
-      <!-- Panel header -->
-      <div class="flex items-center justify-between mb-4">
-        <div class="flex items-center gap-2">
-          <svg class="w-3.5 h-3.5 text-brand-green" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
-          </svg>
-          <p class="text-brand-green text-xs font-semibold tracking-widest uppercase">My Analytics</p>
-        </div>
-        <button onclick="closeTelemetry()"
-                class="text-brand-muted hover:text-white text-sm leading-none cursor-pointer transition-colors">✕</button>
+<!-- The live thing: one real puzzle from the bank -->
+<section class="section on-surface try" id="try">
+  <div class="wrap try-grid">
+    <div class="try-board">
+      <div id="home-board" class="board-frame"><div class="board-placeholder" aria-hidden="true"></div></div>
+    </div>
+    <div class="try-copy" data-reveal>
+      <h2 class="h2">Find the winning move.</h2>
+      <p class="lead soft">This position comes from a real game, one of 6.1 million in our puzzle bank. Drag a piece to play it.</p>
+      <p class="try-status" id="home-status" role="status" aria-live="polite">Loading a puzzle&hellip;</p>
+      <div class="try-actions">
+        <button type="button" class="btn" id="home-next">New puzzle</button>
+        <button type="button" class="btn btn--quiet" id="home-solve">Show me</button>
       </div>
-
-      <!-- Metric rows -->
-      <div class="space-y-2">
-        <div class="flex items-center justify-between rounded-lg border border-brand-border px-4 py-3"
-             style="background:#0b0c10;">
-          <span class="text-brand-muted text-xs">Total Puzzles Played</span>
-          <span id="stat-total" class="text-white text-sm font-bold">—</span>
-        </div>
-        <div class="flex items-center justify-between rounded-lg border border-brand-border px-4 py-3"
-             style="background:#0b0c10;">
-          <span class="text-brand-muted text-xs">Tactical Accuracy</span>
-          <span id="stat-accuracy" class="text-brand-green text-sm font-bold">—</span>
-        </div>
-        <div class="flex items-center justify-between rounded-lg border border-brand-border px-4 py-3"
-             style="background:#0b0c10;">
-          <span class="text-brand-muted text-xs">Avg Solving Velocity</span>
-          <span id="stat-velocity" class="text-white text-sm font-bold">—</span>
-        </div>
-        <div class="pt-2 mt-1 border-t border-brand-border/60 space-y-1.5" id="theme-stats-wrap">
-          <p class="text-brand-muted text-[10px] uppercase tracking-wide px-1">By Theme</p>
-          <div id="theme-stats-rows" class="space-y-1.5"></div>
-        </div>
-      </div>
-
-      <p id="stat-loading" class="text-brand-muted text-xs text-center mt-3 hidden">Refreshing…</p>
+      <p class="small soft try-more">Like it? <a class="text-link" href="/trainer">Open the full trainer</a> for streaks, levels and stats.</p>
     </div>
   </div>
+</section>
 
-  <!-- ─── Daily Training Complete Overlay ─────────────────────────────── -->
-  <div id="daily-limit-banner" class="fixed inset-0 z-[200] flex items-center justify-center hidden">
-    <div class="absolute inset-0" style="background:rgba(0,0,0,0.88);"></div>
-    <div class="relative z-10 w-full max-w-md mx-4 rounded-2xl border p-10 text-center space-y-5"
-         style="background:#131419; border-color:rgba(0,220,130,0.35);">
-      <div class="w-16 h-16 rounded-full flex items-center justify-center mx-auto"
-           style="background:rgba(0,220,130,0.08); border:1px solid rgba(0,220,130,0.25);">
-        <span class="text-3xl">♟</span>
-      </div>
-      <div class="space-y-2">
-        <h2 class="text-xl font-bold text-white leading-snug">
-          Daily Synapchess Training Block Complete!
-        </h2>
-        <p class="text-brand-muted text-sm leading-relaxed">
-          You've hit your daily goal. Consistency is the key to mastery.
-          Your brain is growing even when you're not at the board.
-        </p>
-        <p class="text-brand-green text-sm font-semibold pt-1">See you tomorrow.</p>
-      </div>
-      <button onclick="document.getElementById('daily-limit-banner').classList.add('hidden')"
-              class="border border-brand-border hover:border-brand-green text-brand-muted hover:text-white px-6 py-2.5 rounded-lg text-sm transition-colors cursor-pointer"
-              style="background:#0b0c10;">
-        Dismiss
-      </button>
+<!-- Numbers -->
+<section class="section stats" aria-labelledby="stats-title">
+  <div class="wrap stats-grid">
+    <div class="tile tile--big on-accent">
+      <p class="tile-fig"><span data-count="100" data-suffix="+">100+</span></p>
+      <p class="tile-cap">children have learned chess with Synapchess</p>
+    </div>
+    <h2 class="stats-title h3" id="stats-title">Small numbers, real kids.</h2>
+    <div class="tile tile--ink">
+      <p class="tile-fig"><span data-count="7">7</span></p>
+      <p class="tile-cap">chess sets donated</p>
+    </div>
+    <div class="tile tile--mid">
+      <p class="tile-fig"><span data-count="2">2</span></p>
+      <p class="tile-cap">Title I schools supported</p>
+    </div>
+    <div class="tile tile--photo">
+      <img src="/static/img/photos/rogers-elementary-donation.jpg" width="907" height="904" loading="lazy"
+           alt="A Synapchess volunteer delivers boxes of chess sets to staff at Rogers Elementary" />
+    </div>
+    <div class="tile tile--field">
+      <p class="tile-fig"><span data-count="1">1</span></p>
+      <p class="tile-cap">local business sponsor</p>
+      <a class="text-link tile-link" href="/impact">See the impact <span aria-hidden="true">&rarr;</span></a>
     </div>
   </div>
+</section>
 
-  <!-- ─── Onboarding Diagnostic Wizard ────────────────────────────────── -->
-  <div id="wizard-modal" class="fixed inset-0 z-[150] flex items-center justify-center hidden">
-    <div class="absolute inset-0" style="background:rgba(0,0,0,0.88);"></div>
+<!-- The path -->
+<section class="section on-field path" aria-labelledby="path-title">
+  <div class="wrap">
+    <div class="path-head" data-reveal>
+      <h2 class="h2" id="path-title">From first move to real calculation.</h2>
+      <p class="soft">Kids start wherever they are. Puzzles get harder as their streak grows, and every level stays free.</p>
+    </div>
+    <svg class="path-art" id="path-art" viewBox="0 0 900 200" aria-hidden="true" focusable="false"></svg>
+    <ol class="path-steps">
+      <li><a href="/basics"><strong>New to chess</strong><span>Learn how each piece moves with drag-and-drop lessons.</span></a></li>
+      <li><a href="/trainer?level=1"><strong>Beginner</strong><span>Short tactics: pins, forks and skewers, rated under 1000.</span></a></li>
+      <li><a href="/trainer?level=2"><strong>Intermediate</strong><span>Two- and three-move combinations, rated 1000 to 1600.</span></a></li>
+      <li><a href="/trainer?level=3"><strong>Advanced</strong><span>Deep calculation and endgames, rated above 1600.</span></a></li>
+    </ol>
+  </div>
+</section>
 
-    <div class="relative z-10 w-full max-w-lg mx-4 rounded-2xl border border-brand-border p-8 space-y-7"
-         style="background:#131419;">
+<!-- Tools -->
+<section class="section tools" aria-labelledby="tools-title">
+  <div class="wrap">
+    <div class="tools-head">
+      <h2 class="h2" id="tools-title">Seven ways to practise.</h2>
+      <p class="soft">All free, all in the browser</p>
+    </div>
+    <ul class="tool-list">
+      <li><a href="/basics"><img src="/static/img/chesspieces/wikipedia/wP.png" width="64" height="64" alt="" loading="lazy" />
+        <span class="tool-name">Chess basics <em>Start here</em></span>
+        <span class="tool-desc">How every piece moves, taught through drag-and-drop exercises.</span></a></li>
+      <li><a href="/trainer"><img src="/static/img/chesspieces/wikipedia/wN.png" width="64" height="64" alt="" loading="lazy" />
+        <span class="tool-name">Puzzle trainer <em>6.1M puzzles</em></span>
+        <span class="tool-desc">Real positions from real games, served at your level as your streak grows.</span></a></li>
+      <li><a href="/special-rules"><img src="/static/img/chesspieces/wikipedia/wK.png" width="64" height="64" alt="" loading="lazy" />
+        <span class="tool-name">Special rules <em>Castling and more</em></span>
+        <span class="tool-desc">Check, checkmate, castling and en passant: the rules that trip up every beginner once.</span></a></li>
+      <li><a href="/trainer?rush=1"><img src="/static/img/chesspieces/wikipedia/wQ.png" width="64" height="64" alt="" loading="lazy" />
+        <span class="tool-name">Puzzle Rush <em>1 to 3 min</em></span>
+        <span class="tool-desc">Solve as many puzzles as you can before the clock runs out. Beat your best.</span></a></li>
+      <li><a href="/curriculum"><img src="/static/img/chesspieces/wikipedia/wB.png" width="64" height="64" alt="" loading="lazy" />
+        <span class="tool-name">Video lessons <em>4 tiers</em></span>
+        <span class="tool-desc">Playlists from trusted chess teachers. The site remembers what you have watched.</span></a></li>
+      <li><a href="/play"><img src="/static/img/chesspieces/wikipedia/wR.png" width="64" height="64" alt="" loading="lazy" />
+        <span class="tool-name">Play live <em>Via Lichess</em></span>
+        <span class="tool-desc">Connect a Lichess account and play a real opponent right on this board.</span></a></li>
+      <li><a href="/analysis"><img src="/static/img/chesspieces/wikipedia/bN.png" width="64" height="64" alt="" loading="lazy" />
+        <span class="tool-name">Game analysis <em>Engine graded</em></span>
+        <span class="tool-desc">Paste a game and see your best moves, your mistakes and your blunders.</span></a></li>
+    </ul>
+  </div>
+</section>
 
-      <!-- Progress dots + skip -->
-      <div class="flex items-center justify-between">
-        <div class="flex items-center gap-2">
-          <div class="wiz-dot w-2.5 h-2.5 rounded-full transition-colors" style="background:#00dc82;"></div>
-          <div class="wiz-dot w-2.5 h-2.5 rounded-full transition-colors" style="background:#1e2028;"></div>
-          <div class="wiz-dot w-2.5 h-2.5 rounded-full transition-colors" style="background:#1e2028;"></div>
+<!-- Classroom -->
+<section class="section on-surface room" aria-labelledby="room-title">
+  <div class="wrap room-grid">
+    <figure class="room-photo sq-photo">
+      <img src="/static/img/photos/classroom-group.jpg" width="1600" height="1067" loading="lazy"
+           alt="Students turn around in their classroom seats and smile at the camera" />
+    </figure>
+    <div class="room-copy" data-reveal>
+      <h2 class="h2" id="room-title">Built for the classroom.</h2>
+      <div class="room-points">
+        <div>
+          <h3 class="h3">No equipment beyond a screen</h3>
+          <p class="soft">Lessons, puzzles and progress tracking all run in a browser, on a school laptop or a phone.</p>
         </div>
-        <button onclick="skipWizard()"
-                class="text-brand-muted hover:text-white text-xs transition-colors cursor-pointer">
-          Skip for now →
-        </button>
-      </div>
-
-      <!-- Step 1: Background -->
-      <div id="wiz-step-1" class="space-y-5">
-        <div class="space-y-1">
-          <p class="text-brand-green text-xs font-semibold tracking-widest uppercase">Step 1 of 3</p>
-          <h3 class="text-2xl font-bold text-white">What is your chess background?</h3>
-          <p class="text-brand-muted text-sm">We'll tailor your training path to match your experience.</p>
-        </div>
-        <div class="grid gap-3">
-          <button class="wiz-card text-left rounded-xl border border-brand-border p-4 transition-colors cursor-pointer hover:border-brand-green/60"
-                  style="background:#0b0c10;"
-                  onclick="wizSelectBackground('Absolute Beginner', '/basics', this)">
-            <div class="text-white font-semibold text-sm mb-1">♟ Absolute Beginner</div>
-            <div class="text-brand-muted text-xs">I don't know how the pieces move yet</div>
-          </button>
-          <button class="wiz-card text-left rounded-xl border border-brand-border p-4 transition-colors cursor-pointer hover:border-brand-green/60"
-                  style="background:#0b0c10;"
-                  onclick="wizSelectBackground('Casual', '/trainer?level=1', this)">
-            <div class="text-white font-semibold text-sm mb-1">⭐ Casual</div>
-            <div class="text-brand-muted text-xs">I know the rules and play occasionally</div>
-          </button>
-          <button class="wiz-card text-left rounded-xl border border-brand-border p-4 transition-colors cursor-pointer hover:border-brand-green/60"
-                  style="background:#0b0c10;"
-                  onclick="wizSelectBackground('Club/Competitive', '/trainer?level=2', this)">
-            <div class="text-white font-semibold text-sm mb-1">⭐⭐ Club / Competitive</div>
-            <div class="text-brand-muted text-xs">I play in tournaments or study seriously</div>
-          </button>
-        </div>
-      </div>
-
-      <!-- Step 2: Daily time -->
-      <div id="wiz-step-2" class="space-y-5 hidden">
-        <div class="space-y-1">
-          <p class="text-brand-green text-xs font-semibold tracking-widest uppercase">Step 2 of 3</p>
-          <h3 class="text-2xl font-bold text-white">How much time can you train daily?</h3>
-          <p class="text-brand-muted text-sm">We'll enforce a training block limit to keep you consistent.</p>
-        </div>
-        <div class="grid grid-cols-3 gap-3">
-          <button class="wiz-card rounded-xl border border-brand-border p-5 text-center transition-colors cursor-pointer hover:border-brand-green/60"
-                  style="background:#0b0c10;"
-                  onclick="wizSelectTime(15, this)">
-            <div class="text-3xl font-extrabold text-white mb-1">15</div>
-            <div class="text-brand-muted text-xs">minutes</div>
-          </button>
-          <button class="wiz-card rounded-xl border border-brand-border p-5 text-center transition-colors cursor-pointer hover:border-brand-green/60"
-                  style="background:#0b0c10;"
-                  onclick="wizSelectTime(30, this)">
-            <div class="text-3xl font-extrabold text-white mb-1">30</div>
-            <div class="text-brand-muted text-xs">minutes</div>
-          </button>
-          <button class="wiz-card rounded-xl border border-brand-border p-5 text-center transition-colors cursor-pointer hover:border-brand-green/60"
-                  style="background:#0b0c10;"
-                  onclick="wizSelectTime(60, this)">
-            <div class="text-3xl font-extrabold text-white mb-1">60</div>
-            <div class="text-brand-muted text-xs">minutes</div>
-          </button>
+        <div>
+          <h3 class="h3">Volunteers, not a license</h3>
+          <p class="soft">Mentors sit across the board from a kid for an hour a week. We provide the curriculum.</p>
         </div>
       </div>
-
-      <!-- Step 3: Core target -->
-      <div id="wiz-step-3" class="space-y-5 hidden">
-        <div class="space-y-1">
-          <p class="text-brand-green text-xs font-semibold tracking-widest uppercase">Step 3 of 3</p>
-          <h3 class="text-2xl font-bold text-white">What is your core target?</h3>
-          <p class="text-brand-muted text-sm">Choose the skill you most want to develop right now.</p>
-        </div>
-        <div class="grid gap-3">
-          <button class="wiz-card text-left rounded-xl border border-brand-border p-4 transition-colors cursor-pointer hover:border-brand-green/60"
-                  style="background:#0b0c10;"
-                  onclick="wizSelectGoal('Learn Rules', this)">
-            <div class="text-white font-semibold text-sm mb-1">📖 Learn the Rules</div>
-            <div class="text-brand-muted text-xs">Master piece movement and basic principles</div>
-          </button>
-          <button class="wiz-card text-left rounded-xl border border-brand-border p-4 transition-colors cursor-pointer hover:border-brand-green/60"
-                  style="background:#0b0c10;"
-                  onclick="wizSelectGoal('Master Tactics', this)">
-            <div class="text-white font-semibold text-sm mb-1">⚡ Master Tactics</div>
-            <div class="text-brand-muted text-xs">Win material with pins, forks, and combinations</div>
-          </button>
-          <button class="wiz-card text-left rounded-xl border border-brand-border p-4 transition-colors cursor-pointer hover:border-brand-green/60"
-                  style="background:#0b0c10;"
-                  onclick="wizSelectGoal('Deep Calculation', this)">
-            <div class="text-white font-semibold text-sm mb-1">🔭 Deep Calculation</div>
-            <div class="text-brand-muted text-xs">Calculate 5+ move sequences like a master</div>
-          </button>
-        </div>
-      </div>
-
+      <a class="btn btn--ink" href="/join">Start a chapter</a>
     </div>
   </div>
+</section>
 
-  <!-- ─── Chess Engine ────────────────────────────────────────────────── -->
-  <script>
-    let board                 = null;
-    let game                  = null;
-    let currentFen            = null;
-    let solutionMoves         = [];
-    let currentMoveIndex      = 0;
-    let waitingForComputer    = false;
-    let puzzlesSolvedInStreak = 0;
-    let isReplaying           = false;
-    let replayTimeout         = null;
-    let currentPuzzleId       = null;   // set by /get-puzzle, sent to /log-attempt
-    let puzzleStartTime       = null;   // performance.now() snapshot when puzzle loads
-    let currentUser           = null;   // { username } when logged in, else null
-    let activeModalTab        = 'login';
-    let telemetryOpen         = false;
-    let dailyBudgetMs         = 0;      // user's daily time limit in ms (0 = no limit)
-    let sessionTrainingMs     = 0;      // accumulated active puzzle time this session
+{% if partners %}
+<section class="section partners" aria-labelledby="partners-title">
+  <div class="wrap">
+    <h2 class="h2" id="partners-title">Our partners.</h2>
+    <ul class="partner-list">
+      {% for partner in partners %}
+      <li>
+        {% if partner.logo_url %}<img src="{{ partner.logo_url }}" alt="" loading="lazy" />{% endif %}
+        <div>
+          <h3 class="h3">{% if partner.url %}<a href="{{ partner.url }}" target="_blank" rel="noopener noreferrer">{{ partner.name }}</a>{% else %}{{ partner.name }}{% endif %}</h3>
+          {% if partner.description %}<p class="soft">{{ partner.description }}</p>{% endif %}
+        </div>
+      </li>
+      {% endfor %}
+    </ul>
+  </div>
+</section>
+{% endif %}
 
-    function difficultyFromRating(rating) {
-      if (typeof rating !== 'number') return '';
-      if (rating < 1000)  return '⭐';
-      if (rating <= 1600) return '⭐⭐';
-      return '⭐⭐⭐';
+{% if blog_posts %}
+<section class="section{% if partners %} on-surface{% endif %} news" aria-labelledby="news-title">
+  <div class="wrap">
+    <div class="tools-head">
+      <h2 class="h2" id="news-title">News from the board.</h2>
+      <a class="text-link" href="/blog">All posts</a>
+    </div>
+    <ul class="post-list">
+      {% for post in blog_posts %}
+      <li><a href="/blog/{{ post.slug }}">
+        <span class="post-date small soft">{{ post.created_at.strftime('%B %d, %Y') if post.created_at else '' }}</span>
+        <span class="post-title">{{ post.title }}</span>
+        {% if post.excerpt %}<span class="post-ex soft">{{ post.excerpt }}</span>{% endif %}
+      </a></li>
+      {% endfor %}
+    </ul>
+  </div>
+</section>
+{% endif %}
+
+<!-- Close -->
+<section class="close on-accent" aria-labelledby="close-title">
+  <div class="close-photo">
+    <img src="/static/img/photos/hands-chess-cta.jpg" width="1600" height="1067" loading="lazy"
+         alt="A student's hand moves a black pawn on a green and white board" />
+  </div>
+  <div class="close-copy" data-reveal>
+    <h2 class="h2" id="close-title">Help us reach the next school.</h2>
+    <p>Donations buy real chess sets for classrooms that could not otherwise afford them, and keep every lesson free.</p>
+    <a class="btn btn--ink" href="/donate">Donate <span class="arrow" aria-hidden="true">&rarr;</span></a>
+  </div>
+</section>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+  // The path diagram: scattered squares pulled into a tight ribbon, then set
+  // out in neat green rows. Drawn once, seeded so it is the same every visit.
+  (function () {
+    var svg = document.getElementById('path-art');
+    if (!svg) return;
+    var seed = 7;
+    function rnd() { seed = (seed * 16807) % 2147483647; return (seed - 1) / 2147483646; }
+    var out = [];
+    function sq(x, y, cls) { out.push('<rect class="' + cls + '" x="' + x.toFixed(1) + '" y="' + y.toFixed(1) + '" width="12" height="12"/>'); }
+    for (var i = 0; i < 44; i++) sq(rnd() * 260, 10 + rnd() * 170, rnd() < .5 ? 'p1' : 'p2');
+    for (var r = 0; r < 3; r++) for (var c = 0; c < 18; c++) sq(300 + c * 16, 76 + r * 16, (c + r) % 2 ? 'p2' : 'p1');
+    for (var rr = 0; rr < 6; rr++) for (var cc = 0; cc < 9; cc++) sq(640 + cc * 28, 16 + rr * 30, 'g');
+    svg.innerHTML = out.join('');
+  })();
+</script>
+<script>
+  // Homepage puzzle. The chess libraries load only when this section comes
+  // near the viewport, so the rest of the page never waits on them.
+  (function () {
+    var section = document.getElementById('try');
+    var statusEl = document.getElementById('home-status');
+    var board = null, game = null, solution = [], idx = 0, busy = false, puzzleFen = null;
+    var libs = ['/static/vendor/jquery-3.7.1.min.js', '/static/vendor/chess-0.10.3.min.js',
+                '/static/vendor/chessboard-1.0.0.min.js', '{{ asset("js/board.js") }}'];
+
+    function status(text, tone) {
+      statusEl.textContent = text;
+      statusEl.className = 'try-status' + (tone ? ' is-' + tone : '');
     }
-
-    function prettyTheme(token) {
-      if (!token) return '';
-      return token.replace(/([A-Z])/g, ' $1').replace(/^./, function(c) { return c.toUpperCase(); });
+    function loadLibs() {
+      var css = document.createElement('link');
+      css.rel = 'stylesheet';
+      css.href = '/static/vendor/chessboard-1.0.0.min.css';
+      document.head.appendChild(css);
+      return libs.reduce(function (p, src) { return p.then(function () { return Synap.loadScript(src); }); }, Promise.resolve());
     }
-
-    function updateStreakDisplay() {
-      const level = puzzlesSolvedInStreak < 5 ? 1 : puzzlesSolvedInStreak < 10 ? 2 : 3;
-      document.getElementById('streak-count').textContent = puzzlesSolvedInStreak;
-      document.getElementById('streak-level').textContent = '⭐'.repeat(level);
-    }
-
-    function setStatus(text, color) {
-      const el = document.getElementById('status');
-      el.textContent = text;
-      el.style.color = color || '#94a3b8';
-    }
-
-    // Confetti burst on a correctly solved puzzle
-    function fireConfetti() {
-      if (typeof confetti !== 'function') return;
-      confetti({
-        particleCount: 90,
-        spread:        70,
-        startVelocity: 38,
-        origin:        { y: 0.65 },
-        colors:        ['#00dc82', '#00aa63', '#38bdf8', '#ffffff'],
-        disableForReducedMotion: true
-      });
-    }
-
-    // Auto-plays the computer's response move after a short delay.
-    function playComputerMove() {
-      waitingForComputer = true;
-      setTimeout(function() {
-        const uci   = solutionMoves[currentMoveIndex];
-        const from  = uci.slice(0, 2);
-        const to    = uci.slice(2, 4);
-        const promo = uci.length > 4 ? uci[4] : 'q';
-
-        game.move({ from: from, to: to, promotion: promo });
+    function playReply() {
+      busy = true;
+      setTimeout(function () {
+        var uci = solution[idx];
+        game.move({ from: uci.slice(0, 2), to: uci.slice(2, 4), promotion: uci[4] || 'q' });
         board.position(game.fen());
-        currentMoveIndex++;
-        waitingForComputer = false;
-
-        if (currentMoveIndex >= solutionMoves.length) {
-          puzzlesSolvedInStreak++;
-          updateStreakDisplay();
-          logAttempt(true);
-          setStatus('✓ Puzzle Completed Successfully!', '#00dc82');
-          fireConfetti();
-        } else {
-          const whose = game.turn() === 'w' ? 'White' : 'Black';
-          const left  = Math.ceil((solutionMoves.length - currentMoveIndex) / 2);
-          setStatus(whose + ' to move, ' + left + ' move' + (left > 1 ? 's' : '') + ' left.', '#94a3b8');
-        }
-      }, 450);
+        board.markMove(uci.slice(0, 2), uci.slice(2, 4));
+        idx++;
+        busy = false;
+        status('Your move again.');
+      }, 320);
     }
-
-    function onDrop(source, target) {
-      const move = game.move({ from: source, to: target, promotion: 'q' });
-
-      // Block user input while solution replay is running
-      if (isReplaying) return 'snapback';
-
-      // Illegal move — snap back without touching engine or board state
-      if (move === null) return 'snapback';
-
-      const userMove = source + target;
-
-      if (userMove === solutionMoves[currentMoveIndex].slice(0, 4)) {
-        // Correct — sync board NOW (handles castling rook sliding into place)
-        board.position(game.fen());
-        currentMoveIndex++;
-
-        // All moves played — puzzle done
-        if (currentMoveIndex >= solutionMoves.length) {
-          puzzlesSolvedInStreak++;
-          updateStreakDisplay();
-          logAttempt(true);
-          setStatus('✓ Puzzle Completed Successfully!', '#00dc82');
-          fireConfetti();
-          return;
-        }
-
-        // Trigger opponent's reply
-        setStatus('✓ Correct! Computer is responding…', '#00dc82');
-        playComputerMove();
-
-      } else {
-        // Incorrect — undo engine first, then snap piece back visually.
-        // board.position() is deliberately NOT called here so Chessboard.js
-        // can cleanly return the piece to its origin square via 'snapback'.
+    function onDrop(from, to) {
+      if (busy || idx >= solution.length) return 'snapback';
+      var move = game.move({ from: from, to: to, promotion: 'q' });
+      if (!move) return 'snapback';
+      if (from + to !== solution[idx].slice(0, 4)) {
         game.undo();
-        puzzlesSolvedInStreak = 0;
-        updateStreakDisplay();
-        logAttempt(false);
-        setStatus('✗ Incorrect – try again.', '#ef4444');
+        board.flashWrong();
+        status('Not that one. Look again.', 'bad');
         return 'snapback';
       }
-    }
-
-    function loadPuzzle() {
-      // Cancel any in-progress replay cleanly before fetching a new puzzle
-      clearTimeout(replayTimeout);
-      isReplaying = false;
-
-      setStatus('Loading puzzle…');
-      document.getElementById('difficulty-stars').textContent = '';
-
-      fetch('/get-puzzle?streak=' + puzzlesSolvedInStreak)
-        .then(function(response) {
-          if (!response.ok) throw new Error('No puzzles available.');
-          return response.json();
-        })
-        .then(function(data) {
-          currentFen         = data.fen;
-          currentPuzzleId    = data.puzzle_id;
-          solutionMoves      = data.engine_best_move.split(' ').filter(Boolean);
-          currentMoveIndex   = 0;
-          waitingForComputer = false;
-          puzzleStartTime    = performance.now();
-
-          // Difficulty is the puzzle's real Lichess rating: <1000 ⭐, 1000-1600 ⭐⭐, >1600 ⭐⭐⭐
-          document.getElementById('difficulty-stars').textContent = difficultyFromRating(data.rating);
-
-          game = new Chess(currentFen);
-
-          if (board) board.destroy();
-
-          board = Chessboard('board', {
-            position:    currentFen,
-            draggable:   true,
-            pieceTheme:  '/static/img/chesspieces/wikipedia/{piece}.png',
-            onDragStart: function(source, piece) {
-              // Block dragging while computer is thinking or puzzle is complete
-              if (!game || game.game_over()) return false;
-              if (waitingForComputer)               return false;
-              if (currentMoveIndex >= solutionMoves.length) return false;
-            },
-            onDrop:      onDrop,
-            orientation: game.turn() === 'w' ? 'white' : 'black'
-          });
-
-          const whose = game.turn() === 'w' ? 'White' : 'Black';
-          const total = Math.ceil(solutionMoves.length / 2);
-          setStatus(whose + ' to move, solve ' + total + '-move puzzle.');
-        })
-        .catch(function(err) {
-          setStatus('Error: ' + err.message, '#ef4444');
-        });
-    }
-
-    // ── Daily budget enforcement ─────────────────────────────────────────────
-    function checkDailyLimit(elapsedMs) {
-      if (!dailyBudgetMs) return;
-      sessionTrainingMs += elapsedMs;
-      if (sessionTrainingMs >= dailyBudgetMs) {
-        document.getElementById('daily-limit-banner').classList.remove('hidden');
-      }
-    }
-
-    // ── Telemetry ───────────────────────────────────────────────────────────
-    function logAttempt(isCorrect) {
-      if (!currentPuzzleId || !currentUser) return;
-      const timeMs = puzzleStartTime ? Math.round(performance.now() - puzzleStartTime) : null;
-      if (timeMs) checkDailyLimit(timeMs);
-      fetch('/log-attempt', {
-        method:  'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify({
-          puzzle_id:     currentPuzzleId,
-          time_spent_ms: timeMs,
-          is_correct:    isCorrect
-        })
-      })
-      .then(function() { fetchAnalytics(); })   // real-time stats refresh after every attempt
-      .catch(function() {});
-    }
-
-    // ── Auth modal ──────────────────────────────────────────────────────────
-    function openModal(tab) {
-      activeModalTab = tab || 'login';
-      switchTab(activeModalTab);
-      document.getElementById('modal-username').value = '';
-      document.getElementById('modal-password').value = '';
-      const err = document.getElementById('modal-error');
-      err.classList.add('hidden');
-      err.style.color = '#ef4444';
-      document.getElementById('auth-modal').classList.remove('hidden');
-      setTimeout(function() { document.getElementById('modal-username').focus(); }, 50);
-    }
-
-    function closeModal() {
-      document.getElementById('auth-modal').classList.add('hidden');
-    }
-
-    function switchTab(tab) {
-      activeModalTab = tab;
-      const loginTab    = document.getElementById('tab-login');
-      const registerTab = document.getElementById('tab-register');
-      const submitBtn   = document.getElementById('modal-submit');
-      if (tab === 'login') {
-        loginTab.classList.add('text-brand-ink', 'border-brand-green');
-        loginTab.classList.remove('text-brand-muted', 'border-transparent');
-        registerTab.classList.remove('text-brand-ink', 'border-brand-green');
-        registerTab.classList.add('text-brand-muted', 'border-transparent');
-        submitBtn.textContent = 'Login';
-      } else {
-        registerTab.classList.add('text-brand-ink', 'border-brand-green');
-        registerTab.classList.remove('text-brand-muted', 'border-transparent');
-        loginTab.classList.remove('text-brand-ink', 'border-brand-green');
-        loginTab.classList.add('text-brand-muted', 'border-transparent');
-        submitBtn.textContent = 'Create Account';
-      }
-    }
-
-    function updateNavAuth() {
-      const loggedOut = document.getElementById('auth-logged-out');
-      const loggedIn  = document.getElementById('auth-logged-in');
-      if (currentUser) {
-        loggedOut.classList.add('hidden');
-        loggedIn.classList.remove('hidden');
-        loggedIn.classList.add('flex');
-        document.getElementById('nav-welcome').textContent = 'Welcome, ' + currentUser.username + '!';
-      } else {
-        loggedOut.classList.remove('hidden');
-        loggedIn.classList.add('hidden');
-        loggedIn.classList.remove('flex');
-      }
-    }
-
-    function submitModal() {
-      const username  = document.getElementById('modal-username').value.trim();
-      const password  = document.getElementById('modal-password').value;
-      const errorEl   = document.getElementById('modal-error');
-      const submitBtn = document.getElementById('modal-submit');
-
-      if (!username || !password) {
-        errorEl.style.color  = '#ef4444';
-        errorEl.textContent  = 'Please fill in both fields.';
-        errorEl.classList.remove('hidden');
+      idx++;
+      board.position(game.fen(), false);
+      board.markMove(from, to);
+      if (idx >= solution.length) {
+        status('Solved. That is how you think five moves ahead.', 'good');
+        Synap.confetti();
         return;
       }
-
-      errorEl.classList.add('hidden');
-      submitBtn.textContent = 'Please wait…';
-
-      const endpoint = activeModalTab === 'login' ? '/login' : '/register';
-
-      fetch(endpoint, {
-        method:  'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify({ username: username, password: password })
-      })
-      .then(function(r) {
-        return r.json().then(function(d) { return { ok: r.ok, data: d }; });
-      })
-      .then(function(res) {
-        if (!res.ok) {
-          errorEl.style.color = '#ef4444';
-          errorEl.textContent = res.data.error || 'Something went wrong.';
-          errorEl.classList.remove('hidden');
-          submitBtn.textContent = activeModalTab === 'login' ? 'Login' : 'Create Account';
-          return;
-        }
-        if (activeModalTab === 'register') {
-          // Auto-switch to login after successful registration
-          switchTab('login');
-          errorEl.style.color = '#00dc82';
-          errorEl.textContent = 'Account created! Please log in.';
-          errorEl.classList.remove('hidden');
-          document.getElementById('modal-username').value = username;
-          document.getElementById('modal-password').value = '';
-          document.getElementById('modal-password').focus();
-          return;
-        }
-        // Successful login
-        currentUser = { username: username };
-        if (typeof res.data.streak === 'number') {
-          puzzlesSolvedInStreak = res.data.streak;
-          updateStreakDisplay();
-        }
-        if (typeof res.data.daily_time_budget === 'number' && res.data.daily_time_budget > 0) {
-          dailyBudgetMs = res.data.daily_time_budget * 60 * 1000;
-        }
-        closeModal();
-        updateNavAuth();
-        fetchAnalytics();
-        if (res.data.diagnostic_done === 0) {
-          openWizard();
-        } else {
-          loadPuzzle();
-        }
-      })
-      .catch(function() {
-        errorEl.style.color = '#ef4444';
-        errorEl.textContent = 'Network error. Please try again.';
-        errorEl.classList.remove('hidden');
-        submitBtn.textContent = activeModalTab === 'login' ? 'Login' : 'Create Account';
-      });
+      status('Good move. Watch the reply.', 'good');
+      playReply();
     }
-
-    // ── Analytics panel ─────────────────────────────────────────────────────
-    function fetchAnalytics() {
-      if (!currentUser) return;
-      const loading = document.getElementById('stat-loading');
-      loading.classList.remove('hidden');
-      fetch('/get-analytics')
-        .then(function(r) { return r.json(); })
-        .then(function(d) {
-          loading.classList.add('hidden');
-          document.getElementById('stat-total').textContent = d.total_attempts;
-          const pct = d.total_attempts > 0 ? Math.round(d.accuracy) + '%' : '0%';
-          document.getElementById('stat-accuracy').textContent = pct;
-          const secs = d.avg_time_ms > 0 ? (d.avg_time_ms / 1000).toFixed(1) + 's' : '—';
-          document.getElementById('stat-velocity').textContent = secs;
-
-          const themeRows = document.getElementById('theme-stats-rows');
-          themeRows.innerHTML = (d.by_theme || []).slice(0, 5).map(function(t) {
-            return '<div class="flex items-center justify-between text-[11px] px-1">' +
-              '<span class="text-brand-muted">' + prettyTheme(t.theme) + '</span>' +
-              '<span class="text-brand-green font-semibold">' + t.accuracy + '%</span></div>';
-          }).join('');
+    function next() {
+      status('Loading a puzzle…');
+      fetch('/get-puzzle?level=1', { credentials: 'same-origin' })
+        .then(function (r) { if (!r.ok) throw new Error(); return r.json(); })
+        .then(function (d) {
+          puzzleFen = d.fen;
+          game = new Chess(d.fen);
+          solution = d.engine_best_move.split(' ').filter(Boolean);
+          idx = 0;
+          var side = game.turn() === 'w' ? 'white' : 'black';
+          if (!board) {
+            document.getElementById('home-board').innerHTML = '';
+            board = SynapBoard.create('home-board', {
+              position: d.fen, orientation: side, onDrop: onDrop,
+              onDragStart: function () { return !busy && idx < solution.length; },
+              legalMoves: function (sq) {
+                if (busy || idx >= solution.length) return [];
+                return game.moves({ square: sq, verbose: true }).map(function (m) { return m.to; });
+              }
+            });
+          } else {
+            board.show(d.fen, side);
+          }
+          status((side === 'white' ? 'White' : 'Black') + ' to move. Find the best move.');
         })
-        .catch(function() { loading.classList.add('hidden'); });
+        .catch(function () { status('Could not load a puzzle. Try again in a moment.', 'bad'); });
+    }
+    function solve() {
+      if (!game || !puzzleFen) return;
+      busy = true;
+      game = new Chess(puzzleFen);
+      board.show(puzzleFen);
+      var i = 0;
+      (function step() {
+        if (i >= solution.length) { busy = false; idx = solution.length; status('That is the solution. Try a new one.'); return; }
+        var uci = solution[i++];
+        game.move({ from: uci.slice(0, 2), to: uci.slice(2, 4), promotion: uci[4] || 'q' });
+        board.position(game.fen());
+        board.markMove(uci.slice(0, 2), uci.slice(2, 4));
+        setTimeout(step, 650);
+      })();
     }
 
-    function toggleTelemetry() {
-      telemetryOpen ? closeTelemetry() : openTelemetry();
+    var started = false;
+    function start() {
+      if (started) return;
+      started = true;
+      loadLibs().then(next).catch(function () { status('Could not load the board. Refresh to try again.', 'bad'); });
     }
-
-    function openTelemetry() {
-      document.getElementById('telemetry-panel').classList.remove('hidden');
-      telemetryOpen = true;
-      fetchAnalytics();
-    }
-
-    function closeTelemetry() {
-      document.getElementById('telemetry-panel').classList.add('hidden');
-      telemetryOpen = false;
-    }
-
-    function handleLogout() {
-      fetch('/logout').then(function() {
-        currentUser = null;
-        closeTelemetry();
-        updateNavAuth();
-        setStatus('Logged out. Click "Train New Puzzle" to continue as guest.');
-      });
-    }
-
-    // ── Onboarding Wizard ───────────────────────────────────────────────────
-    var wizData     = { experience_level: '', daily_time_budget: 30, training_goal: '' };
-    var wizRedirect = '/';
-
-    function openWizard() {
-      wizData     = { experience_level: '', daily_time_budget: 30, training_goal: '' };
-      wizRedirect = '/';
-      showWizStep(1);
-      document.getElementById('wizard-modal').classList.remove('hidden');
-    }
-
-    function closeWizard() {
-      document.getElementById('wizard-modal').classList.add('hidden');
-    }
-
-    function showWizStep(n) {
-      [1, 2, 3].forEach(function(i) {
-        document.getElementById('wiz-step-' + i).classList.add('hidden');
-      });
-      document.getElementById('wiz-step-' + n).classList.remove('hidden');
-      document.querySelectorAll('.wiz-dot').forEach(function(d, idx) {
-        d.style.background = idx < n ? '#00dc82' : '#1e2028';
-      });
-    }
-
-    function wizSelectBackground(val, redirect, el) {
-      wizData.experience_level = val;
-      wizRedirect              = redirect;
-      document.querySelectorAll('#wiz-step-1 .wiz-card').forEach(function(c) {
-        c.style.borderColor = '#1e2028';
-      });
-      el.style.borderColor = '#00dc82';
-      setTimeout(function() { showWizStep(2); }, 320);
-    }
-
-    function wizSelectTime(val, el) {
-      wizData.daily_time_budget = val;
-      document.querySelectorAll('#wiz-step-2 .wiz-card').forEach(function(c) {
-        c.style.borderColor = '#1e2028';
-      });
-      el.style.borderColor = '#00dc82';
-      setTimeout(function() { showWizStep(3); }, 320);
-    }
-
-    function wizSelectGoal(val, el) {
-      wizData.training_goal = val;
-      document.querySelectorAll('#wiz-step-3 .wiz-card').forEach(function(c) {
-        c.style.borderColor = '#1e2028';
-      });
-      el.style.borderColor = '#00dc82';
-      setTimeout(submitWizard, 400);
-    }
-
-    function submitWizard() {
-      SynapchessSync.queuedPost('/save-diagnostic', wizData)
-        .then(function() {
-          if (wizData.daily_time_budget > 0) {
-            dailyBudgetMs = wizData.daily_time_budget * 60 * 1000;
-          }
-          closeWizard();
-          window.location.href = wizRedirect;
-        });
-    }
-
-    function skipWizard() {
-      closeWizard();
-      loadPuzzle();
-    }
-
-    // Nav button wiring
-    document.getElementById('btn-login').addEventListener('click', function() { openModal('login'); });
-    document.getElementById('btn-register').addEventListener('click', function() { openModal('register'); });
-    document.getElementById('btn-logout').addEventListener('click', handleLogout);
-
-    // Submit on Enter key inside modal inputs
-    ['modal-username', 'modal-password'].forEach(function(id) {
-      document.getElementById(id).addEventListener('keydown', function(e) {
-        if (e.key === 'Enter') submitModal();
-      });
-    });
-
-    // Close modal on Escape; close telemetry panel too
-    document.addEventListener('keydown', function(e) {
-      if (e.key === 'Escape') { closeModal(); closeTelemetry(); }
-    });
-
-    // Close telemetry panel when clicking outside it
-    document.addEventListener('click', function(e) {
-      if (!telemetryOpen) return;
-      const panel = document.getElementById('telemetry-panel');
-      const btn   = document.getElementById('btn-telemetry');
-      if (!panel.contains(e.target) && (!btn || !btn.contains(e.target))) {
-        closeTelemetry();
-      }
-    });
-
-    // Initial auth check on page load
-    fetch('/me')
-      .then(function(r) { return r.json(); })
-      .then(function(d) {
-        if (d.logged_in) {
-          currentUser = { username: d.username };
-          if (typeof d.streak === 'number') {
-            puzzlesSolvedInStreak = d.streak;
-            updateStreakDisplay();
-          }
-          if (typeof d.daily_time_budget === 'number' && d.daily_time_budget > 0) {
-            dailyBudgetMs = d.daily_time_budget * 60 * 1000;
-          }
-          updateNavAuth();
-          fetchAnalytics();
-        }
-      })
-      .catch(function() {});
-  </script>
-
-  <!-- ─── Stat cards: count-up + grow-in bars on scroll into view ───── -->
-  <script>
-    (function() {
-      var cards = Array.prototype.slice.call(document.querySelectorAll('.stat-card'));
-      if (!cards.length) return;
-
-      var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-      function formatNum(n, decimals) {
-        return decimals ? n.toFixed(1) : Math.round(n).toLocaleString('en-US');
-      }
-
-      function animateCount(el) {
-        var target   = parseFloat(el.dataset.target);
-        var prefix   = el.dataset.prefix || '';
-        var suffix   = el.dataset.suffix || '';
-        var decimals = el.dataset.target.indexOf('.') !== -1;
-
-        if (reduceMotion) {
-          el.textContent = prefix + formatNum(target, decimals) + suffix;
-          return;
-        }
-
-        var duration = 1200;
-        var start    = null;
-
-        function step(ts) {
-          if (start === null) start = ts;
-          var progress = Math.min(1, (ts - start) / duration);
-          var eased    = 1 - Math.pow(1 - progress, 3); // ease-out cubic
-          el.textContent = prefix + formatNum(target * eased, decimals) + suffix;
-          if (progress < 1) requestAnimationFrame(step);
-        }
-        requestAnimationFrame(step);
-      }
-
-      var observer = new IntersectionObserver(function(entries) {
-        entries.forEach(function(entry) {
-          if (!entry.isIntersecting) return;
-          var card = entry.target;
-          card.classList.add('in-view');
-          var numEl = card.querySelector('.stat-num');
-          if (numEl && !numEl.dataset.animated) {
-            numEl.dataset.animated = '1';
-            animateCount(numEl);
-          }
-          observer.unobserve(card);
-        });
-      }, { threshold: 0.35 });
-
-      cards.forEach(function(card) { observer.observe(card); });
-    })();
-  </script>
-
-</body>
-</html>
+    if ('IntersectionObserver' in window) {
+      var io = new IntersectionObserver(function (e) { if (e[0].isIntersecting) { io.disconnect(); start(); } }, { rootMargin: '400px' });
+      io.observe(section);
+    } else { start(); }
+    document.getElementById('home-next').addEventListener('click', function () { start(); if (board) next(); });
+    document.getElementById('home-solve').addEventListener('click', solve);
+  })();
+</script>
+{% endblock %}

@@ -1,0 +1,42 @@
+<div class="dialog" id="wizard-dialog" role="dialog" aria-modal="true" aria-labelledby="wiz-title" hidden>
+  <div class="dialog-box dialog-box--wide">
+    <div class="steps" aria-hidden="true"><i class="on"></i><i></i><i></i></div>
+
+    <div data-wiz-step="1">
+      <h2 id="wiz-title">How much chess do you know?</h2>
+      <p class="soft" style="margin-top:8px">We will start you in the right place.</p>
+      <div class="choice-list">
+        <button type="button" class="choice" data-wiz="experience_level" data-value="Absolute Beginner" data-go="/basics">
+          <strong>I'm brand new</strong><span>I don't know how the pieces move yet</span></button>
+        <button type="button" class="choice" data-wiz="experience_level" data-value="Casual" data-go="/trainer?level=1">
+          <strong>I know the rules</strong><span>I play now and then</span></button>
+        <button type="button" class="choice" data-wiz="experience_level" data-value="Club/Competitive" data-go="/trainer?level=2">
+          <strong>I play a lot</strong><span>Tournaments, a club or serious study</span></button>
+      </div>
+    </div>
+
+    <div data-wiz-step="2" hidden>
+      <h2>How long can you train each day?</h2>
+      <p class="soft" style="margin-top:8px">We will tell you when today's session is done.</p>
+      <div class="choice-row">
+        <button type="button" class="choice" data-wiz="daily_time_budget" data-value="15"><strong>15</strong><span>minutes</span></button>
+        <button type="button" class="choice" data-wiz="daily_time_budget" data-value="30"><strong>30</strong><span>minutes</span></button>
+        <button type="button" class="choice" data-wiz="daily_time_budget" data-value="60"><strong>60</strong><span>minutes</span></button>
+      </div>
+    </div>
+
+    <div data-wiz-step="3" hidden>
+      <h2>What do you want to get better at?</h2>
+      <div class="choice-list">
+        <button type="button" class="choice" data-wiz="training_goal" data-value="Learn Rules">
+          <strong>The rules</strong><span>How pieces move and the basic ideas</span></button>
+        <button type="button" class="choice" data-wiz="training_goal" data-value="Master Tactics">
+          <strong>Tactics</strong><span>Pins, forks and combinations that win material</span></button>
+        <button type="button" class="choice" data-wiz="training_goal" data-value="Deep Calculation">
+          <strong>Calculation</strong><span>Seeing five or more moves ahead</span></button>
+      </div>
+    </div>
+
+    <p style="margin-top:22px"><button type="button" class="link-btn" data-wiz-skip>Skip for now</button></p>
+  </div>
+</div>

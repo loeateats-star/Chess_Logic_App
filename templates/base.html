@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script>
+    (function () {
+      var d = document.documentElement;
+      d.className += ' js';
+      try {
+        var t = localStorage.getItem('theme');
+        if (t === 'dark' || t === 'light') d.setAttribute('data-theme', t);
+      } catch (e) {}
+    })();
+  </script>
+  <title>{% block title %}Synapchess{% endblock %}</title>
+  <meta name="description" content="{% block description %}Synapchess is a nonprofit bringing free chess lessons, puzzle training and real chess sets to kids in Title I schools.{% endblock %}" />
+  <meta name="theme-color" content="#0f2b1d" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 2 2'%3E%3Crect width='1' height='1' fill='%2300dc82'/%3E%3Crect x='1' y='1' width='1' height='1' fill='%2300dc82'/%3E%3Crect x='1' width='1' height='1' fill='%230f2b1d'/%3E%3Crect y='1' width='1' height='1' fill='%230f2b1d'/%3E%3C/svg%3E" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Albert+Sans:wght@400;500;600&display=swap" />
+  <link rel="stylesheet" href="{{ asset('css/site.css') }}" />
+  {% block head %}{% endblock %}
+</head>
+<body class="{% block body_class %}{% endblock %}">
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header class="site-head" id="site-head">
+    <div class="wrap head-row">
+      <a class="brand" href="/" aria-label="Synapchess home">
+        <svg class="brand-mark" viewBox="0 0 2 2" aria-hidden="true">
+          <rect class="a" width="1" height="1"/><rect class="b" x="1" width="1" height="1"/>
+          <rect class="b" y="1" width="1" height="1"/><rect class="a" x="1" y="1" width="1" height="1"/>
+        </svg>
+        Synapchess
+      </a>
+
+      <nav class="nav" aria-label="Main">
+        <div class="dd">
+          <button type="button" class="dd-trigger{% if nav == 'learn' %} is-current{% endif %}" aria-expanded="false" aria-controls="dd-learn">
+            Learn
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
+          <div class="dd-panel" id="dd-learn">
+            <a href="/curriculum">Video lessons<span>Four tiers, beginner to advanced</span></a>
+            <a href="/basics">Chess basics<span>How every piece moves</span></a>
+            <a href="/special-rules">Special rules<span>Castling, en passant, promotion</span></a>
+            <a href="/blog">Blog<span>News from our chapters</span></a>
+          </div>
+        </div>
+        <div class="dd">
+          <button type="button" class="dd-trigger{% if nav == 'train' %} is-current{% endif %}" aria-expanded="false" aria-controls="dd-train">
+            Train
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
+          <div class="dd-panel" id="dd-train">
+            <a href="/trainer">Puzzle trainer<span>6.1 million real puzzles</span></a>
+            <a href="/trainer?rush=1">Puzzle Rush<span>Beat the clock</span></a>
+            <a href="/play">Play live<span>A real opponent on Lichess</span></a>
+            <a href="/analysis">Game analysis<span>Find your best and worst moves</span></a>
+          </div>
+        </div>
+        <a href="/impact"{% if nav == 'impact' %} aria-current="page"{% endif %}>Impact</a>
+        <a href="/join"{% if nav == 'join' %} aria-current="page"{% endif %}>Join</a>
+        <a href="/donate"{% if nav == 'donate' %} aria-current="page"{% endif %}>Donate</a>
+      </nav>
+
+      <div class="head-actions">
+        <button type="button" class="icon-btn theme-toggle" id="theme-toggle" aria-label="Switch light or dark theme">
+          <svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M6.3 17.7l-1.4 1.4M19.1 4.9l-1.4 1.4"/></svg>
+          <svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+        </button>
+        <span class="hide-sm" data-auth="out">
+          <button type="button" class="link-btn" data-open-auth="login">Log in</button>
+        </span>
+        <span class="hide-sm" data-auth="in" hidden>
+          <button type="button" class="link-btn" id="stats-toggle" aria-expanded="false" aria-controls="stats-popover">My stats</button>
+          <button type="button" class="link-btn" data-logout>Log out</button>
+        </span>
+        <a class="btn btn--sm hide-sm" href="/trainer">Start training</a>
+        <button type="button" class="icon-btn menu-toggle" id="menu-toggle" aria-label="Open menu" aria-expanded="false" aria-controls="mobile-panel">
+          <svg class="bars" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+          <svg class="x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <div class="mobile-panel" id="mobile-panel">
+      <h2>Learn</h2>
+      <a href="/curriculum">Video lessons</a>
+      <a href="/basics">Chess basics</a>
+      <a href="/special-rules">Special rules</a>
+      <a href="/blog">Blog</a>
+      <h2>Train</h2>
+      <a href="/trainer">Puzzle trainer</a>
+      <a href="/trainer?rush=1">Puzzle Rush</a>
+      <a href="/play">Play live</a>
+      <a href="/analysis">Game analysis</a>
+      <h2>Synapchess</h2>
+      <a href="/impact">Impact</a>
+      <a href="/join">Join</a>
+      <a href="/donate">Donate</a>
+      <span data-auth="out"><button type="button" class="m-action" data-open-auth="login">Log in</button></span>
+      <span data-auth="in" hidden><button type="button" class="m-action" data-logout>Log out</button></span>
+      <a class="btn" href="/trainer">Start training</a>
+    </div>
+  </header>
+
+  <aside class="popover" id="stats-popover" aria-label="My stats" hidden>
+    <h2>My stats</h2>
+    <dl>
+      <div class="kv"><dt>Puzzles played</dt><dd id="pop-total">-</dd></div>
+      <div class="kv"><dt>Accuracy</dt><dd id="pop-accuracy">-</dd></div>
+      <div class="kv"><dt>Average solve time</dt><dd id="pop-velocity">-</dd></div>
+    </dl>
+    <div id="pop-themes"></div>
+  </aside>
+
+  <main id="main">
+    {% block content %}{% endblock %}
+  </main>
+
+  {% block footer %}
+  <div class="checker-band" aria-hidden="true"></div>
+  <footer class="site-foot">
+    <div class="wrap">
+      <p class="foot-mark" aria-hidden="true">Synap<span>chess</span></p>
+      <div class="grid-12 foot-cols">
+        <div class="foot-col">
+          <h2>Learn</h2>
+          <a href="/curriculum">Video lessons</a>
+          <a href="/basics">Chess basics</a>
+          <a href="/special-rules">Special rules</a>
+          <a href="/blog">Blog</a>
+        </div>
+        <div class="foot-col">
+          <h2>Train</h2>
+          <a href="/trainer">Puzzle trainer</a>
+          <a href="/trainer?rush=1">Puzzle Rush</a>
+          <a href="/play">Play live</a>
+          <a href="/analysis">Game analysis</a>
+        </div>
+        <div class="foot-col">
+          <h2>Nonprofit</h2>
+          <a href="/impact">Impact</a>
+          <a href="/join">Join</a>
+          <a href="/donate">Donate</a>
+        </div>
+        <div class="foot-col">
+          <h2>Contact</h2>
+          <p><a href="mailto:hello@synapchess.org">hello@synapchess.org</a></p>
+          <p>Synapchess is fiscally sponsored by HCB Foundation. Lessons, puzzles and training are free for every student.</p>
+        </div>
+      </div>
+      <div class="foot-base">
+        <span>&copy; 2026 Synapchess</span>
+        <a class="btn btn--sm" href="/donate">Donate</a>
+      </div>
+    </div>
+  </footer>
+  {% endblock %}
+
+  <div class="dialog" id="auth-dialog" role="dialog" aria-modal="true" aria-labelledby="auth-title" hidden>
+    <div class="dialog-box">
+      <button type="button" class="icon-btn dialog-close" data-close-auth aria-label="Close">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+      <h2 id="auth-title">Welcome back</h2>
+      <p class="soft" id="auth-sub" style="margin:8px 0 22px">Log in to save your streak and see your stats.</p>
+      <div class="tabs" role="tablist">
+        <button type="button" class="tab" role="tab" id="tab-login" aria-selected="true" data-auth-tab="login">Log in</button>
+        <button type="button" class="tab" role="tab" id="tab-register" aria-selected="false" data-auth-tab="register">Create account</button>
+      </div>
+      <form id="auth-form" novalidate>
+        <label class="field"><span>Username</span>
+          <input class="input" id="auth-username" name="username" type="text" autocomplete="username" required />
+        </label>
+        <label class="field"><span>Password</span>
+          <input class="input" id="auth-password" name="password" type="password" autocomplete="current-password" required aria-describedby="auth-pw-hint" />
+        </label>
+        <p class="small soft" id="auth-pw-hint" hidden>At least 8 characters.</p>
+        <p class="form-msg" id="auth-msg" role="status"></p>
+        <button type="submit" class="btn btn--block" id="auth-submit">Log in</button>
+      </form>
+    </div>
+  </div>
+
+  {% include '_wizard.html' %}
+
+  <script src="{{ asset('js/offline-sync.js') }}"></script>
+  <script src="{{ asset('js/site.js') }}"></script>
+  <script src="{{ asset('js/wizard.js') }}"></script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

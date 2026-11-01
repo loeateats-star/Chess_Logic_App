@@ -19,3 +19,4 @@ games.pgn
 # Bytecode cache
 __pycache__/
 *.pyc
+.taste-skill/

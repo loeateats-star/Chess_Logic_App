@@ -1,1948 +1,922 @@
-<!DOCTYPE html>
-<html lang="en" class="scroll-smooth">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <script>
-    (function() {
-      try {
-        var t = localStorage.getItem('theme');
-        if (t === 'dark' || (!t && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-          document.documentElement.classList.add('dark');
-        }
-      } catch (e) {}
-    })();
-  </script>
-  <title>Level {{ level }} Puzzle Trainer: Synapchess</title>
+{% extends 'base.html' %}
+{% set nav = 'train' %}
 
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="/static/js/offline-sync.js"></script>
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            brand: {
-              bg:     'var(--color-bg)',
-              card:   'var(--color-surface)',
-              border: 'var(--color-border)',
-              green:  'var(--color-accent)',
-              gdark:  'var(--color-accent-dark)',
-              muted:  'var(--color-muted)',
-              ink:    'var(--color-ink)',
-            }
-          }
-        }
-      }
-    }
-  </script>
-  <style>
-    :root {
-      --color-bg: #ffffff;
-      --color-surface: #f6faf8;
-      --color-border: #e7ebe9;
-      --color-chip: #e6f9f0;
-      --color-ink: #0b0c10;
-      --color-muted: #64748b;
-      --color-accent: #00dc82;
-      --color-accent-dark: #00aa63;
-      --color-header: rgba(255,255,255,0.92);
-      --color-overlay: rgba(255,255,255,0.96);
-    }
-    html.dark {
-      color-scheme: dark;
-      --color-bg: #0A0A0F;
-      --color-surface: #111118;
-      --color-border: #2a2620;
-      --color-chip: rgba(212,175,55,0.12);
-      --color-ink: #F0F0F0;
-      --color-muted: #9a9690;
-      --color-accent: #D4AF37;
-      --color-accent-dark: #B8941F;
-      --color-header: rgba(10,10,15,0.88);
-      --color-overlay: rgba(10,10,15,0.92);
-    }
-    html.dark body { background-color: var(--color-bg); color: var(--color-ink); }
-    body { transition: background-color .25s ease, color .25s ease; }
-    html.dark [style*="background:#ffffff"],
-    html.dark [style*="background: #ffffff"],
-    html.dark [style*="background-color: #ffffff"],
-    html.dark [style*="background-color:#ffffff"] { background-color: var(--color-bg) !important; }
-    html.dark [style*="background:#f6faf8"] { background-color: var(--color-surface) !important; }
-    html.dark [style*="background:#e7ebe9"] { background-color: var(--color-border) !important; }
-    html.dark [style*="background:#e6f9f0"] { background-color: var(--color-chip) !important; }
-    html.dark [style*="rgba(255,255,255,0.92)"] { background: var(--color-header) !important; }
-    html.dark [style*="rgba(255,255,255,0.96)"] { background: var(--color-overlay) !important; }
-    html.dark .text-slate-500 { color: var(--color-muted) !important; }
-    html.dark .text-slate-300 { color: var(--color-border) !important; }
-    html.dark .border-slate-200 { border-color: var(--color-border) !important; }
-    html.dark .bg-white { background-color: var(--color-surface) !important; }
+{% block title %}Level {{ level }} puzzle trainer: Synapchess{% endblock %}
+{% block description %}Solve real chess puzzles at your level, build a streak, and race the clock in Puzzle Rush. Free for every student.{% endblock %}
+{% block head %}
+<link rel="stylesheet" href="/static/vendor/chessboard-1.0.0.min.css" />
+<link rel="stylesheet" href="{{ asset('css/app.css') }}" />
+{% endblock %}
 
-    /* Learn dropdown */
-    .nav-dropdown { position: relative; }
-    .nav-dropdown-trigger {
-      display: flex; align-items: center; gap: 4px; cursor: pointer;
-      background: none; border: none; font: inherit; padding: 0;
-    }
-    .nav-dropdown-trigger svg { width: 11px; height: 11px; transition: transform .18s ease; }
-    .nav-dropdown-panel {
-      position: absolute; top: 100%; left: 50%; transform: translate(-50%, 6px);
-      min-width: 200px; margin-top: 10px; padding: 8px; border-radius: 12px;
-      background: var(--color-bg); border: 1px solid var(--color-border);
-      box-shadow: 0 12px 32px rgba(0,0,0,0.14);
-      opacity: 0; visibility: hidden; pointer-events: none;
-      transition: opacity .18s ease, transform .18s ease;
-      z-index: 60;
-    }
-    .nav-dropdown-panel a {
-      display: flex; align-items: center; gap: 8px;
-      padding: 9px 12px; border-radius: 8px; font-size: 13px; font-weight: 500;
-      color: var(--color-muted); white-space: nowrap; transition: background .15s, color .15s;
-    }
-    .nav-dropdown-panel a:hover { background: var(--color-surface); color: var(--color-ink); }
-    .nav-dropdown.open .nav-dropdown-trigger svg { transform: rotate(180deg); }
-    .nav-dropdown.open .nav-dropdown-panel {
-      opacity: 1; visibility: visible; pointer-events: auto; transform: translate(-50%, 2px);
-    }
-    @media (hover: hover) {
-      .nav-dropdown:hover .nav-dropdown-trigger svg { transform: rotate(180deg); }
-      .nav-dropdown:hover .nav-dropdown-panel {
-        opacity: 1; visibility: visible; pointer-events: auto; transform: translate(-50%, 2px);
-      }
-    }
-
-    /* Dark mode toggle */
-    .theme-toggle {
-      display: flex; align-items: center; justify-content: center;
-      width: 32px; height: 32px; border-radius: 8px; flex-shrink: 0;
-      border: 1px solid var(--color-border); background: var(--color-surface);
-      color: var(--color-muted); cursor: pointer;
-      transition: color .15s, border-color .15s, background .15s;
-    }
-    .theme-toggle:hover { color: var(--color-ink); border-color: var(--color-accent); }
-    .theme-toggle .icon-moon { display: none; }
-    html.dark .theme-toggle .icon-sun { display: none; }
-    html.dark .theme-toggle .icon-moon { display: block; }
-  </style>
-
-  <script>
-    document.addEventListener('DOMContentLoaded', function() {
-      var toggle = document.getElementById('theme-toggle');
-      if (toggle) {
-        toggle.addEventListener('click', function() {
-          var isDark = document.documentElement.classList.toggle('dark');
-          try { localStorage.setItem('theme', isDark ? 'dark' : 'light'); } catch (e) {}
-        });
-      }
-
-      document.querySelectorAll('.nav-dropdown').forEach(function(dd) {
-        var trigger = dd.querySelector('.nav-dropdown-trigger');
-        if (!trigger) return;
-        trigger.addEventListener('click', function(e) {
-          e.stopPropagation();
-          var willOpen = !dd.classList.contains('open');
-          document.querySelectorAll('.nav-dropdown.open').forEach(function(o) { o.classList.remove('open'); });
-          if (willOpen) {
-            dd.classList.add('open');
-            trigger.setAttribute('aria-expanded', 'true');
-          } else {
-            trigger.setAttribute('aria-expanded', 'false');
-          }
-        });
-      });
-      document.addEventListener('click', function() {
-        document.querySelectorAll('.nav-dropdown.open').forEach(function(o) {
-          o.classList.remove('open');
-          var t = o.querySelector('.nav-dropdown-trigger');
-          if (t) t.setAttribute('aria-expanded', 'false');
-        });
-      });
-      document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') {
-          document.querySelectorAll('.nav-dropdown.open').forEach(function(o) { o.classList.remove('open'); });
-        }
-      });
-    });
-  </script>
-
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
-  <link rel="stylesheet" href="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.css" />
-  <script src="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
-
-  <style>
-    body { background-color: var(--color-bg); color: var(--color-ink); }
-    #board { width: min(400px, 92vw); }
-    #rush-board { width: min(92vw, 480px); }
-    /* Touch-friendly dragging: without this, mobile browsers treat a finger
-       press-and-drag on the board as a page-scroll/selection gesture, which
-       fights chessboard.js's own touch handling and makes piece drags feel
-       stuck or laggy. touch-action:none hands the gesture entirely to the
-       board; user-select/-webkit-touch-callout stop long-press text
-       selection and the iOS callout menu from interrupting a drag. */
-    #board, #rush-board {
-      touch-action: none;
-      -webkit-user-select: none;
-      user-select: none;
-      -webkit-touch-callout: none;
-    }
-    .board-b72b1 { border: 2px solid #00dc82 !important; border-radius: 6px; }
-    .black-3c85d { background-color: #66b38c !important; }
-    .black-3c85d.notation-322f9 { color: #1a3d2b !important; }
-    .white-1e1d7.notation-322f9 { color: #66b38c !important; }
-
-    @keyframes checkPop {
-      0%   { transform: scale(0); opacity: 0; }
-      65%  { transform: scale(1.25); }
-      100% { transform: scale(1);   opacity: 1; }
-    }
-    .check-pop {
-      animation: checkPop 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-    }
-  </style>
-  <!-- Runtime board theme — swapped by JS when entering/exiting practice mode -->
-  <style id="board-theme"></style>
-</head>
-<body class="text-brand-ink antialiased" style="font-family: Inter, system-ui, sans-serif;">
-
-  <!-- ─── SiteHeader ────────────────────────────────────────────────────── -->
-  <header class="sticky top-0 z-50 border-b border-brand-border" style="background:rgba(255,255,255,0.92); backdrop-filter:blur(8px);">
-    <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-
-      <a href="/" class="flex items-center gap-2 font-semibold text-brand-ink text-sm">
-        <span class="flex items-center justify-center w-7 h-7 rounded-md bg-brand-green text-brand-ink font-bold text-base">♟</span>
-        Synapchess
-      </a>
-
-      <nav class="hidden md:flex items-center gap-8 text-sm font-medium">
-        <div class="nav-dropdown">
-          <button type="button" class="nav-dropdown-trigger text-brand-muted hover:text-brand-ink transition-colors" aria-haspopup="true" aria-expanded="false">
-            Learn
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 9l6 6 6-6"/></svg>
-          </button>
-          <div class="nav-dropdown-panel" role="menu">
-            <a href="/curriculum" role="menuitem">Lessons</a>
-            <a href="/basics" role="menuitem">Chess Basics</a>
-            <a href="/special-rules" role="menuitem">Special Rules</a>
-            <a href="/blog" role="menuitem">Blog</a>
-          </div>
-        </div>
-        <div class="nav-dropdown">
-          <button type="button" class="nav-dropdown-trigger text-brand-ink" aria-haspopup="true" aria-expanded="false">
-            Train
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 9l6 6 6-6"/></svg>
-          </button>
-          <div class="nav-dropdown-panel" role="menu">
-            <a href="/trainer" role="menuitem">Puzzle Trainer</a>
-            <a href="/trainer?rush=1" role="menuitem">Puzzle Rush</a>
-            <a href="/play" role="menuitem">Play Live ⚡</a>
-            <a href="/analysis" role="menuitem">Game Analyzer</a>
-          </div>
-        </div>
-        <a href="/join"   class="text-brand-muted hover:text-brand-ink transition-colors">Join</a>
-        <a href="/impact" class="text-brand-muted hover:text-brand-ink transition-colors">Impact</a>
-        <a href="/donate" class="text-brand-muted hover:text-brand-ink transition-colors">Donate</a>
-      </nav>
-
-      <div class="flex items-center gap-4 text-sm">
-        <button id="mobile-nav-toggle" class="mobile-nav-toggle md:hidden" type="button" aria-label="Toggle menu" aria-expanded="false" aria-controls="mobile-nav-panel">
-          <svg class="icon-menu" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
-          <svg class="icon-close" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 6l12 12M18 6L6 18"/></svg>
-        </button>
-        <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Toggle dark mode" title="Toggle dark mode">
-          <svg class="icon-sun" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path stroke-linecap="round" d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
-          <svg class="icon-moon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
-        </button>
-        <div id="auth-logged-out" class="flex items-center gap-3">
-          <button id="btn-login"
-                  class="text-brand-muted hover:text-brand-ink transition-colors cursor-pointer text-sm">
-            Student Login
-          </button>
-        </div>
-        <div id="auth-logged-in" class="hidden items-center gap-3">
-          <span id="nav-welcome" class="text-brand-muted text-xs"></span>
-          <span class="text-brand-border text-xs">|</span>
-          <button id="btn-logout"
-                  class="text-brand-muted hover:text-brand-ink transition-colors cursor-pointer text-xs">
-            Logout
-          </button>
-        </div>
-        <a href="/"
-           class="bg-brand-green hover:bg-brand-gdark text-brand-ink font-semibold px-4 py-2 rounded-md transition-colors text-sm">
-          Dashboard
-        </a>
+{% block content %}
+<section class="app">
+  <div class="wrap">
+    <div class="app-head">
+      <div>
+        <h1 id="header-title">Puzzle trainer</h1>
+        <p id="header-desc"></p>
+      </div>
+      <div class="app-controls">
+        <nav class="seg" aria-label="Level">
+          <a href="/trainer?level=1"{% if level == 1 %} aria-current="true"{% endif %}>Level 1</a>
+          <a href="/trainer?level=2"{% if level == 2 %} aria-current="true"{% endif %}>Level 2</a>
+          <a href="/trainer?level=3"{% if level == 3 %} aria-current="true"{% endif %}>Level 3</a>
+        </nav>
+        <button type="button" class="btn btn--ink" id="rush-launch-btn"><span class="hide-xs">Puzzle&nbsp;</span>Rush</button>
       </div>
     </div>
-  </header>
 
-  <!-- ─── Mobile nav panel ────────────────────────────────────────────── -->
-  <style>
-    .mobile-nav-toggle {
-      display: flex; align-items: center; justify-content: center;
-      width: 32px; height: 32px; border-radius: 8px; flex-shrink: 0;
-      border: 1px solid var(--color-border); background: var(--color-surface);
-      color: var(--color-muted); cursor: pointer;
-      transition: color .15s, border-color .15s, background .15s;
-    }
-    .mobile-nav-toggle:hover { color: var(--color-ink); border-color: var(--color-accent); }
-    .mobile-nav-toggle .icon-close { display: none; }
-    .mobile-nav-toggle.open .icon-menu  { display: none; }
-    .mobile-nav-toggle.open .icon-close { display: block; }
-    @media (min-width: 768px) { .mobile-nav-toggle, #mobile-nav-panel { display: none !important; } }
-
-    #mobile-nav-panel {
-      display: none; position: fixed; top: 64px; left: 0; right: 0; z-index: 49;
-      border-bottom: 1px solid var(--color-border);
-      background: var(--color-bg); max-height: calc(100vh - 64px); overflow-y: auto;
-      box-shadow: 0 12px 24px rgba(0,0,0,0.12);
-    }
-    #mobile-nav-panel.open { display: block; }
-    #mobile-nav-panel .mnp-section { padding: 14px 20px; border-bottom: 1px solid var(--color-border); }
-    #mobile-nav-panel .mnp-section:last-child { border-bottom: none; }
-    #mobile-nav-panel .mnp-label {
-      font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
-      color: var(--color-muted); margin-bottom: 8px;
-    }
-    #mobile-nav-panel a {
-      display: block; padding: 10px 4px; font-size: 15px; font-weight: 500;
-      color: var(--color-ink);
-    }
-    #mobile-nav-panel a:active { color: var(--color-accent-dark); }
-  </style>
-  <div id="mobile-nav-panel" role="menu" aria-label="Mobile navigation">
-    <div class="mnp-section">
-      <div class="mnp-label">Learn</div>
-      <a href="/curriculum" role="menuitem">Lessons</a>
-      <a href="/basics" role="menuitem">Chess Basics</a>
-      <a href="/special-rules" role="menuitem">Special Rules</a>
-      <a href="/blog" role="menuitem">Blog</a>
-    </div>
-    <div class="mnp-section">
-      <div class="mnp-label">Train</div>
-      <a href="/trainer" role="menuitem">Puzzle Trainer</a>
-      <a href="/trainer?rush=1" role="menuitem">Puzzle Rush</a>
-      <a href="/play" role="menuitem">Play Live ⚡</a>
-      <a href="/analysis" role="menuitem">Game Analyzer</a>
-    </div>
-    <div class="mnp-section">
-      <a href="/join" role="menuitem">Join</a>
-      <a href="/impact" role="menuitem">Impact</a>
-      <a href="/donate" role="menuitem">Donate</a>
-    </div>
-  </div>
-  <script>
-    (function() {
-      var toggle = document.getElementById('mobile-nav-toggle');
-      var panel  = document.getElementById('mobile-nav-panel');
-      if (!toggle || !panel) return;
-      function setOpen(open) {
-        toggle.classList.toggle('open', open);
-        panel.classList.toggle('open', open);
-        toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
-        document.documentElement.classList.toggle('mobile-nav-open', open);
-      }
-      toggle.addEventListener('click', function(e) {
-        e.stopPropagation();
-        setOpen(!panel.classList.contains('open'));
-      });
-      panel.addEventListener('click', function(e) {
-        if (e.target.closest('a')) setOpen(false);
-      });
-      document.addEventListener('click', function(e) {
-        if (panel.classList.contains('open') && !panel.contains(e.target) && e.target !== toggle) setOpen(false);
-      });
-      document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') setOpen(false);
-      });
-      window.addEventListener('resize', function() {
-        if (window.innerWidth >= 768) setOpen(false);
-      });
-    })();
-  </script>
-
-
-  <!-- ─── Page Header ───────────────────────────────────────────────────── -->
-  <section class="py-10 px-6 border-b border-brand-border" style="background:#ffffff;">
-    <div class="max-w-6xl mx-auto space-y-3">
-      <a href="/"
-         class="inline-flex items-center gap-2 text-brand-muted hover:text-brand-ink transition-colors text-sm group">
-        <svg class="w-4 h-4 transition-transform group-hover:-translate-x-1"
-             fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
-        </svg>
-        Back to Dashboard
-      </a>
-      <div class="flex items-center gap-3 flex-wrap">
-        <span id="header-label"
-              class="text-brand-gdark text-xs font-semibold tracking-widest uppercase"></span>
-        <span id="header-stars" class="text-base"></span>
-      </div>
-      <h1 id="header-title" class="text-3xl md:text-4xl font-extrabold text-brand-ink leading-tight"></h1>
-      <p  id="header-desc"  class="text-brand-muted text-sm max-w-xl leading-relaxed"></p>
-    </div>
-  </section>
-
-  <!-- ─── Trainer Layout ────────────────────────────────────────────────── -->
-  <section class="py-10 px-6" style="background:#ffffff;">
-    <div class="max-w-6xl mx-auto flex flex-col md:flex-row gap-7 items-stretch md:items-start">
-
-      <!-- ── Left: Level info ──────────────────────────────────────────── -->
-      <aside class="w-full md:w-52 flex-shrink-0 space-y-4">
-
-        <!-- Level card -->
-        <div class="rounded-xl border border-brand-border p-4 space-y-3" style="background:#f6faf8;">
-          <div class="flex items-center gap-2">
-            <div id="left-badge"
-                 class="w-8 h-8 rounded-lg flex items-center justify-center text-brand-gdark font-bold text-sm flex-shrink-0"
-                 style="background:#e6f9f0;"></div>
-            <p id="left-label"
-               class="text-brand-gdark text-xs font-semibold tracking-widest uppercase leading-tight"></p>
-          </div>
-          <p id="left-desc" class="text-brand-muted text-xs leading-relaxed"></p>
-          <div class="border-t border-brand-border pt-3 space-y-1">
-            <p class="text-brand-muted text-xs">Puzzle range</p>
-            <p id="left-range" class="text-brand-ink text-xs font-semibold"></p>
-          </div>
-          <div class="border-t border-brand-border pt-3 space-y-1">
-            <p class="text-brand-muted text-xs">Streak window</p>
-            <p id="left-unlock" class="text-brand-ink text-xs font-semibold"></p>
-          </div>
-        </div>
-
-        <!-- Difficulty -->
-        <div class="rounded-xl border border-brand-border p-4 space-y-1" style="background:#f6faf8;">
-          <p class="text-brand-muted text-xs">This puzzle</p>
-          <div class="flex items-center gap-2 min-h-5">
-            <span id="difficulty-stars" class="text-base"></span>
-            <span id="difficulty-label" class="text-brand-muted text-xs"></span>
-          </div>
-          <div class="flex items-center gap-1.5 pt-1 min-h-5">
-            <span id="puzzle-theme"
-                  class="inline-flex items-center text-[10px] font-semibold uppercase tracking-wide text-brand-gdark border border-brand-border rounded-full px-2 py-0.5"
-                  style="background:#ffffff;"></span>
-          </div>
-        </div>
-
-        <!-- Session streak -->
-        <div class="rounded-xl border border-brand-border p-4 space-y-1" style="background:#f6faf8;">
-          <p class="text-brand-muted text-xs">Session streak</p>
-          <div class="flex items-center gap-2">
-            <span id="streak-count" class="text-brand-ink text-2xl font-extrabold">0</span>
-            <span id="streak-stars" class="text-base">⭐</span>
-          </div>
-        </div>
-
-        <!-- Daily time budget (shown only when user has a budget set) -->
-        <div id="budget-card" class="rounded-xl border border-brand-border p-4 space-y-2 hidden" style="background:#f6faf8;">
-          <p class="text-brand-muted text-xs">Daily time budget</p>
-          <div class="flex items-center justify-between">
-            <span id="budget-used"  class="text-brand-ink text-sm font-bold">0m</span>
-            <span id="budget-total" class="text-brand-muted text-xs"></span>
-          </div>
-          <div class="w-full h-1.5 rounded-full" style="background:#e7ebe9;">
-            <div id="budget-bar" class="h-1.5 rounded-full transition-all duration-500"
-                 style="background:#00dc82; width:0%;"></div>
-          </div>
-        </div>
-
-        <!-- Switch level -->
-        <div class="rounded-xl border border-brand-border p-4 space-y-2" style="background:#f6faf8;">
-          <p class="text-brand-muted text-xs mb-3">Switch level</p>
-          <a href="/trainer?level=1"
-             data-level="1"
-             class="level-link flex items-center justify-between px-3 py-2 rounded-lg border border-brand-border hover:border-brand-green text-brand-muted hover:text-brand-ink transition-colors text-xs bg-white">
-            <span>Level 1</span><span>⭐</span>
-          </a>
-          <a href="/trainer?level=2"
-             data-level="2"
-             class="level-link flex items-center justify-between px-3 py-2 rounded-lg border border-brand-border hover:border-brand-green text-brand-muted hover:text-brand-ink transition-colors text-xs bg-white">
-            <span>Level 2</span><span>⭐⭐</span>
-          </a>
-          <a href="/trainer?level=3"
-             data-level="3"
-             class="level-link flex items-center justify-between px-3 py-2 rounded-lg border border-brand-border hover:border-brand-green text-brand-muted hover:text-brand-ink transition-colors text-xs bg-white">
-            <span>Level 3</span><span>⭐⭐⭐</span>
-          </a>
-        </div>
-
-      </aside>
-
-      <!-- ── Center: Board + controls ──────────────────────────────────── -->
-      <div class="flex-1 flex flex-col items-center gap-5">
-
-        <!-- Mode switcher -->
-        <div class="w-full max-w-sm space-y-1.5">
-          <div class="flex items-center gap-1.5 p-1 rounded-lg border border-brand-border" style="background:#f6faf8;">
-            <button id="mode-btn-standard" class="mode-btn flex-1 text-xs font-semibold py-1.5 rounded-md transition-colors cursor-pointer" onclick="setMode('standard')">Standard</button>
-            <button id="mode-btn-improve" class="mode-btn flex-1 text-xs font-semibold py-1.5 rounded-md transition-colors cursor-pointer" onclick="setMode('improve')">🎯 Improve</button>
-            <button id="mode-btn-assessment" class="mode-btn flex-1 text-xs font-semibold py-1.5 rounded-md transition-colors cursor-pointer" onclick="setMode('assessment')">📊 Assessment</button>
-          </div>
-          <p id="improve-lock-hint" class="hidden text-brand-muted text-[11px] text-center"></p>
-        </div>
-
-        <div class="rounded-lg overflow-hidden shadow-2xl shadow-brand-green/10">
-          <div id="board"></div>
-        </div>
-
-        <!-- Practice mode banner — shown when reviewing a history entry -->
-        <div id="practice-banner"
-             class="hidden w-full max-w-sm text-center py-2 px-4 rounded-lg text-xs font-semibold"
-             style="background:rgba(139,92,246,0.08); border:1px solid rgba(139,92,246,0.3); color:#7c3aed;">
-          ♻ Practice Mode: reviewing a previous puzzle. Attempts won't count toward your score.
-        </div>
-
-        <!-- Improve mode banner -->
-        <div id="improve-banner"
-             class="hidden w-full max-w-sm text-center py-2 px-4 rounded-lg text-xs font-semibold"
-             style="background:rgba(0,220,130,0.08); border:1px solid rgba(0,170,99,0.3); color:#00703f;">
-          🎯 Improve Mode: training your weakest themes — <span id="improve-banner-themes"></span>
-        </div>
-
-        <!-- Assessment mode banner -->
-        <div id="assessment-banner" class="hidden w-full max-w-sm space-y-1.5">
-          <div class="text-center py-2 px-4 rounded-lg text-xs font-semibold"
-               style="background:rgba(59,130,246,0.08); border:1px solid rgba(59,130,246,0.3); color:#1d4ed8;">
-            📊 Assessment Mode: puzzle <span id="assessment-progress-text">1/50</span>
-          </div>
-          <div class="w-full h-1.5 rounded-full" style="background:#e7ebe9;">
-            <div id="assessment-progress-bar" class="h-1.5 rounded-full transition-all duration-300" style="background:#3b82f6; width:0%;"></div>
-          </div>
-        </div>
-
-        <p id="status"
-           class="text-sm font-medium text-brand-muted min-h-5 text-center px-4">
-          Click "New Puzzle" to begin.
-        </p>
-
-        <div class="flex items-center gap-3">
-          <button id="train-btn"
-                  class="bg-brand-green hover:bg-brand-gdark text-brand-ink font-semibold px-5 py-2.5 rounded-md transition-colors text-sm cursor-pointer">
-            New Puzzle
-          </button>
-          <button id="show-btn"
-                  class="border border-brand-border hover:border-brand-green text-brand-muted hover:text-brand-ink font-semibold px-5 py-2.5 rounded-md transition-colors text-sm cursor-pointer bg-white">
-            Show Solution
-          </button>
-          <button id="rush-launch-btn" onclick="openRushSetup()"
-                  class="border border-brand-border hover:border-brand-green text-brand-muted hover:text-brand-ink font-semibold px-5 py-2.5 rounded-md transition-colors text-sm cursor-pointer bg-white">
-            ⚡ Puzzle Rush
-          </button>
-        </div>
-
+    <div class="app-grid">
+      <div class="board-col">
+        <div id="board" class="board-frame"><div class="board-placeholder" aria-hidden="true"></div></div>
       </div>
 
-      <!-- ── Right: Live stats + history ───────────────────────────────── -->
-      <aside class="w-full md:w-52 flex-shrink-0 space-y-4">
+      <aside class="side" aria-label="Puzzle controls">
+        <div class="seg" role="group" aria-label="Training mode">
+          <button type="button" id="mode-btn-standard" aria-pressed="true">Standard</button>
+          <button type="button" id="mode-btn-improve" aria-pressed="false">Improve</button>
+          <button type="button" id="mode-btn-assessment" aria-pressed="false">Assessment</button>
+        </div>
+        <p id="improve-lock-hint" class="small soft" hidden></p>
 
-        <!-- Live stats -->
-        <div class="rounded-xl border border-brand-border p-4 space-y-3" style="background:#f6faf8;">
-          <div class="flex items-center gap-2">
-            <svg class="w-3.5 h-3.5 text-brand-green flex-shrink-0"
-                 fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-              <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
-            </svg>
-            <p class="text-brand-gdark text-xs font-semibold tracking-widest uppercase">Live Stats</p>
-          </div>
-
-          <!-- Not signed in -->
-          <div id="stats-signin" class="text-center py-1 space-y-2">
-            <p class="text-brand-muted text-xs leading-relaxed">
-              Sign in to track accuracy &amp; progress.
-            </p>
-            <button onclick="openModal('login')"
-                    class="text-brand-gdark text-xs font-medium hover:text-brand-green transition-colors cursor-pointer">
-              Sign in →
-            </button>
-          </div>
-
-          <!-- Signed in -->
-          <div id="stats-content" class="space-y-2 hidden">
-            <div class="flex items-center justify-between rounded-lg px-3 py-2 border border-brand-border bg-white">
-              <span class="text-brand-muted text-xs">Total</span>
-              <span id="stat-total" class="text-brand-ink text-xs font-bold">—</span>
-            </div>
-            <div class="flex items-center justify-between rounded-lg px-3 py-2 border border-brand-border bg-white">
-              <span class="text-brand-muted text-xs">Accuracy</span>
-              <span id="stat-accuracy" class="text-brand-gdark text-xs font-bold">—</span>
-            </div>
-            <div class="flex items-center justify-between rounded-lg px-3 py-2 border border-brand-border bg-white">
-              <span class="text-brand-muted text-xs">Avg Time</span>
-              <span id="stat-velocity" class="text-brand-ink text-xs font-bold">—</span>
-            </div>
-            <div class="border-t border-brand-border pt-2 mt-1 space-y-1">
-              <p class="text-brand-muted text-[10px] uppercase tracking-wide">By theme</p>
-              <div id="stat-themes" class="space-y-1"></div>
-            </div>
-          </div>
+        <p id="practice-banner" class="banner banner--practice" hidden>Practice: replaying an earlier puzzle. It won't count toward your score.</p>
+        <p id="improve-banner" class="banner banner--improve" hidden>Improve mode: training your weakest themes, <span id="improve-banner-themes"></span>.</p>
+        <div id="assessment-banner" class="banner banner--assess" hidden>
+          Assessment: puzzle <span id="assessment-progress-text" class="num">1/50</span>
+          <div class="bar"><i id="assessment-progress-bar"></i></div>
         </div>
 
-        <!-- Puzzle history -->
-        <div class="rounded-xl border border-brand-border p-4 space-y-3" style="background:#f6faf8;">
-          <div class="flex items-center justify-between">
-            <p class="text-brand-gdark text-xs font-semibold tracking-widest uppercase">History</p>
-            <span id="puzzle-count"
-                  class="text-brand-ink text-xs font-bold px-1.5 py-0.5 rounded"
-                  style="background:#e7ebe9;">0</span>
-          </div>
+        <p class="status" id="status" role="status" aria-live="polite">Loading a puzzle&hellip;</p>
 
-          <p id="history-empty"
-             class="text-brand-muted text-xs text-center py-3 leading-relaxed">
-            Complete puzzles to<br />build your history.
-          </p>
+        <div class="actions">
+          <button type="button" class="btn" id="train-btn">New puzzle</button>
+          <button type="button" class="btn btn--quiet" id="show-btn">Show solution</button>
+        </div>
+        <p class="kbd">Keys: <kbd>N</kbd> new puzzle, <kbd>S</kbd> show solution</p>
 
-          <!-- Checks appear here, newest first, wrapping grid -->
-          <div id="history-checks" class="flex flex-wrap gap-2 max-h-72 overflow-y-auto"></div>
+        <dl class="info-row">
+          <div class="metric"><dt>Difficulty</dt><dd><span class="pips" id="difficulty-pips" aria-hidden="true"><i></i><i></i><i></i></span> <small id="difficulty-label"></small></dd></div>
+          <div class="metric"><dt>Theme</dt><dd class="theme-name" id="puzzle-theme">-</dd></div>
+          <div class="metric"><dt>Streak</dt><dd id="streak-count">0</dd></div>
+          <div class="metric"><dt>Puzzle range</dt><dd class="theme-name" id="left-range"></dd></div>
+        </dl>
+
+        <div class="panel" id="budget-card" hidden>
+          <h2>Today's training <span class="count-tag"><span id="budget-used">0m</span> <span id="budget-total"></span></span></h2>
+          <div class="bar" id="budget-bar-wrap"><i id="budget-bar"></i></div>
         </div>
 
+        <div class="panel">
+          <h2>This session <span class="count-tag" id="puzzle-count">0</span></h2>
+          <p class="soft" id="history-empty">Each puzzle you finish adds a square here. Tap one to replay it.</p>
+          <div class="history" id="history-checks"></div>
+        </div>
+
+        <div class="panel">
+          <h2>My stats</h2>
+          <div id="stats-signin">
+            <p class="soft">Log in to track accuracy and unlock Improve mode.</p>
+            <button type="button" class="text-link" data-open-auth="login" style="margin-top:10px">Log in</button>
+          </div>
+          <div id="stats-content" hidden>
+            <dl class="info-row">
+              <div class="metric" style="background:var(--ground)"><dt>Accuracy</dt><dd id="stat-accuracy">-</dd></div>
+              <div class="metric" style="background:var(--ground)"><dt>Avg time</dt><dd id="stat-velocity">-</dd></div>
+            </dl>
+            <p class="small soft" style="margin-top:10px"><span id="stat-total">0</span> puzzles played</p>
+            <div class="theme-bars" id="stat-themes"></div>
+          </div>
+        </div>
       </aside>
     </div>
-  </section>
+  </div>
+</section>
 
-  <!-- ─── SiteFooter ────────────────────────────────────────────────────── -->
-  <footer class="border-t border-brand-border pt-16 pb-8 px-6" style="background:#ffffff;">
-    <div class="max-w-6xl mx-auto">
+<!-- Daily time budget reached -->
+<div class="dialog" id="budget-overlay" role="dialog" aria-modal="true" aria-labelledby="budget-title" hidden>
+  <div class="dialog-box">
+    <h2 id="budget-title">That's today's training done.</h2>
+    <p class="soft" style="margin:12px 0 24px">You reached the time you set for today. Your brain keeps sorting out what it learned while you rest.</p>
+    <a class="btn btn--block" href="/">Back to home</a>
+    <p style="margin-top:12px"><button type="button" class="link-btn" id="budget-dismiss">Keep training anyway</button></p>
+  </div>
+</div>
 
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-10 mb-14">
-        <div class="col-span-2 space-y-3">
-          <a href="/" class="flex items-center gap-2 font-semibold text-brand-ink text-sm">
-            <span class="flex items-center justify-center w-7 h-7 rounded-md bg-brand-green text-brand-ink font-bold text-base">♟</span>
-            Synapchess
-          </a>
-          <p class="text-brand-muted text-sm leading-relaxed max-w-xs">
-            Synapchess is fiscally sponsored by HCB Foundation, closing the cognitive equity gap in Title I schools.
-          </p>
-        </div>
-
-        <div class="space-y-3">
-          <h4 class="text-brand-ink text-sm font-semibold">Site</h4>
-          <ul class="space-y-2 text-sm text-brand-muted">
-            <li><a href="/learn"  class="hover:text-brand-ink transition-colors">Learn</a></li>
-            <li><a href="/join"   class="hover:text-brand-ink transition-colors">Join</a></li>
-            <li><a href="/impact" class="hover:text-brand-ink transition-colors">Impact</a></li>
-            <li><a href="/donate" class="hover:text-brand-ink transition-colors">Donate</a></li>
-          </ul>
-        </div>
-
-        <div class="space-y-3">
-          <h4 class="text-brand-ink text-sm font-semibold">Resources</h4>
-          <ul class="space-y-2 text-sm text-brand-muted">
-            <li><a href="/trainer"  class="hover:text-brand-ink transition-colors">Puzzle Trainer</a></li>
-            <li><a href="/analysis" class="hover:text-brand-ink transition-colors">Game Analysis</a></li>
-          </ul>
-        </div>
-      </div>
-
-      <div class="border-t border-brand-border pt-6 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-brand-muted">
-        <span>© 2026 Synapchess. All rights reserved.</span>
-        <div class="flex gap-5">
-          <a href="#" class="hover:text-brand-ink transition-colors">Privacy</a>
-          <a href="#" class="hover:text-brand-ink transition-colors">Terms</a>
-        </div>
-      </div>
+<!-- Assessment results -->
+<div class="dialog" id="assessment-overlay" role="dialog" aria-modal="true" aria-labelledby="assess-title" hidden>
+  <div class="dialog-box dialog-box--wide">
+    <h2 id="assess-title">Assessment done.</h2>
+    <p class="soft" id="assessment-overall" style="margin-top:10px"></p>
+    <h3 class="small" style="margin-top:22px;font-weight:600">Your weakest themes first</h3>
+    <div class="theme-bars" id="assessment-theme-list"></div>
+    <div class="actions" style="margin-top:26px">
+      <button type="button" class="btn" id="assess-improve">Train these</button>
+      <button type="button" class="btn btn--quiet" id="assess-close">Back to standard</button>
     </div>
-  </footer>
+  </div>
+</div>
 
-  <!-- ─── Budget Complete Overlay ─────────────────────────────────────── -->
-  <div id="budget-overlay" class="fixed inset-0 z-[200] flex items-center justify-center hidden">
-    <div class="absolute inset-0" style="background:rgba(255,255,255,0.96);"></div>
-    <div class="relative z-10 text-center space-y-6 px-6 max-w-sm mx-auto">
-      <div class="w-20 h-20 rounded-full mx-auto flex items-center justify-center text-5xl"
-           style="background:#f6faf8; border:2px solid #00dc82;">
-        🏆
-      </div>
-      <div class="space-y-3">
-        <h2 class="text-3xl font-extrabold text-brand-ink leading-tight">
-          Daily Synapchess Training Block Complete!
-        </h2>
-        <p class="text-brand-muted text-base leading-relaxed">
-          You've hit your training allocation for today.<br />
-          Rest up and let your brain consolidate your gains.
-        </p>
-        <p class="text-brand-gdark font-bold text-lg">See you tomorrow. ♟</p>
-      </div>
-      <div class="flex flex-col items-center gap-3 pt-2">
-        <a href="/"
-           class="w-full max-w-xs bg-brand-green hover:bg-brand-gdark text-brand-ink font-semibold py-3 rounded-md transition-colors text-sm text-center">
-          Return to Dashboard
-        </a>
-        <button onclick="dismissBudgetOverlay()"
-                class="text-brand-muted hover:text-brand-ink text-sm transition-colors cursor-pointer">
-          Keep Training Anyway
-        </button>
+<!-- Puzzle Rush: setup -->
+<div class="dialog" id="rush-setup-overlay" role="dialog" aria-modal="true" aria-labelledby="rush-title" hidden>
+  <div class="dialog-box">
+    <button type="button" class="icon-btn dialog-close" id="rush-setup-close" aria-label="Close">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+    </button>
+    <h2 id="rush-title">Puzzle Rush</h2>
+    <p class="soft" style="margin-top:10px">Solve as many as you can before time runs out. One wrong move and the next puzzle appears.</p>
+    <div class="rush-pick">
+      <button type="button" data-rush="60"><strong>1 minute</strong><span id="rush-best-60">Best: -</span></button>
+      <button type="button" data-rush="120"><strong>2 minutes</strong><span id="rush-best-120">Best: -</span></button>
+      <button type="button" data-rush="180"><strong>3 minutes</strong><span id="rush-best-180">Best: -</span></button>
+    </div>
+  </div>
+</div>
+
+<!-- Puzzle Rush: results -->
+<div class="dialog" id="rush-results-overlay" role="dialog" aria-modal="true" aria-labelledby="rush-done-title" hidden>
+  <div class="dialog-box">
+    <h2 id="rush-done-title">Time's up.</h2>
+    <span class="new-best" id="rush-new-best-badge" hidden>New best score</span>
+    <dl class="result-figs">
+      <div class="metric"><dt>Solved</dt><dd id="rush-result-score">0</dd></div>
+      <div class="metric"><dt>Accuracy</dt><dd id="rush-result-accuracy">0%</dd></div>
+    </dl>
+    <p class="soft">Your best: <strong id="rush-result-best">0</strong></p>
+    <div class="actions" style="margin-top:22px">
+      <button type="button" class="btn" id="rush-again">Play again</button>
+      <button type="button" class="btn btn--quiet" id="rush-back">Back to trainer</button>
+    </div>
+  </div>
+</div>
+
+<!-- Puzzle Rush: play -->
+<div class="rush" id="rush-play-overlay" hidden>
+  <div class="rush-top">
+    <button type="button" class="btn btn--quiet btn--sm" id="rush-quit">Quit</button>
+    <div class="rush-clock" id="rush-timer-fs" aria-live="off">1:00</div>
+    <div class="rush-score"><b id="rush-score-fs">0</b><span>solved</span></div>
+  </div>
+  <div class="rush-timebar"><i id="rush-timebar"></i></div>
+  <div class="rush-body">
+    <div id="rush-board" class="board-frame"></div>
+    <div class="rush-side">
+      <p class="status" id="rush-status">Get ready&hellip;</p>
+      <div class="panel">
+        <h2>This run</h2>
+        <div class="rush-run" id="rush-run" aria-label="Results this run"></div>
       </div>
     </div>
   </div>
+</div>
+{% endblock %}
 
-  <!-- ─── Assessment Results Overlay ──────────────────────────────────── -->
-  <div id="assessment-overlay" class="fixed inset-0 z-[200] flex items-center justify-center hidden">
-    <div class="absolute inset-0" style="background:rgba(255,255,255,0.96);"></div>
-    <div class="relative z-10 text-center space-y-5 px-6 max-w-md mx-auto">
-      <div class="w-20 h-20 rounded-full mx-auto flex items-center justify-center text-5xl"
-           style="background:#f6faf8; border:2px solid #3b82f6;">
-        📊
-      </div>
-      <div class="space-y-2">
-        <h2 class="text-3xl font-extrabold text-brand-ink leading-tight">Assessment Complete!</h2>
-        <p id="assessment-overall" class="text-brand-muted text-base leading-relaxed"></p>
-      </div>
-      <div class="text-left space-y-2">
-        <p class="text-brand-gdark text-xs font-semibold tracking-widest uppercase">Weakest themes</p>
-        <div id="assessment-theme-list" class="space-y-2"></div>
-      </div>
-      <div class="flex flex-col items-center gap-3 pt-2">
-        <button onclick="closeAssessmentOverlayAndImprove()"
-                class="w-full max-w-xs bg-brand-green hover:bg-brand-gdark text-brand-ink font-semibold py-3 rounded-md transition-colors text-sm cursor-pointer">
-          🎯 Start Improve Mode
-        </button>
-        <button onclick="closeAssessmentOverlay()"
-                class="text-brand-muted hover:text-brand-ink text-sm transition-colors cursor-pointer">
-          Back to Standard
-        </button>
-      </div>
-    </div>
-  </div>
+{% block scripts %}
+<script src="/static/vendor/jquery-3.7.1.min.js"></script>
+<script src="/static/vendor/chess-0.10.3.min.js"></script>
+<script src="/static/vendor/chessboard-1.0.0.min.js"></script>
+<script src="{{ asset('js/board.js') }}"></script>
+<script>
+(function () {
+  'use strict';
 
-  <!-- ─── Puzzle Rush Full-Screen Play Overlay ─────────────────────────── -->
-  <div id="rush-play-overlay" class="hidden fixed inset-0 z-[150] items-center" style="background:var(--color-bg);">
-    <div class="w-full h-full flex flex-col items-center">
-      <div class="w-full max-w-md flex items-center justify-between px-6 py-5">
-        <button onclick="quitRush()"
-                class="text-brand-muted hover:text-brand-ink text-sm font-semibold transition-colors cursor-pointer">
-          ✕ Quit
-        </button>
-        <div class="flex items-center gap-2">
-          <span class="text-xl">⚡</span>
-          <span id="rush-timer-fs" class="text-brand-ink text-3xl font-extrabold tabular-nums">1:00</span>
-        </div>
-        <div class="flex items-center gap-2">
-          <span class="text-brand-muted text-xs uppercase tracking-wide">Score</span>
-          <span id="rush-score-fs" class="text-brand-gdark text-3xl font-extrabold">0</span>
-        </div>
-      </div>
-      <div class="flex-1 w-full flex items-center justify-center px-4 pb-8">
-        <div class="rounded-lg overflow-hidden shadow-2xl shadow-brand-green/10">
-          <div id="rush-board"></div>
-        </div>
-      </div>
-    </div>
-  </div>
+  var LEVEL = {{ level }};
+  var LEVEL_INFO = {
+    1: { title: 'Beginner tactics',     desc: 'Short combinations: pins, skewers and double attacks.',              range: 'Under 1000' },
+    2: { title: 'Intermediate tactics', desc: 'Two- and three-move combinations: overloads, decoys and sacrifices.', range: '1000 to 1600' },
+    3: { title: 'Advanced calculation', desc: 'Deep calculation, endgame technique and master-level sequences.',    range: 'Above 1600' }
+  };
+  var cfg = LEVEL_INFO[LEVEL] || LEVEL_INFO[1];
 
-  <!-- ─── Puzzle Rush Setup Overlay ────────────────────────────────────── -->
-  <div id="rush-setup-overlay" class="fixed inset-0 z-[200] flex items-center justify-center hidden">
-    <div class="absolute inset-0" style="background:rgba(255,255,255,0.96);" onclick="closeRushSetup()"></div>
-    <div class="relative z-10 text-center space-y-5 px-8 py-8 max-w-sm mx-auto rounded-2xl border border-brand-border" style="background:#ffffff;">
-      <button onclick="closeRushSetup()"
-              class="absolute top-4 right-4 text-brand-muted hover:text-brand-ink transition-colors text-lg leading-none cursor-pointer">✕</button>
-      <div class="w-16 h-16 rounded-full mx-auto flex items-center justify-center text-4xl"
-           style="background:#e6f9f0; border:2px solid #00dc82;">
-        ⚡
-      </div>
-      <div class="space-y-2">
-        <h2 class="text-2xl font-extrabold text-brand-ink leading-tight">Puzzle Rush</h2>
-        <p class="text-brand-muted text-sm leading-relaxed">Solve as many puzzles as you can before time runs out.</p>
-      </div>
-      <div class="space-y-2">
-        <button onclick="startRush(60)"
-                class="w-full flex items-center justify-between px-4 py-3 rounded-lg border border-brand-border hover:border-brand-green transition-colors cursor-pointer bg-white">
-          <span class="text-brand-ink font-semibold text-sm">1 Minute</span>
-          <span id="rush-best-60" class="text-brand-muted text-xs">Best: —</span>
-        </button>
-        <button onclick="startRush(120)"
-                class="w-full flex items-center justify-between px-4 py-3 rounded-lg border border-brand-border hover:border-brand-green transition-colors cursor-pointer bg-white">
-          <span class="text-brand-ink font-semibold text-sm">2 Minutes</span>
-          <span id="rush-best-120" class="text-brand-muted text-xs">Best: —</span>
-        </button>
-        <button onclick="startRush(180)"
-                class="w-full flex items-center justify-between px-4 py-3 rounded-lg border border-brand-border hover:border-brand-green transition-colors cursor-pointer bg-white">
-          <span class="text-brand-ink font-semibold text-sm">3 Minutes</span>
-          <span id="rush-best-180" class="text-brand-muted text-xs">Best: —</span>
-        </button>
-      </div>
-    </div>
-  </div>
+  function $(id) { return document.getElementById(id); }
+  var prettyTheme = Synap.prettyTheme;
 
-  <!-- ─── Puzzle Rush Results Overlay ──────────────────────────────────── -->
-  <div id="rush-results-overlay" class="fixed inset-0 z-[200] flex items-center justify-center hidden">
-    <div class="absolute inset-0" style="background:rgba(255,255,255,0.96);"></div>
-    <div class="relative z-10 text-center space-y-5 px-8 py-8 max-w-sm mx-auto rounded-2xl border border-brand-border" style="background:#ffffff;">
-      <div class="w-20 h-20 rounded-full mx-auto flex items-center justify-center text-5xl"
-           style="background:#f6faf8; border:2px solid #00dc82;">
-        ⚡
-      </div>
-      <div class="space-y-1">
-        <h2 class="text-3xl font-extrabold text-brand-ink leading-tight">Time's Up!</h2>
-        <span id="rush-new-best-badge"
-              class="hidden inline-block text-xs font-bold uppercase tracking-wide px-2 py-1 rounded-full"
-              style="background:#e6f9f0; color:#00aa63;">
-          🏆 New Best!
-        </span>
-      </div>
-      <div class="grid grid-cols-2 gap-3">
-        <div class="rounded-lg border border-brand-border p-3" style="background:#f6faf8;">
-          <p class="text-brand-muted text-xs uppercase tracking-wide">Score</p>
-          <p id="rush-result-score" class="text-brand-ink text-2xl font-extrabold">0</p>
-        </div>
-        <div class="rounded-lg border border-brand-border p-3" style="background:#f6faf8;">
-          <p class="text-brand-muted text-xs uppercase tracking-wide">Accuracy</p>
-          <p id="rush-result-accuracy" class="text-brand-ink text-2xl font-extrabold">0%</p>
-        </div>
-      </div>
-      <p class="text-brand-muted text-sm">Best score: <span id="rush-result-best" class="text-brand-gdark font-bold">0</span></p>
-      <div class="flex flex-col items-center gap-3 pt-2">
-        <button onclick="closeRushResults(true)"
-                class="w-full max-w-xs bg-brand-green hover:bg-brand-gdark text-brand-ink font-semibold py-3 rounded-md transition-colors text-sm cursor-pointer">
-          ⚡ Play Again
-        </button>
-        <button onclick="closeRushResults(false)"
-                class="text-brand-muted hover:text-brand-ink text-sm transition-colors cursor-pointer">
-          Back to Trainer
-        </button>
-      </div>
-    </div>
-  </div>
+  // ── State ──────────────────────────────────────────────────────────────
+  var board = null, game = null;
+  var currentFen = null, solutionMoves = [], currentMoveIndex = 0;
+  var waitingForComputer = false, isReplaying = false, replayTimeout = null;
+  var currentPuzzleId = null, currentRating = null, currentTheme = null;
+  var puzzleStartTime = null, currentUser = null;
+  var puzzleChecked = false, sessionCount = 0, streak = 0, wrongAttempts = 0;
+  var dailyBudgetMs = 0, totalTimeMs = 0, budgetCheckpoint = null, budgetNotified = false;
+  var practiceMode = false;
 
-  <!-- ─── Auth Modal ────────────────────────────────────────────────────── -->
-  <div id="auth-modal" class="fixed inset-0 z-[100] flex items-center justify-center hidden">
-    <div class="absolute inset-0" style="background:rgba(15,23,20,0.5);" onclick="closeModal()"></div>
-    <div class="relative z-10 w-full max-w-sm mx-4 rounded-2xl border border-brand-border p-8 space-y-6"
-         style="background:#ffffff;">
-      <button onclick="closeModal()"
-              class="absolute top-4 right-4 text-brand-muted hover:text-brand-ink transition-colors text-lg leading-none cursor-pointer">✕</button>
-      <div class="flex gap-6 border-b border-brand-border pb-4">
-        <button id="tab-login" onclick="switchTab('login')"
-                class="text-brand-ink font-semibold text-sm pb-1 border-b-2 border-brand-green cursor-pointer">Login</button>
-        <button id="tab-register" onclick="switchTab('register')"
-                class="text-brand-muted hover:text-brand-ink font-semibold text-sm pb-1 border-b-2 border-transparent cursor-pointer">Register</button>
-      </div>
-      <div class="space-y-4">
-        <input id="modal-username" type="text" placeholder="Username" autocomplete="username"
-               class="w-full px-4 py-3 rounded-lg border border-brand-border text-brand-ink text-sm outline-none focus:border-brand-green transition-colors"
-               style="background:#f6faf8;" />
-        <input id="modal-password" type="password" placeholder="Password" autocomplete="current-password"
-               class="w-full px-4 py-3 rounded-lg border border-brand-border text-brand-ink text-sm outline-none focus:border-brand-green transition-colors"
-               style="background:#f6faf8;" />
-        <p id="modal-error" class="text-xs hidden" style="color:#ef4444;"></p>
-        <button id="modal-submit" onclick="submitModal()"
-                class="w-full bg-brand-green hover:bg-brand-gdark text-brand-ink font-semibold py-3 rounded-lg transition-colors text-sm cursor-pointer">
-          Login
-        </button>
-      </div>
-    </div>
-  </div>
+  var currentMode = 'standard';
+  var improveThemes = [], assessmentThemePool = [];
+  var assessmentIndex = 0, ASSESSMENT_TOTAL = 50, assessmentRatingMid = 900, assessmentResults = [];
+  var lastAnalytics = null, IMPROVE_UNLOCK_AT = 100;
 
-  <!-- ─── Engine ────────────────────────────────────────────────────────── -->
-  <script>
-    // ── Level config (from Flask) ──────────────────────────────────────────
-    var LEVEL = {{ level }};
+  // ── Header text ────────────────────────────────────────────────────────
+  $('header-title').textContent = 'Level ' + LEVEL + ': ' + cfg.title;
+  $('header-desc').textContent = cfg.desc;
+  $('left-range').textContent = cfg.range;
 
-    var LEVEL_INFO = {
-      1: { label: 'Level 1 · Beginner Tactics',       title: 'Beginner Tactics Trainer',       stars: '⭐',     desc: 'Short tactical combinations: absolute pins, skewers, and double attacks.', range: 'Rating below 1000', unlock: 'Streak 0–4'  },
-      2: { label: 'Level 2 · Intermediate Strategy',  title: 'Intermediate Strategy Trainer',  stars: '⭐⭐',   desc: 'Multi-move combinations: piece overloads, decoy sacrifices, and positional play.', range: 'Rating 1000–1600', unlock: 'Streak 5–9'  },
-      3: { label: 'Level 3 · Advanced Calculation',   title: 'Advanced Calculation Trainer',   stars: '⭐⭐⭐', desc: 'Deep calculation: horizon effects, endgame logic, and master-level sequences.', range: 'Rating above 1600', unlock: 'Streak 10+' }
-    };
-    var cfg = LEVEL_INFO[LEVEL] || LEVEL_INFO[1];
+  // ── Status line ────────────────────────────────────────────────────────
+  function setStatus(text, tone) {
+    var el = $('status');
+    el.textContent = text;
+    el.className = 'status' + (tone ? ' is-' + tone : '');
+  }
+  function turnTone() { return game && game.turn() === 'w' ? 'turn-w' : 'turn-b'; }
+  function whoseMove() { return game.turn() === 'w' ? 'White' : 'Black'; }
 
-    // ── Rating-based difficulty + theme display helpers ─────────────────────
-    function difficultyFromRating(rating) {
-      if (typeof rating !== 'number') return { stars: '', label: '' };
-      if (rating < 1000)  return { stars: '⭐',   label: 'Beginner' };
-      if (rating <= 1600) return { stars: '⭐⭐',  label: 'Intermediate' };
-      return                     { stars: '⭐⭐⭐', label: 'Advanced' };
+  function setDifficulty(rating) {
+    var n = 0, label = '';
+    if (typeof rating === 'number') {
+      if (rating < 1000) { n = 1; label = 'Beginner'; }
+      else if (rating <= 1600) { n = 2; label = 'Intermediate'; }
+      else { n = 3; label = 'Advanced'; }
     }
+    Array.prototype.forEach.call($('difficulty-pips').children, function (pip, i) { pip.classList.toggle('on', i < n); });
+    $('difficulty-label').textContent = label;
+  }
 
-    function prettyTheme(token) {
-      if (!token) return '';
-      return token.replace(/([A-Z])/g, ' $1').replace(/^./, function(c) { return c.toUpperCase(); });
+  function updateStreakDisplay() { $('streak-count').textContent = streak; }
+
+  // ── Board ──────────────────────────────────────────────────────────────
+  function canDrag() {
+    return !!game && !game.game_over() && !waitingForComputer && !isReplaying &&
+           currentMoveIndex < solutionMoves.length;
+  }
+  function legalMoves(sq) {
+    if (!canDrag()) return [];
+    return game.moves({ square: sq, verbose: true }).map(function (m) { return m.to; });
+  }
+  function showOnBoard(fen) {
+    var side = game.turn() === 'w' ? 'white' : 'black';
+    if (!board) {
+      $('board').innerHTML = '';
+      board = SynapBoard.create('board', { position: fen, orientation: side, onDrop: onDrop, onDragStart: canDrag, legalMoves: legalMoves });
+    } else {
+      board.show(fen, side);
     }
+    $('board').classList.toggle('is-practice', practiceMode);
+  }
 
-    // ── State ──────────────────────────────────────────────────────────────
-    var board              = null;
-    var game               = null;
-    var currentFen         = null;
-    var solutionMoves      = [];
-    var currentMoveIndex   = 0;
-    var waitingForComputer = false;
-    var isReplaying        = false;
-    var replayTimeout      = null;
-    var currentPuzzleId    = null;
-    var currentRating      = null;
-    var currentTheme       = null;
-    var puzzleStartTime    = null;
-    var currentUser        = null;
-    var activeModalTab     = 'login';
-    var puzzleChecked      = false;   // true once current puzzle has a history entry
-    var sessionCount       = 0;       // total checks this session
-    var streak             = 0;
-    var wrongAttempts      = 0;       // wrong moves on the current puzzle (max 3)
-    var dailyBudgetMs      = 0;       // user's daily time allocation in ms (0 = no limit)
-    var totalTimeMs        = 0;       // accumulated active puzzle time this session
-    var budgetCheckpoint   = null;    // performance.now() snapshot when puzzle started
-    var budgetNotified     = false;   // true once the budget overlay has been shown
-    var practiceMode       = false;   // true when reviewing a history entry (no scoring)
+  // ── Fetching, with the next puzzle fetched ahead ───────────────────────
+  // Waiting on /get-puzzle after every solve was most of the "lag" between
+  // puzzles, so the next one is requested while the current one is still
+  // on the board. Signed-in students get puzzles from a spaced-repetition
+  // queue that only moves once an attempt is logged, so for them the
+  // prefetch starts after the attempt has been saved.
+  var prefetched = null;
 
-    // ── Improve / Assessment mode state ──────────────────────────────────────
-    var currentMode         = 'standard';  // 'standard' | 'improve' | 'assessment'
-    var improveThemes       = [];
-    var assessmentThemePool = [];          // fetched once from /get-common-themes
-    var assessmentIndex     = 0;
-    var ASSESSMENT_TOTAL    = 50;
-    var assessmentRatingMid = 900;         // adaptive difficulty center; starts easy
-    var assessmentResults   = [];          // [{theme, correct}]
-    var lastAnalytics       = null;        // cached /get-analytics response
-    var IMPROVE_UNLOCK_AT   = 100;
-
-    // ── Page init ──────────────────────────────────────────────────────────
-    document.addEventListener('DOMContentLoaded', function() {
-      // Fill header and sidebar with level config
-      document.getElementById('header-label').textContent = cfg.label;
-      document.getElementById('header-stars').textContent = cfg.stars;
-      document.getElementById('header-title').textContent = cfg.title;
-      document.getElementById('header-desc').textContent  = cfg.desc;
-      document.getElementById('left-badge').textContent   = String(LEVEL);
-      document.getElementById('left-label').textContent   = cfg.label;
-      document.getElementById('left-desc').textContent    = cfg.desc;
-      document.getElementById('left-range').textContent   = cfg.range;
-      document.getElementById('left-unlock').textContent  = cfg.unlock;
-
-      // Highlight active level switch link
-      document.querySelectorAll('.level-link').forEach(function(a) {
-        if (a.dataset.level === String(LEVEL)) {
-          a.style.borderColor = '#00dc82';
-          a.style.color       = '#0b0c10';
-        }
-      });
-
-      initAuth();
-      updateModeButtonsUI();
-      updateImproveLockUI();
-
-      // Dropdown link ("Puzzle Rush") launches straight into the setup overlay
-      if (new URLSearchParams(window.location.search).get('rush') === '1') {
-        openRushSetup();
-      }
+  function puzzleUrl() {
+    if (currentMode === 'improve') return '/get-puzzle?themes=' + encodeURIComponent(improveThemes.join(','));
+    if (currentMode === 'assessment') {
+      var theme = assessmentThemePool[assessmentIndex % assessmentThemePool.length];
+      var lo = Math.max(400, assessmentRatingMid - 150);
+      var hi = Math.min(2400, assessmentRatingMid + 150);
+      return '/get-puzzle?themes=' + encodeURIComponent(theme) + '&min_rating=' + lo + '&max_rating=' + hi;
+    }
+    return '/get-puzzle?level=' + LEVEL;
+  }
+  function fetchPuzzle(url) {
+    return fetch(url, { credentials: 'same-origin' }).then(function (r) {
+      if (!r.ok) throw new Error('No puzzles found for this level.');
+      return r.json();
     });
-
-    // ── Auth init ──────────────────────────────────────────────────────────
-    function initAuth() {
-      fetch('/me')
-        .then(function(r) { return r.json(); })
-        .then(function(d) {
-          if (d.logged_in) {
-            currentUser = { username: d.username };
-            if (typeof d.streak === 'number') {
-              streak = d.streak;
-              updateStreakDisplay();
-            }
-            if (typeof d.daily_time_budget === 'number' && d.daily_time_budget > 0) {
-              dailyBudgetMs = d.daily_time_budget * 60000;
-              document.getElementById('budget-card').classList.remove('hidden');
-              updateBudgetBar();
-            }
-            updateNavAuth();
-            fetchAnalytics();
-          }
-        })
-        .catch(function() {});
-    }
-
-    function updateNavAuth() {
-      var out = document.getElementById('auth-logged-out');
-      var inn = document.getElementById('auth-logged-in');
-      if (currentUser) {
-        out.classList.add('hidden');
-        inn.classList.remove('hidden');
-        inn.classList.add('flex');
-        document.getElementById('nav-welcome').textContent = 'Welcome, ' + currentUser.username + '!';
-        document.getElementById('stats-signin').classList.add('hidden');
-        document.getElementById('stats-content').classList.remove('hidden');
-        fetchAnalytics();
-      } else {
-        out.classList.remove('hidden');
-        inn.classList.add('hidden');
-        inn.classList.remove('flex');
-        document.getElementById('stats-signin').classList.remove('hidden');
-        document.getElementById('stats-content').classList.add('hidden');
-      }
-    }
-
-    // ── Streak ─────────────────────────────────────────────────────────────
-    function updateStreakDisplay() {
-      var lvl = streak < 5 ? 1 : streak < 10 ? 2 : 3;
-      document.getElementById('streak-count').textContent = streak;
-      document.getElementById('streak-stars').textContent = '⭐'.repeat(lvl);
-    }
-
-    // ── Confetti ───────────────────────────────────────────────────────────
-    function fireConfetti() {
-      if (typeof confetti !== 'function') return;
-      confetti({
-        particleCount: 90,
-        spread:        70,
-        origin:        { y: 0.6 },
-        colors:        ['#00dc82', '#00aa63', '#f6faf8']
+  }
+  function prefetchNext() {
+    if (currentMode === 'assessment') return;
+    var url = puzzleUrl();
+    if (prefetched && prefetched.url === url) return;
+    prefetched = { url: url, promise: fetchPuzzle(url).catch(function () { return null; }) };
+  }
+  function takePuzzle(url) {
+    var p = prefetched;
+    prefetched = null;
+    if (p && p.url === url) {
+      return p.promise.then(function (d) {
+        return d && d.puzzle_id !== currentPuzzleId ? d : fetchPuzzle(url);
       });
     }
+    return fetchPuzzle(url);
+  }
 
-    // ── Puzzle history entry ───────────────────────────────────────────────
-    // result: 'green' (solved 1st/2nd try), 'yellow' (solved 3rd try), 'red' (failed)
-    function addHistoryEntry(result) {
-      if (puzzleChecked || practiceMode) return;
-      puzzleChecked = true;
-      sessionCount++;
+  // ── Loading a puzzle ───────────────────────────────────────────────────
+  function applyPuzzle(data) {
+    currentFen = data.fen;
+    currentPuzzleId = data.puzzle_id;
+    currentRating = data.rating;
+    currentTheme = data.theme;
+    solutionMoves = data.engine_best_move.split(' ').filter(Boolean);
+    currentMoveIndex = 0;
+    waitingForComputer = false;
+    puzzleStartTime = performance.now();
+    budgetCheckpoint = performance.now();
 
-      // Capture snapshot so the click handler can replay this exact puzzle
-      var savedFen    = currentFen;
-      var savedMoves  = solutionMoves.slice();
-      var savedId     = currentPuzzleId;
-      var savedRating = currentRating;
-      var savedTheme  = currentTheme;
-      var savedNum    = sessionCount;
+    setDifficulty(currentRating);
+    $('puzzle-theme').textContent = prettyTheme(currentTheme) || '-';
+    game = new Chess(currentFen);
+    showOnBoard(currentFen);
+    $('train-btn').textContent = 'Skip puzzle';
 
-      var empty = document.getElementById('history-empty');
-      if (empty) empty.style.display = 'none';
+    var total = Math.ceil(solutionMoves.length / 2);
+    setStatus(whoseMove() + ' to move. Find the best ' + (total > 1 ? total + '-move line.' : 'move.'), turnTone());
+    if (!currentUser) prefetchNext();
+  }
 
-      var bg, fg, sym, label;
-      if (result === 'yellow') {
-        bg = '#f59e0b'; fg = '#0b0c10'; sym = '✓'; label = 'Solved (3rd try)';
-      } else if (result === 'red') {
-        bg = '#ef4444'; fg = '#ffffff'; sym = '✗'; label = 'Failed';
-      } else {
-        bg = '#00dc82'; fg = '#0b0c10'; sym = '✓'; label = 'Solved';
-        fireConfetti();
-      }
+  function loadPuzzle() {
+    clearTimeout(replayTimeout);
+    isReplaying = false;
+    practiceMode = false;
+    $('practice-banner').hidden = true;
 
-      var container = document.getElementById('history-checks');
-      var el        = document.createElement('div');
-      el.className  = 'check-pop';
-      el.title      = 'Puzzle #' + savedNum + ': ' + label + ' · Click to review in Practice Mode';
-      el.style.cssText = [
-        'width:34px', 'height:34px', 'border-radius:50%',
-        'background:' + bg, 'color:' + fg,
-        'display:flex', 'align-items:center', 'justify-content:center',
-        'font-weight:bold', 'font-size:15px', 'flex-shrink:0',
-        'cursor:pointer', 'transition:opacity 0.15s'
-      ].join(';');
-      el.textContent = sym;
-      el.addEventListener('mouseenter', function() { el.style.opacity = '0.75'; });
-      el.addEventListener('mouseleave', function() { el.style.opacity = '1'; });
-      el.addEventListener('click', function() { reviewPuzzle(savedFen, savedMoves, savedId, savedRating, savedTheme); });
-      container.insertBefore(el, container.firstChild);
-      document.getElementById('puzzle-count').textContent = sessionCount;
+    // An unfinished puzzle that gets skipped counts as a miss.
+    if (currentPuzzleId && !puzzleChecked) addHistoryEntry('red');
+    puzzleChecked = false;
+    wrongAttempts = 0;
+
+    if (currentMode === 'assessment') {
+      $('assessment-progress-text').textContent = (assessmentIndex + 1) + '/' + ASSESSMENT_TOTAL;
+      $('assessment-progress-bar').style.width = Math.round((assessmentIndex / ASSESSMENT_TOTAL) * 100) + '%';
     }
 
-    // ── Board theme (normal = mint green, practice = light purple) ────────
-    function setBoardTheme(mode) {
-      var el = document.getElementById('board-theme');
-      if (mode === 'practice') {
-        el.textContent = [
-          '.black-3c85d{background-color:#c4b5fd!important;}',
-          '.black-3c85d.notation-322f9{color:#4c1d95!important;}',
-          '.white-1e1d7.notation-322f9{color:#c4b5fd!important;}'
-        ].join('');
-      } else {
-        el.textContent = '';
-      }
+    var url = puzzleUrl();
+    if (!prefetched || prefetched.url !== url) setStatus('Loading a puzzle…');
+    takePuzzle(url)
+      .then(applyPuzzle)
+      .catch(function (err) { setStatus(err.message || 'Could not load a puzzle.', 'bad'); });
+  }
+
+  // ── Moves ──────────────────────────────────────────────────────────────
+  function puzzleSolved() {
+    $('train-btn').textContent = 'Next puzzle';
+    if (practiceMode) {
+      setStatus('Solved in practice. Press N for a fresh puzzle.', 'good');
+      return;
+    }
+    streak++;
+    updateStreakDisplay();
+    addHistoryEntry(wrongAttempts < 2 ? 'green' : 'yellow');
+    logAttempt(true);
+    setStatus(wrongAttempts === 0 ? 'Solved. Press N for the next one.' : 'Solved on try ' + (wrongAttempts + 1) + '. Press N for the next one.', 'good');
+    recordAssessmentIfActive(true);
+  }
+
+  function onDrop(source, target) {
+    if (isReplaying || !canDrag()) return 'snapback';
+    var move = game.move({ from: source, to: target, promotion: 'q' });
+    if (move === null) return 'snapback';
+
+    if (source + target === solutionMoves[currentMoveIndex].slice(0, 4)) {
+      board.position(game.fen(), false);
+      board.markMove(source, target);
+      currentMoveIndex++;
+      if (currentMoveIndex >= solutionMoves.length) { puzzleSolved(); return; }
+      setStatus('Correct. Watch the reply…', 'good');
+      playComputerMove();
+      return;
     }
 
-    // ── Practice mode: replay a history puzzle without scoring ─────────────
-    function reviewPuzzle(fen, moves, puzzleId, rating, theme) {
-      clearTimeout(replayTimeout);
-      isReplaying        = false;
-      practiceMode       = true;
-      currentFen         = fen;
-      solutionMoves      = moves.slice();
-      currentPuzzleId    = puzzleId;
-      currentRating      = rating;
-      currentTheme       = theme;
-      currentMoveIndex   = 0;
-      waitingForComputer = false;
-      wrongAttempts      = 0;
-      puzzleStartTime    = performance.now();
-      budgetCheckpoint   = performance.now();
-
-      document.getElementById('practice-banner').classList.remove('hidden');
-      setBoardTheme('practice');
-
-      var d = difficultyFromRating(currentRating);
-      document.getElementById('difficulty-stars').textContent = d.stars;
-      document.getElementById('difficulty-label').textContent = d.label;
-      document.getElementById('puzzle-theme').textContent = prettyTheme(currentTheme);
-
-      game = new Chess(currentFen);
-
-      if (board) board.destroy();
-      board = Chessboard('board', {
-        position:    currentFen,
-        draggable:   true,
-        pieceTheme:  '/static/img/chesspieces/wikipedia/{piece}.png',
-        onDragStart: function(source, piece) {
-          if (!game || game.game_over())                return false;
-          if (waitingForComputer)                       return false;
-          if (currentMoveIndex >= solutionMoves.length) return false;
-        },
-        onDrop:      onDrop,
-        orientation: game.turn() === 'w' ? 'white' : 'black'
-      });
-
-      var whose = game.turn() === 'w' ? 'White' : 'Black';
-      var total = Math.ceil(solutionMoves.length / 2);
-      setStatus(whose + ' to move, practice this ' + total + '-move puzzle.');
+    game.undo();
+    board.flashWrong();
+    wrongAttempts++;
+    if (!practiceMode) {
+      streak = 0;
+      updateStreakDisplay();
+      logAttempt(false);
     }
-
-    // ── Improve / Assessment mode ────────────────────────────────────────────
-    function updateModeButtonsUI() {
-      ['standard', 'improve', 'assessment'].forEach(function(m) {
-        var btn = document.getElementById('mode-btn-' + m);
-        if (m === currentMode) {
-          btn.style.background = '#00dc82';
-          btn.style.color      = '#0b0c10';
+    if (wrongAttempts >= 3) {
+      if (!practiceMode) {
+        addHistoryEntry('red');
+        if (currentMode === 'assessment') {
+          setStatus('Three misses. On to the next one…', 'bad');
+          recordAssessmentIfActive(false);
         } else {
-          btn.style.background = 'transparent';
-          btn.style.color      = '#64748b';
+          setStatus('Three misses. Loading the next puzzle…', 'bad');
+          setTimeout(loadPuzzle, 1100);
         }
-      });
-      document.getElementById('improve-banner').classList.toggle('hidden', currentMode !== 'improve');
-      document.getElementById('assessment-banner').classList.toggle('hidden', currentMode !== 'assessment');
-      if (currentMode === 'improve') {
-        document.getElementById('improve-banner-themes').textContent =
-          improveThemes.map(prettyTheme).join(', ');
-      }
-    }
-
-    function updateImproveLockUI() {
-      var hint  = document.getElementById('improve-lock-hint');
-      var btn   = document.getElementById('mode-btn-improve');
-      var total = lastAnalytics ? lastAnalytics.total_attempts : 0;
-      if (total >= IMPROVE_UNLOCK_AT) {
-        hint.classList.add('hidden');
-        btn.style.opacity = '1';
-        btn.style.cursor  = 'pointer';
       } else {
-        hint.classList.remove('hidden');
-        hint.textContent = '🔒 Unlocks at ' + IMPROVE_UNLOCK_AT + ' puzzles (' + total + '/' + IMPROVE_UNLOCK_AT + ')';
-        btn.style.opacity = '0.5';
-        btn.style.cursor  = 'not-allowed';
+        setStatus('No tries left. Press N for a fresh puzzle.', 'bad');
       }
+      return 'snapback';
     }
+    var left = 3 - wrongAttempts;
+    setStatus('Not that one. ' + left + ' ' + (left === 1 ? 'try' : 'tries') + ' left.', 'bad');
+    return 'snapback';
+  }
 
-    function setMode(mode) {
-      if (mode === currentMode) return;
-      if ((mode === 'improve' || mode === 'assessment') && !currentUser) {
-        openModal('login');
+  function playComputerMove() {
+    waitingForComputer = true;
+    setTimeout(function () {
+      var uci = solutionMoves[currentMoveIndex];
+      game.move({ from: uci.slice(0, 2), to: uci.slice(2, 4), promotion: uci[4] || 'q' });
+      board.position(game.fen());
+      board.markMove(uci.slice(0, 2), uci.slice(2, 4));
+      currentMoveIndex++;
+      waitingForComputer = false;
+      if (currentMoveIndex >= solutionMoves.length) { puzzleSolved(); return; }
+      var left = Math.ceil((solutionMoves.length - currentMoveIndex) / 2);
+      setStatus(whoseMove() + ' to move. ' + left + ' more ' + (left > 1 ? 'moves.' : 'move.'), turnTone());
+    }, 280);
+  }
+
+  // ── History squares ────────────────────────────────────────────────────
+  function addHistoryEntry(result) {
+    if (puzzleChecked || practiceMode) return;
+    puzzleChecked = true;
+    sessionCount++;
+    var snap = { fen: currentFen, moves: solutionMoves.slice(), id: currentPuzzleId, rating: currentRating, theme: currentTheme };
+    var label = result === 'yellow' ? 'solved on the third try' : result === 'red' ? 'missed' : 'solved';
+    if (result === 'green') Synap.confetti({ particleCount: 60 });
+
+    $('history-empty').hidden = true;
+    var sq = document.createElement('button');
+    sq.type = 'button';
+    sq.className = 'hsq hsq--' + result;
+    sq.setAttribute('aria-label', 'Puzzle ' + sessionCount + ', ' + label + '. Replay in practice.');
+    sq.title = 'Puzzle ' + sessionCount + ': ' + label;
+    sq.addEventListener('click', function () { reviewPuzzle(snap); });
+    var wrap = $('history-checks');
+    wrap.insertBefore(sq, wrap.firstChild);
+    $('puzzle-count').textContent = sessionCount;
+  }
+
+  function reviewPuzzle(snap) {
+    clearTimeout(replayTimeout);
+    isReplaying = false;
+    practiceMode = true;
+    currentFen = snap.fen;
+    solutionMoves = snap.moves.slice();
+    currentPuzzleId = snap.id;
+    currentRating = snap.rating;
+    currentTheme = snap.theme;
+    currentMoveIndex = 0;
+    waitingForComputer = false;
+    wrongAttempts = 0;
+    puzzleStartTime = performance.now();
+    budgetCheckpoint = performance.now();
+
+    $('practice-banner').hidden = false;
+    setDifficulty(currentRating);
+    $('puzzle-theme').textContent = prettyTheme(currentTheme) || '-';
+    game = new Chess(currentFen);
+    showOnBoard(currentFen);
+    setStatus(whoseMove() + ' to move. Practice this one again.', 'practice');
+  }
+
+  // ── Show solution ──────────────────────────────────────────────────────
+  function showSolution() {
+    if (!currentFen || solutionMoves.length === 0 || isReplaying) return;
+    // Viewing the answer counts as a miss (once), including in Assessment.
+    var alreadyResolved = puzzleChecked;
+    addHistoryEntry('red');
+    if (!alreadyResolved) recordAssessmentIfActive(false);
+
+    clearTimeout(replayTimeout);
+    isReplaying = true;
+    game = new Chess(currentFen);
+    board.show(currentFen);
+    setStatus('Here is the solution…');
+    (function playNext(i) {
+      if (i >= solutionMoves.length) {
+        isReplaying = false;
+        currentMoveIndex = solutionMoves.length;
+        $('train-btn').textContent = 'Next puzzle';
+        setStatus('That is the full line. Press N for the next puzzle.');
         return;
       }
-      if (mode === 'improve' && (!lastAnalytics || lastAnalytics.total_attempts < IMPROVE_UNLOCK_AT)) {
-        return; // still locked
-      }
+      replayTimeout = setTimeout(function () {
+        var uci = solutionMoves[i];
+        game.move({ from: uci.slice(0, 2), to: uci.slice(2, 4), promotion: uci[4] || 'q' });
+        board.position(game.fen());
+        board.markMove(uci.slice(0, 2), uci.slice(2, 4));
+        playNext(i + 1);
+      }, 600);
+    })(0);
+  }
 
-      currentMode = mode;
-      updateModeButtonsUI();
+  // ── Modes ──────────────────────────────────────────────────────────────
+  function updateModeButtonsUI() {
+    ['standard', 'improve', 'assessment'].forEach(function (m) {
+      $('mode-btn-' + m).setAttribute('aria-pressed', m === currentMode ? 'true' : 'false');
+    });
+    $('improve-banner').hidden = currentMode !== 'improve';
+    $('assessment-banner').hidden = currentMode !== 'assessment';
+    if (currentMode === 'improve') $('improve-banner-themes').textContent = improveThemes.map(prettyTheme).join(', ');
+  }
 
-      if (mode === 'improve') {
-        startImprove();
-      } else if (mode === 'assessment') {
-        startAssessment();
-      } else {
-        loadPuzzle();
-      }
+  function updateImproveLockUI() {
+    var total = lastAnalytics ? lastAnalytics.total_attempts : 0;
+    var locked = total < IMPROVE_UNLOCK_AT;
+    var btn = $('mode-btn-improve');
+    btn.setAttribute('aria-disabled', locked ? 'true' : 'false');
+    $('improve-lock-hint').hidden = !locked || !currentUser;
+    $('improve-lock-hint').textContent = 'Improve mode unlocks after ' + IMPROVE_UNLOCK_AT + ' puzzles. You have played ' + total + '.';
+  }
+
+  function setMode(mode) {
+    if (mode === currentMode) return;
+    if ((mode === 'improve' || mode === 'assessment') && !currentUser) { Synap.openAuth('login'); return; }
+    if (mode === 'improve' && (!lastAnalytics || lastAnalytics.total_attempts < IMPROVE_UNLOCK_AT)) { updateImproveLockUI(); return; }
+    currentMode = mode;
+    prefetched = null;
+    updateModeButtonsUI();
+    if (mode === 'improve') startImprove();
+    else if (mode === 'assessment') startAssessment();
+    else loadPuzzle();
+  }
+
+  function startImprove() {
+    var saved = null;
+    try { saved = JSON.parse(localStorage.getItem('lastAssessmentWeakThemes') || 'null'); } catch (e) {}
+    if (saved && saved.length) {
+      improveThemes = saved.slice(0, 3);
+    } else if (lastAnalytics && lastAnalytics.by_theme) {
+      improveThemes = lastAnalytics.by_theme
+        .filter(function (t) { return t.attempts >= 3; })
+        .sort(function (a, b) { return a.accuracy - b.accuracy; })
+        .slice(0, 3).map(function (t) { return t.theme; });
+    } else {
+      improveThemes = [];
     }
-
-    function startImprove() {
-      var saved = null;
-      try {
-        var raw = localStorage.getItem('lastAssessmentWeakThemes');
-        if (raw) saved = JSON.parse(raw);
-      } catch (e) {}
-
-      if (saved && saved.length) {
-        improveThemes = saved.slice(0, 3);
-      } else if (lastAnalytics && lastAnalytics.by_theme) {
-        var qualifying = lastAnalytics.by_theme.filter(function(t) { return t.attempts >= 3; });
-        qualifying.sort(function(a, b) { return a.accuracy - b.accuracy; });
-        improveThemes = qualifying.slice(0, 3).map(function(t) { return t.theme; });
-      } else {
-        improveThemes = [];
-      }
-
-      if (improveThemes.length === 0) {
-        setStatus('Not enough theme data yet to find weak spots — keep solving!', '#ef4444');
-        currentMode = 'standard';
-        updateModeButtonsUI();
-        return;
-      }
-
-      updateModeButtonsUI();
-      loadPuzzle();
-    }
-
-    function startAssessment() {
-      assessmentIndex     = 0;
-      assessmentResults    = [];
-      assessmentRatingMid = 900;
-
-      if (assessmentThemePool.length > 0) {
-        loadPuzzle();
-        return;
-      }
-
-      fetch('/get-common-themes')
-        .then(function(r) { return r.json(); })
-        .then(function(d) {
-          assessmentThemePool = (d.themes || []).map(function(t) { return t.theme; });
-          if (assessmentThemePool.length === 0) assessmentThemePool = ['tactics'];
-          loadPuzzle();
-        })
-        .catch(function() {
-          assessmentThemePool = ['tactics'];
-          loadPuzzle();
-        });
-    }
-
-    function recordAssessmentIfActive(isCorrect) {
-      if (currentMode !== 'assessment') return;
-
-      assessmentResults.push({ theme: currentTheme, correct: isCorrect });
-      assessmentRatingMid += isCorrect ? 150 : -150;
-      assessmentRatingMid  = Math.max(400, Math.min(2400, assessmentRatingMid));
-      assessmentIndex++;
-
-      if (assessmentIndex >= ASSESSMENT_TOTAL) {
-        setTimeout(finishAssessment, 1200);
-      } else {
-        setTimeout(loadPuzzle, 1200);
-      }
-    }
-
-    function finishAssessment() {
-      var byTheme = {};
-      assessmentResults.forEach(function(r) {
-        if (!r.theme) return;
-        if (!byTheme[r.theme]) byTheme[r.theme] = { attempts: 0, correct: 0 };
-        byTheme[r.theme].attempts++;
-        if (r.correct) byTheme[r.theme].correct++;
-      });
-
-      var themeStats = Object.keys(byTheme).map(function(theme) {
-        var s = byTheme[theme];
-        return { theme: theme, attempts: s.attempts, accuracy: Math.round((s.correct / s.attempts) * 100) };
-      });
-      themeStats.sort(function(a, b) { return a.accuracy - b.accuracy; });
-
-      var totalCorrect = assessmentResults.filter(function(r) { return r.correct; }).length;
-      var overallAcc   = assessmentResults.length > 0
-        ? Math.round((totalCorrect / assessmentResults.length) * 100) : 0;
-      document.getElementById('assessment-overall').textContent =
-        'You solved ' + totalCorrect + ' of ' + assessmentResults.length +
-        ' puzzles (' + overallAcc + '% accuracy).';
-
-      var listEl = document.getElementById('assessment-theme-list');
-      listEl.innerHTML = themeStats.map(function(t) {
-        var barColor = t.accuracy < 50 ? '#ef4444' : t.accuracy < 75 ? '#f59e0b' : '#00dc82';
-        return '<div class="space-y-1">' +
-          '<div class="flex items-center justify-between text-xs">' +
-            '<span class="text-brand-ink font-medium">' + prettyTheme(t.theme) + '</span>' +
-            '<span class="text-brand-muted">' + t.accuracy + '% (' + t.attempts + ')</span>' +
-          '</div>' +
-          '<div class="w-full h-1.5 rounded-full" style="background:#e7ebe9;">' +
-            '<div class="h-1.5 rounded-full" style="background:' + barColor + '; width:' + t.accuracy + '%;"></div>' +
-          '</div>' +
-        '</div>';
-      }).join('');
-
-      var weakThemes = themeStats.slice(0, 3).map(function(t) { return t.theme; });
-      try { localStorage.setItem('lastAssessmentWeakThemes', JSON.stringify(weakThemes)); } catch (e) {}
-
+    if (!improveThemes.length) {
+      setStatus('Not enough theme data yet to find weak spots. Keep solving.', 'bad');
       currentMode = 'standard';
       updateModeButtonsUI();
-      document.getElementById('assessment-overlay').classList.remove('hidden');
+      return;
     }
-
-    function closeAssessmentOverlay() {
-      document.getElementById('assessment-overlay').classList.add('hidden');
-      loadPuzzle();
-    }
-
-    function closeAssessmentOverlayAndImprove() {
-      document.getElementById('assessment-overlay').classList.add('hidden');
-      setMode('improve');
-    }
-
-    // ── Status ─────────────────────────────────────────────────────────────
-    function setStatus(text, color) {
-      var el         = document.getElementById('status');
-      el.textContent = text;
-      el.style.color = color || '#64748b';
-    }
-
-    // ── Load puzzle ────────────────────────────────────────────────────────
-    function loadPuzzle() {
-      clearTimeout(replayTimeout);
-      isReplaying  = false;
-      practiceMode = false;
-      document.getElementById('practice-banner').classList.add('hidden');
-      setBoardTheme('normal');
-
-      // If an unsolved puzzle was active, count it as abandoned (red)
-      if (currentPuzzleId && !puzzleChecked) {
-        addHistoryEntry('red');
-      }
-      puzzleChecked = false;
-      wrongAttempts = 0;
-
-      setStatus('Loading puzzle…');
-      document.getElementById('difficulty-stars').textContent = '';
-      document.getElementById('difficulty-label').textContent = '';
-      document.getElementById('puzzle-theme').textContent = '';
-
-      var url = '/get-puzzle?level=' + LEVEL;
-      if (currentMode === 'improve') {
-        url = '/get-puzzle?themes=' + encodeURIComponent(improveThemes.join(','));
-      } else if (currentMode === 'assessment') {
-        var theme = assessmentThemePool[assessmentIndex % assessmentThemePool.length];
-        var lo    = Math.max(400, assessmentRatingMid - 150);
-        var hi    = Math.min(2400, assessmentRatingMid + 150);
-        url = '/get-puzzle?themes=' + encodeURIComponent(theme) + '&min_rating=' + lo + '&max_rating=' + hi;
-
-        document.getElementById('assessment-progress-text').textContent =
-          (assessmentIndex + 1) + '/' + ASSESSMENT_TOTAL;
-        document.getElementById('assessment-progress-bar').style.width =
-          Math.round((assessmentIndex / ASSESSMENT_TOTAL) * 100) + '%';
-      }
-
-      fetch(url)
-        .then(function(r) {
-          if (!r.ok) throw new Error('No puzzles found for this level.');
-          return r.json();
-        })
-        .then(function(data) {
-          currentFen       = data.fen;
-          currentPuzzleId  = data.puzzle_id;
-          currentRating    = data.rating;
-          currentTheme     = data.theme;
-          solutionMoves    = data.engine_best_move.split(' ').filter(Boolean);
-          currentMoveIndex = 0;
-          waitingForComputer = false;
-          puzzleStartTime  = performance.now();
-          budgetCheckpoint = performance.now();
-
-          var d = difficultyFromRating(currentRating);
-          document.getElementById('difficulty-stars').textContent = d.stars;
-          document.getElementById('difficulty-label').textContent = d.label;
-          document.getElementById('puzzle-theme').textContent = prettyTheme(currentTheme);
-
-          game = new Chess(currentFen);
-
-          if (board) board.destroy();
-          board = Chessboard('board', {
-            position:    currentFen,
-            draggable:   true,
-            pieceTheme:  '/static/img/chesspieces/wikipedia/{piece}.png',
-            onDragStart: function(source, piece) {
-              if (!game || game.game_over())                 return false;
-              if (waitingForComputer)                        return false;
-              if (currentMoveIndex >= solutionMoves.length) return false;
-            },
-            onDrop:      onDrop,
-            orientation: game.turn() === 'w' ? 'white' : 'black'
-          });
-
-          var whose = game.turn() === 'w' ? 'White' : 'Black';
-          var total = Math.ceil(solutionMoves.length / 2);
-          setStatus(whose + ' to move, solve ' + total + '-move puzzle.');
-        })
-        .catch(function(err) {
-          setStatus('Error: ' + err.message, '#ef4444');
-        });
-    }
-
-    // ── Drop handler ───────────────────────────────────────────────────────
-    function onDrop(source, target) {
-      if (isReplaying) return 'snapback';
-
-      var move = game.move({ from: source, to: target, promotion: 'q' });
-      if (move === null) return 'snapback';
-
-      var userMove = source + target;
-
-      if (userMove === solutionMoves[currentMoveIndex].slice(0, 4)) {
-        board.position(game.fen());
-        currentMoveIndex++;
-
-        if (currentMoveIndex >= solutionMoves.length) {
-          if (!practiceMode) {
-            streak++;
-            updateStreakDisplay();
-            addHistoryEntry(wrongAttempts < 2 ? 'green' : 'yellow');
-            logAttempt(true);
-            setStatus('✓ Puzzle solved! Well done.', '#00aa63');
-            recordAssessmentIfActive(true);
-          } else {
-            setStatus('✓ Solved in practice! Click "New Puzzle" for a fresh one.', '#7c3aed');
-          }
-          return;
-        }
-
-        setStatus('✓ Correct! Computer is responding…', '#00aa63');
-        playComputerMove();
-
-      } else {
-        game.undo();
-        wrongAttempts++;
-        if (!practiceMode) {
-          streak = 0;
-          updateStreakDisplay();
-          logAttempt(false);
-        }
-
-        if (wrongAttempts >= 3) {
-          if (!practiceMode) {
-            addHistoryEntry('red');
-            if (currentMode === 'assessment') {
-              setStatus('✗ Failed. Recording and loading next puzzle…', '#ef4444');
-              recordAssessmentIfActive(false);
-            } else {
-              setStatus('✗ No more attempts. Loading next puzzle…', '#ef4444');
-              setTimeout(loadPuzzle, 1800);
-            }
-          } else {
-            setStatus('✗ All attempts used. Click "New Puzzle" for a fresh puzzle.', '#ef4444');
-          }
-          return 'snapback';
-        }
-
-        var left = 3 - wrongAttempts;
-        setStatus('✗ Incorrect. ' + left + ' attempt' + (left === 1 ? '' : 's') + ' remaining.', '#ef4444');
-        return 'snapback';
-      }
-    }
-
-    // ── Computer response ──────────────────────────────────────────────────
-    function playComputerMove() {
-      waitingForComputer = true;
-      setTimeout(function() {
-        var uci   = solutionMoves[currentMoveIndex];
-        var from  = uci.slice(0, 2);
-        var to    = uci.slice(2, 4);
-        var promo = uci.length > 4 ? uci[4] : 'q';
-
-        game.move({ from: from, to: to, promotion: promo });
-        board.position(game.fen());
-        currentMoveIndex++;
-        waitingForComputer = false;
-
-        if (currentMoveIndex >= solutionMoves.length) {
-          if (!practiceMode) {
-            streak++;
-            updateStreakDisplay();
-            addHistoryEntry(wrongAttempts < 2 ? 'green' : 'yellow');
-            logAttempt(true);
-            setStatus('✓ Puzzle solved! Well done.', '#00aa63');
-            recordAssessmentIfActive(true);
-          } else {
-            setStatus('✓ Solved in practice! Click "New Puzzle" for a fresh one.', '#7c3aed');
-          }
-        } else {
-          var whose = game.turn() === 'w' ? 'White' : 'Black';
-          var left  = Math.ceil((solutionMoves.length - currentMoveIndex) / 2);
-          setStatus(whose + ' to move, ' + left + ' move' + (left > 1 ? 's' : '') + ' left.');
-        }
-      }, 450);
-    }
-
-    // ── Telemetry ──────────────────────────────────────────────────────────
-    function logAttempt(isCorrect) {
-      if (!currentPuzzleId || !currentUser || practiceMode) return;
-      var timeMs = puzzleStartTime ? Math.round(performance.now() - puzzleStartTime) : null;
-
-      // Accumulate active puzzle time toward the daily budget
-      if (budgetCheckpoint !== null) {
-        totalTimeMs     += performance.now() - budgetCheckpoint;
-        budgetCheckpoint = performance.now();
-        updateBudgetBar();
-        checkTimeBudget();
-      }
-
-      var body = {
-        puzzle_id:     currentPuzzleId,
-        time_spent_ms: timeMs,
-        is_correct:    isCorrect
-      };
-      if (currentMode === 'improve' || currentMode === 'assessment') {
-        body.mode = currentMode;
-      }
-
-      SynapchessSync.queuedPost('/log-attempt', body).then(function(result) {
-        if (!result.queued) fetchAnalytics();
-      });
-    }
-
-    // A queued attempt that failed to save live (offline) refreshes the
-    // stats panel once it finally syncs in the background.
-    window.addEventListener('synapchess-sync', function(e) {
-      if (e.detail && e.detail.url === '/log-attempt') fetchAnalytics();
-    });
-
-    function fetchAnalytics() {
-      if (!currentUser) return;
-      fetch('/get-analytics')
-        .then(function(r) { return r.json(); })
-        .then(function(d) {
-          if (d.error) return;
-          lastAnalytics = d;
-          updateImproveLockUI();
-          document.getElementById('stats-signin').classList.add('hidden');
-          document.getElementById('stats-content').classList.remove('hidden');
-          document.getElementById('stat-total').textContent    = d.total_attempts;
-          var pct  = d.total_attempts > 0 ? Math.round(d.accuracy) + '%' : '0%';
-          document.getElementById('stat-accuracy').textContent = pct;
-          var secs = d.avg_time_ms > 0 ? (d.avg_time_ms / 1000).toFixed(1) + 's' : '—';
-          document.getElementById('stat-velocity').textContent = secs;
-
-          var wrap = document.getElementById('stat-themes');
-          wrap.innerHTML = (d.by_theme || []).slice(0, 5).map(function(t) {
-            return '<div class="flex items-center justify-between text-[11px]">' +
-              '<span class="text-brand-muted">' + prettyTheme(t.theme) + '</span>' +
-              '<span class="text-brand-ink font-semibold">' + t.accuracy + '%</span></div>';
-          }).join('');
-        })
-        .catch(function() {});
-    }
-
-    // ── Auth modal ─────────────────────────────────────────────────────────
-    function openModal(tab) {
-      activeModalTab = tab || 'login';
-      switchTab(activeModalTab);
-      document.getElementById('modal-username').value = '';
-      document.getElementById('modal-password').value = '';
-      var err = document.getElementById('modal-error');
-      err.classList.add('hidden');
-      err.style.color = '#ef4444';
-      document.getElementById('auth-modal').classList.remove('hidden');
-      setTimeout(function() { document.getElementById('modal-username').focus(); }, 50);
-    }
-
-    function closeModal() {
-      document.getElementById('auth-modal').classList.add('hidden');
-    }
-
-    function switchTab(tab) {
-      activeModalTab = tab;
-      var lt  = document.getElementById('tab-login');
-      var rt  = document.getElementById('tab-register');
-      var sub = document.getElementById('modal-submit');
-      if (tab === 'login') {
-        lt.classList.add('text-brand-ink', 'border-brand-green');
-        lt.classList.remove('text-brand-muted', 'border-transparent');
-        rt.classList.remove('text-brand-ink', 'border-brand-green');
-        rt.classList.add('text-brand-muted', 'border-transparent');
-        sub.textContent = 'Login';
-      } else {
-        rt.classList.add('text-brand-ink', 'border-brand-green');
-        rt.classList.remove('text-brand-muted', 'border-transparent');
-        lt.classList.remove('text-brand-ink', 'border-brand-green');
-        lt.classList.add('text-brand-muted', 'border-transparent');
-        sub.textContent = 'Create Account';
-      }
-    }
-
-    function submitModal() {
-      var username  = document.getElementById('modal-username').value.trim();
-      var password  = document.getElementById('modal-password').value;
-      var errorEl   = document.getElementById('modal-error');
-      var submitBtn = document.getElementById('modal-submit');
-
-      if (!username || !password) {
-        errorEl.style.color = '#ef4444';
-        errorEl.textContent = 'Please fill in both fields.';
-        errorEl.classList.remove('hidden');
-        return;
-      }
-      errorEl.classList.add('hidden');
-      submitBtn.textContent = 'Please wait…';
-
-      var endpoint = activeModalTab === 'login' ? '/login' : '/register';
-      fetch(endpoint, {
-        method:  'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify({ username: username, password: password })
-      })
-      .then(function(r) { return r.json().then(function(d) { return { ok: r.ok, data: d }; }); })
-      .then(function(res) {
-        if (!res.ok) {
-          errorEl.style.color = '#ef4444';
-          errorEl.textContent = res.data.error || 'Something went wrong.';
-          errorEl.classList.remove('hidden');
-          submitBtn.textContent = activeModalTab === 'login' ? 'Login' : 'Create Account';
-          return;
-        }
-        if (activeModalTab === 'register') {
-          switchTab('login');
-          errorEl.style.color = '#00aa63';
-          errorEl.textContent = 'Account created! Please log in.';
-          errorEl.classList.remove('hidden');
-          document.getElementById('modal-username').value = username;
-          document.getElementById('modal-password').value = '';
-          document.getElementById('modal-password').focus();
-          return;
-        }
-        currentUser = { username: username };
-        if (typeof res.data.streak === 'number') {
-          streak = res.data.streak;
-          updateStreakDisplay();
-        }
-        if (typeof res.data.daily_time_budget === 'number' && res.data.daily_time_budget > 0) {
-          dailyBudgetMs = res.data.daily_time_budget * 60000;
-          document.getElementById('budget-card').classList.remove('hidden');
-          updateBudgetBar();
-        }
-        closeModal();
-        updateNavAuth();
-      })
-      .catch(function() {
-        errorEl.style.color = '#ef4444';
-        errorEl.textContent = 'Network error. Please try again.';
-        errorEl.classList.remove('hidden');
-        submitBtn.textContent = activeModalTab === 'login' ? 'Login' : 'Create Account';
-      });
-    }
-
-    // ── Time budget ────────────────────────────────────────────────────────
-    function updateBudgetBar() {
-      if (!dailyBudgetMs) return;
-      var usedMin  = Math.floor(totalTimeMs / 60000);
-      var totalMin = Math.floor(dailyBudgetMs / 60000);
-      var pct      = Math.min(100, Math.round((totalTimeMs / dailyBudgetMs) * 100));
-      document.getElementById('budget-used').textContent  = usedMin + 'm';
-      document.getElementById('budget-total').textContent = 'of ' + totalMin + 'm';
-      var bar = document.getElementById('budget-bar');
-      bar.style.width      = pct + '%';
-      bar.style.background = pct >= 100 ? '#ef4444' : pct >= 75 ? '#f59e0b' : '#00dc82';
-    }
-
-    function checkTimeBudget() {
-      if (!dailyBudgetMs || budgetNotified) return;
-      if (totalTimeMs >= dailyBudgetMs) {
-        budgetNotified = true;
-        document.getElementById('budget-overlay').classList.remove('hidden');
-      }
-    }
-
-    function dismissBudgetOverlay() {
-      document.getElementById('budget-overlay').classList.add('hidden');
-    }
-
-    // ── Button wiring ──────────────────────────────────────────────────────
-    document.getElementById('btn-login').addEventListener('click', function() { openModal('login'); });
-
-    document.getElementById('btn-logout').addEventListener('click', function() {
-      fetch('/logout').then(function() {
-        currentUser = null;
-        updateNavAuth();
-        setStatus('Logged out.');
-      });
-    });
-
-    ['modal-username', 'modal-password'].forEach(function(id) {
-      document.getElementById(id).addEventListener('keydown', function(e) {
-        if (e.key === 'Enter') submitModal();
-      });
-    });
-
-    document.addEventListener('keydown', function(e) {
-      if (e.key === 'Escape') closeModal();
-    });
-
-    document.getElementById('train-btn').addEventListener('click', loadPuzzle);
-
-    document.getElementById('show-btn').addEventListener('click', function() {
-      if (!currentFen || solutionMoves.length === 0) return;
-
-      // Viewing the solution counts as a failed attempt. Only record it for
-      // Assessment Mode if this puzzle hasn't already been resolved (e.g. the
-      // user solved it, then clicked Show Solution anyway) — addHistoryEntry
-      // itself no-ops in that case, but recordAssessmentIfActive has no such
-      // guard, so it must be skipped explicitly to avoid double-counting.
-      var alreadyResolved = puzzleChecked;
-      addHistoryEntry('red');
-      if (!alreadyResolved) recordAssessmentIfActive(false);
-
-      clearTimeout(replayTimeout);
-      isReplaying = true;
-      game = new Chess(currentFen);
-      board.position(currentFen, false);
-      setStatus('Playing solution…');
-
-      function playNext(idx) {
-        if (idx >= solutionMoves.length) {
-          isReplaying = false;
-          setStatus("Solution complete. Click 'New Puzzle' to continue!");
-          return;
-        }
-        replayTimeout = setTimeout(function() {
-          var uci   = solutionMoves[idx];
-          var from  = uci.slice(0, 2);
-          var to    = uci.slice(2, 4);
-          var promo = uci.length > 4 ? uci[4] : 'q';
-          game.move({ from: from, to: to, promotion: promo });
-          board.position(game.fen());
-          playNext(idx + 1);
-        }, 800);
-      }
-      playNext(0);
-    });
-
-    // ── Puzzle Rush ─────────────────────────────────────────────────────────
-    var rushActive          = false;
-    var rushDurationSec     = 60;
-    var rushTimeLeft        = 0;
-    var rushTimerId         = null;
-    var rushCorrect         = 0;
-    var rushAttempted       = 0;
-    var rushSolutionMoves   = [];
-    var rushMoveIndex       = 0;
-    var rushWaitingComputer = false;
-
-    // A dedicated board instance (kept separate from the standard trainer's
-    // `board`) so Rush never tears down and rebuilds the DOM board between
-    // puzzles — that rebuild (destroy + recreate 64 squares/pieces) was the
-    // main source of visible lag/jank on a mode where puzzles change every
-    // 1-2 seconds. It's created once on the first puzzle and just
-    // repositioned after that. `rushNextPuzzle` holds a puzzle fetched ahead
-    // of time so advancing between puzzles doesn't wait on the network.
-    var rushBoard       = null;
-    var rushNextPuzzle  = null;
-    var rushPrefetching = false;
-
-    // Rush pulls puzzles by an explicit numeric rating band (the same
-    // "fresh, non-SRS" delivery path Assessment Mode uses) instead of the
-    // SRS priority queue. The SRS queue's P1 tier always returns the single
-    // most-overdue puzzle for a signed-in user until an attempt is logged
-    // against it — Rush never logs attempts (it's a speed drill, not a
-    // spaced-repetition session), so going through that path meant every
-    // fetch during a run kept re-serving the same overdue puzzle. Rating
-    // bands mirror _level_filter in app.py.
-    function rushRatingBand(level) {
-      if (level === 2) return [1000, 1600];
-      if (level === 3) return [1601, 4000];
-      return [0, 999];
-    }
-
-    function openRushSetup() {
-      fetch('/puzzle-rush/best')
-        .then(function(r) { return r.json(); })
-        .then(function(d) {
-          var best = d.best || {};
-          [60, 120, 180].forEach(function(sec) {
-            var el = document.getElementById('rush-best-' + sec);
-            if (el) el.textContent = 'Best: ' + (best[String(sec)] || 0);
-          });
-        })
-        .catch(function() {});
-      document.getElementById('rush-setup-overlay').classList.remove('hidden');
-    }
-
-    function closeRushSetup() {
-      document.getElementById('rush-setup-overlay').classList.add('hidden');
-    }
-
-    function startRush(durationSec) {
-      closeRushSetup();
-
-      clearTimeout(replayTimeout);
-      isReplaying  = false;
-      practiceMode = false;
-      setBoardTheme('normal');
-
-      rushActive      = true;
-      rushDurationSec = durationSec;
-      rushTimeLeft    = durationSec;
-      rushCorrect     = 0;
-      rushAttempted   = 0;
-      rushNextPuzzle  = null;
-      rushPrefetching = false;
-
-      var overlay = document.getElementById('rush-play-overlay');
-      overlay.classList.remove('hidden');
-      overlay.classList.add('flex');
-      updateRushHud();
-
-      clearInterval(rushTimerId);
-      rushTimerId = setInterval(function() {
-        rushTimeLeft--;
-        updateRushHud();
-        if (rushTimeLeft <= 0) endRush();
-      }, 1000);
-
-      loadRushPuzzle();
-    }
-
-    function updateRushHud() {
-      var m = Math.floor(Math.max(0, rushTimeLeft) / 60);
-      var s = Math.max(0, rushTimeLeft) % 60;
-      document.getElementById('rush-timer-fs').textContent = m + ':' + (s < 10 ? '0' : '') + s;
-      document.getElementById('rush-score-fs').textContent = rushCorrect;
-    }
-
-    function fetchRushPuzzle() {
-      var band = rushRatingBand(LEVEL);
-      var url  = '/get-puzzle?min_rating=' + band[0] + '&max_rating=' + band[1];
-      return fetch(url).then(function(r) {
-        if (!r.ok) throw new Error('No puzzles found.');
-        return r.json();
-      });
-    }
-
-    // Fetches the next puzzle in the background while the current one is
-    // still being solved, so loadRushPuzzle() usually has zero network wait
-    // when it's time to advance — that round-trip was the other big
-    // contributor to Rush feeling laggy on a tight timer.
-    function prefetchRushPuzzle() {
-      if (!rushActive || rushPrefetching || rushNextPuzzle) return;
-      rushPrefetching = true;
-      fetchRushPuzzle()
-        .then(function(data) { rushNextPuzzle = data; })
-        .catch(function() { /* fall back to a synchronous fetch next time */ })
-        .then(function() { rushPrefetching = false; });
-    }
-
-    function loadRushPuzzle() {
-      if (!rushActive) return;
-      rushWaitingComputer = false;
-
-      function applyPuzzle(data) {
-        if (!rushActive) return;
-        currentFen        = data.fen;
-        rushSolutionMoves = (data.engine_best_move || '').split(' ').filter(Boolean);
-        rushMoveIndex      = 0;
-
-        game = new Chess(currentFen);
-        var orientation = game.turn() === 'w' ? 'white' : 'black';
-
-        if (!rushBoard) {
-          rushBoard = Chessboard('rush-board', {
-            position:    currentFen,
-            draggable:   true,
-            pieceTheme:  '/static/img/chesspieces/wikipedia/{piece}.png',
-            onDragStart: function() {
-              if (!rushActive || rushWaitingComputer) return false;
-            },
-            onDrop:      onDropRush,
-            orientation: orientation
-          });
-        } else {
-          rushBoard.orientation(orientation);
-          rushBoard.position(currentFen, false);
-        }
-
-        // Start fetching the puzzle after this one right away.
-        prefetchRushPuzzle();
-      }
-
-      if (rushNextPuzzle) {
-        var data = rushNextPuzzle;
-        rushNextPuzzle = null;
-        applyPuzzle(data);
-        return;
-      }
-
-      fetchRushPuzzle()
-        .then(applyPuzzle)
-        .catch(function() {
-          if (rushActive) setTimeout(loadRushPuzzle, 500);
-        });
-    }
-
-    function onDropRush(source, target) {
-      if (!rushActive || rushWaitingComputer) return 'snapback';
-
-      var move = game.move({ from: source, to: target, promotion: 'q' });
-      if (move === null) return 'snapback';
-
-      var userMove = source + target;
-
-      if (userMove === rushSolutionMoves[rushMoveIndex].slice(0, 4)) {
-        rushBoard.position(game.fen());
-        rushMoveIndex++;
-
-        if (rushMoveIndex >= rushSolutionMoves.length) {
-          rushCorrect++;
-          rushAttempted++;
-          updateRushHud();
-          setTimeout(loadRushPuzzle, 250);
-          return;
-        }
-
-        rushWaitingComputer = true;
-        setTimeout(function() {
-          if (!rushActive) return;
-          var uci   = rushSolutionMoves[rushMoveIndex];
-          var promo = uci.length > 4 ? uci[4] : 'q';
-          game.move({ from: uci.slice(0, 2), to: uci.slice(2, 4), promotion: promo });
-          rushBoard.position(game.fen());
-          rushMoveIndex++;
-          rushWaitingComputer = false;
-
-          if (rushMoveIndex >= rushSolutionMoves.length) {
-            rushCorrect++;
-            rushAttempted++;
-            updateRushHud();
-            setTimeout(loadRushPuzzle, 250);
-          }
-        }, 300);
-
-      } else {
-        game.undo();
-        rushAttempted++;
-        updateRushHud();
-        setTimeout(loadRushPuzzle, 300);
-        return 'snapback';
-      }
-    }
-
-    function quitRush() {
-      if (!rushActive) return;
-      endRush();
-    }
-
-    function endRush() {
-      clearInterval(rushTimerId);
-      rushTimerId = null;
-      rushActive  = false;
-
-      var overlay = document.getElementById('rush-play-overlay');
-      overlay.classList.add('hidden');
-      overlay.classList.remove('flex');
-
-      var accuracy = rushAttempted > 0 ? Math.round((rushCorrect / rushAttempted) * 100) : 0;
-
-      SynapchessSync.queuedPost('/puzzle-rush/score', { duration: rushDurationSec, score: rushCorrect })
-        .then(function(d) {
-          if (d.queued) showRushResults(accuracy, rushCorrect, false);
-          else showRushResults(accuracy, d.best, d.is_new_best);
-        });
-
-      if (rushCorrect > 0 && typeof confetti === 'function') fireConfetti();
-    }
-
-    function showRushResults(accuracy, best, isNewBest) {
-      document.getElementById('rush-result-score').textContent    = rushCorrect;
-      document.getElementById('rush-result-accuracy').textContent = accuracy + '%';
-      document.getElementById('rush-result-best').textContent     = best;
-      document.getElementById('rush-new-best-badge').classList.toggle('hidden', !isNewBest);
-      document.getElementById('rush-results-overlay').classList.remove('hidden');
-    }
-
-    function closeRushResults(playAgain) {
-      document.getElementById('rush-results-overlay').classList.add('hidden');
-
-      if (playAgain) {
-        openRushSetup();
-      } else {
+    updateModeButtonsUI();
+    loadPuzzle();
+  }
+
+  function startAssessment() {
+    assessmentIndex = 0;
+    assessmentResults = [];
+    assessmentRatingMid = 900;
+    if (assessmentThemePool.length) { loadPuzzle(); return; }
+    fetch('/get-common-themes', { credentials: 'same-origin' })
+      .then(function (r) { return r.json(); })
+      .then(function (d) { assessmentThemePool = (d.themes || []).map(function (t) { return t.theme; }); })
+      .catch(function () {})
+      .then(function () {
+        if (!assessmentThemePool.length) assessmentThemePool = ['tactics'];
         loadPuzzle();
+      });
+  }
+
+  function recordAssessmentIfActive(isCorrect) {
+    if (currentMode !== 'assessment') return;
+    assessmentResults.push({ theme: currentTheme, correct: isCorrect });
+    assessmentRatingMid = Math.max(400, Math.min(2400, assessmentRatingMid + (isCorrect ? 150 : -150)));
+    assessmentIndex++;
+    setTimeout(assessmentIndex >= ASSESSMENT_TOTAL ? finishAssessment : loadPuzzle, 800);
+  }
+
+  function themeBarsHtml(list) {
+    return list.map(function (t) {
+      var acc = Math.round(t.accuracy);
+      var cls = acc < 50 ? ' is-over' : acc < 75 ? ' is-warn' : '';
+      return '<div><div class="row"><span>' + prettyTheme(t.theme) + '</span><span class="num">' + acc + '%' +
+        (t.attempts != null ? ' <span class="soft">(' + t.attempts + ')</span>' : '') + '</span></div>' +
+        '<div class="bar' + cls + '"><i style="width:' + acc + '%"></i></div></div>';
+    }).join('');
+  }
+
+  function finishAssessment() {
+    var byTheme = {};
+    assessmentResults.forEach(function (r) {
+      if (!r.theme) return;
+      byTheme[r.theme] = byTheme[r.theme] || { attempts: 0, correct: 0 };
+      byTheme[r.theme].attempts++;
+      if (r.correct) byTheme[r.theme].correct++;
+    });
+    var stats = Object.keys(byTheme).map(function (theme) {
+      var s = byTheme[theme];
+      return { theme: theme, attempts: s.attempts, accuracy: Math.round((s.correct / s.attempts) * 100) };
+    }).sort(function (a, b) { return a.accuracy - b.accuracy; });
+
+    var correct = assessmentResults.filter(function (r) { return r.correct; }).length;
+    var acc = assessmentResults.length ? Math.round((correct / assessmentResults.length) * 100) : 0;
+    $('assessment-overall').textContent = 'You solved ' + correct + ' of ' + assessmentResults.length + ' puzzles (' + acc + '% accuracy).';
+    $('assessment-theme-list').innerHTML = themeBarsHtml(stats);
+    try { localStorage.setItem('lastAssessmentWeakThemes', JSON.stringify(stats.slice(0, 3).map(function (t) { return t.theme; }))); } catch (e) {}
+
+    currentMode = 'standard';
+    updateModeButtonsUI();
+    $('assessment-overlay').hidden = false;
+  }
+
+  // ── Saving attempts + stats ────────────────────────────────────────────
+  function logAttempt(isCorrect) {
+    if (!currentPuzzleId || !currentUser || practiceMode) return;
+    var timeMs = puzzleStartTime ? Math.round(performance.now() - puzzleStartTime) : null;
+    if (budgetCheckpoint !== null) {
+      totalTimeMs += performance.now() - budgetCheckpoint;
+      budgetCheckpoint = performance.now();
+      updateBudgetBar();
+      checkTimeBudget();
+    }
+    var body = { puzzle_id: currentPuzzleId, time_spent_ms: timeMs, is_correct: isCorrect };
+    if (currentMode === 'improve' || currentMode === 'assessment') body.mode = currentMode;
+    var resolved = isCorrect || wrongAttempts >= 3;
+    SynapchessSync.queuedPost('/log-attempt', body).then(function (result) {
+      if (resolved) prefetchNext();
+      if (!result.queued) Synap.refreshStats();
+    });
+  }
+
+  window.addEventListener('synapchess-sync', function (e) {
+    if (e.detail && e.detail.url === '/log-attempt') Synap.refreshStats();
+  });
+
+  window.addEventListener('synap:stats', function (e) {
+    var d = e.detail;
+    lastAnalytics = d;
+    updateImproveLockUI();
+    $('stats-signin').hidden = true;
+    $('stats-content').hidden = false;
+    $('stat-total').textContent = d.total_attempts;
+    $('stat-accuracy').textContent = d.total_attempts > 0 ? Math.round(d.accuracy) + '%' : '0%';
+    $('stat-velocity').textContent = d.avg_time_ms > 0 ? (d.avg_time_ms / 1000).toFixed(1) + 's' : '-';
+    $('stat-themes').innerHTML = themeBarsHtml((d.by_theme || []).slice(0, 4));
+  });
+
+  function updateBudgetBar() {
+    if (!dailyBudgetMs) return;
+    var pct = Math.min(100, Math.round((totalTimeMs / dailyBudgetMs) * 100));
+    $('budget-used').textContent = Math.floor(totalTimeMs / 60000) + 'm';
+    $('budget-total').textContent = 'of ' + Math.floor(dailyBudgetMs / 60000) + 'm';
+    $('budget-bar').style.width = pct + '%';
+    $('budget-bar-wrap').className = 'bar' + (pct >= 100 ? ' is-over' : pct >= 75 ? ' is-warn' : '');
+  }
+  function checkTimeBudget() {
+    if (!dailyBudgetMs || budgetNotified || totalTimeMs < dailyBudgetMs) return;
+    budgetNotified = true;
+    $('budget-overlay').hidden = false;
+  }
+
+  Synap.onAuth(function (user, d, source) {
+    currentUser = user;
+    if (user) {
+      if (d && typeof d.streak === 'number') { streak = d.streak; updateStreakDisplay(); }
+      if (d && typeof d.daily_time_budget === 'number' && d.daily_time_budget > 0) {
+        dailyBudgetMs = d.daily_time_budget * 60000;
+        $('budget-card').hidden = false;
+        updateBudgetBar();
+      }
+      prefetched = null;
+      Synap.refreshStats();
+    } else {
+      lastAnalytics = null;
+      $('stats-signin').hidden = false;
+      $('stats-content').hidden = true;
+      $('budget-card').hidden = true;
+      dailyBudgetMs = 0;
+      if (source === 'logout') {
+        if (currentMode !== 'standard') { currentMode = 'standard'; updateModeButtonsUI(); }
+        setStatus('Logged out. You can keep solving as a guest.');
       }
     }
-  </script>
+    updateImproveLockUI();
+  });
 
-</body>
-</html>
+  // ── Wiring ─────────────────────────────────────────────────────────────
+  $('train-btn').addEventListener('click', loadPuzzle);
+  $('show-btn').addEventListener('click', showSolution);
+  ['standard', 'improve', 'assessment'].forEach(function (m) {
+    $('mode-btn-' + m).addEventListener('click', function () { setMode(m); });
+  });
+  $('budget-dismiss').addEventListener('click', function () { $('budget-overlay').hidden = true; });
+  $('assess-close').addEventListener('click', function () { $('assessment-overlay').hidden = true; loadPuzzle(); });
+  $('assess-improve').addEventListener('click', function () { $('assessment-overlay').hidden = true; setMode('improve'); });
+
+  function anyDialogOpen() {
+    return Array.prototype.some.call(document.querySelectorAll('.dialog'), function (d) { return !d.hidden; }) || rush.active;
+  }
+  document.addEventListener('keydown', function (e) {
+    if (e.ctrlKey || e.metaKey || e.altKey || anyDialogOpen()) return;
+    if (/input|textarea|select/i.test(e.target.tagName)) return;
+    if (e.key === 'n' || e.key === 'N') { e.preventDefault(); loadPuzzle(); }
+    if (e.key === 's' || e.key === 'S') { e.preventDefault(); showSolution(); }
+  });
+
+  // ── Puzzle Rush ────────────────────────────────────────────────────────
+  // Rush keeps a queue of puzzles filled several at a time (one request for
+  // up to 8), starting the moment the setup dialog opens, so the first
+  // puzzle and every one after it appear without waiting on the network.
+  // It uses explicit rating bands rather than the spaced-repetition queue,
+  // which would keep re-serving the same overdue puzzle (Rush logs no
+  // attempts). Bands mirror _level_filter in app.py.
+  var rush = {
+    active: false, dur: 60, deadline: 0, timer: null, correct: 0, attempted: 0,
+    queue: [], seen: {}, filling: null, sol: [], idx: 0, waiting: false, game: null, board: null
+  };
+
+  function rushBand() {
+    if (LEVEL === 2) return [1000, 1600];
+    if (LEVEL === 3) return [1601, 4000];
+    return [0, 999];
+  }
+  function fillRushQueue() {
+    if (rush.filling) return rush.filling;
+    var band = rushBand();
+    rush.filling = fetch('/get-puzzle?min_rating=' + band[0] + '&max_rating=' + band[1] + '&count=8', { credentials: 'same-origin' })
+      .then(function (r) { if (!r.ok) throw new Error(); return r.json(); })
+      .then(function (d) {
+        (d.puzzles || []).forEach(function (p) {
+          if (rush.seen[p.puzzle_id]) return;
+          rush.seen[p.puzzle_id] = true;
+          rush.queue.push(p);
+        });
+      })
+      .catch(function () {})
+      .then(function () { rush.filling = null; });
+    return rush.filling;
+  }
+
+  function rushStatus(text, tone) {
+    var el = $('rush-status');
+    el.textContent = text;
+    el.className = 'status' + (tone ? ' is-' + tone : '');
+  }
+
+  function openRushSetup() {
+    rush.queue = [];
+    rush.seen = {};
+    fillRushQueue();
+    fetch('/puzzle-rush/best', { credentials: 'same-origin' })
+      .then(function (r) { return r.json(); })
+      .then(function (d) {
+        var best = d.best || {};
+        [60, 120, 180].forEach(function (sec) { $('rush-best-' + sec).textContent = 'Best: ' + (best[String(sec)] || 0); });
+      })
+      .catch(function () {});
+    $('rush-setup-overlay').hidden = false;
+  }
+
+  function fmt(sec) { var m = Math.floor(sec / 60), s = sec % 60; return m + ':' + (s < 10 ? '0' : '') + s; }
+
+  function rushTick() {
+    var left = Math.max(0, rush.deadline - performance.now());
+    var sec = Math.ceil(left / 1000);
+    var clock = $('rush-timer-fs');
+    clock.textContent = fmt(sec);
+    clock.classList.toggle('is-low', sec <= 10);
+    $('rush-timebar').style.transform = 'scaleX(' + (left / (rush.dur * 1000)) + ')';
+    if (left <= 0) endRush();
+  }
+
+  function startRush(durationSec) {
+    $('rush-setup-overlay').hidden = true;
+    clearTimeout(replayTimeout);
+    isReplaying = false;
+
+    rush.active = true;
+    rush.dur = durationSec;
+    rush.correct = 0;
+    rush.attempted = 0;
+    $('rush-score-fs').textContent = '0';
+    $('rush-run').innerHTML = '';
+    $('rush-play-overlay').hidden = false;
+    document.body.style.overflow = 'hidden';
+    // The overlay was hidden since the last run, so the board measures itself
+    // again once now rather than on every puzzle.
+    if (rush.board) rush.board.resize();
+
+    rush.deadline = performance.now() + durationSec * 1000;
+    rushTick();
+    clearInterval(rush.timer);
+    rush.timer = setInterval(rushTick, 100);
+    nextRushPuzzle();
+  }
+
+  function nextRushPuzzle() {
+    if (!rush.active) return;
+    rush.waiting = false;
+    if (!rush.queue.length) {
+      rushStatus('Loading…');
+      fillRushQueue().then(function () {
+        if (!rush.active) return;
+        if (rush.queue.length) nextRushPuzzle();
+        else setTimeout(nextRushPuzzle, 400);
+      });
+      return;
+    }
+    var p = rush.queue.shift();
+    if (rush.queue.length < 4) fillRushQueue();
+
+    rush.sol = (p.engine_best_move || '').split(' ').filter(Boolean);
+    rush.idx = 0;
+    rush.game = new Chess(p.fen);
+    var side = rush.game.turn() === 'w' ? 'white' : 'black';
+    if (!rush.board) {
+      rush.board = SynapBoard.create('rush-board', {
+        position: p.fen, orientation: side, onDrop: onDropRush,
+        onDragStart: function () { return rush.active && !rush.waiting; },
+        legalMoves: function (sq) {
+          if (!rush.active || rush.waiting) return [];
+          return rush.game.moves({ square: sq, verbose: true }).map(function (m) { return m.to; });
+        }
+      });
+    } else {
+      rush.board.show(p.fen, side);
+    }
+    rushStatus((side === 'white' ? 'White' : 'Black') + ' to move.', side === 'white' ? 'turn-w' : 'turn-b');
+  }
+
+  function rushResult(ok) {
+    rush.attempted++;
+    if (ok) rush.correct++;
+    $('rush-score-fs').textContent = rush.correct;
+    var sq = document.createElement('i');
+    sq.className = ok ? 'ok' : 'no';
+    $('rush-run').appendChild(sq);
+  }
+
+  function onDropRush(source, target) {
+    if (!rush.active || rush.waiting) return 'snapback';
+    var move = rush.game.move({ from: source, to: target, promotion: 'q' });
+    if (move === null) return 'snapback';
+
+    if (source + target !== rush.sol[rush.idx].slice(0, 4)) {
+      rush.game.undo();
+      rush.board.flashWrong();
+      rushResult(false);
+      rushStatus('Missed it. Next one.', 'bad');
+      rush.waiting = true;
+      setTimeout(nextRushPuzzle, 260);
+      return 'snapback';
+    }
+
+    rush.board.position(rush.game.fen(), false);
+    rush.board.markMove(source, target);
+    rush.idx++;
+    if (rush.idx >= rush.sol.length) {
+      rushResult(true);
+      rushStatus('Solved.', 'good');
+      rush.waiting = true;
+      setTimeout(nextRushPuzzle, 160);
+      return;
+    }
+    rush.waiting = true;
+    setTimeout(function () {
+      if (!rush.active) return;
+      var uci = rush.sol[rush.idx];
+      rush.game.move({ from: uci.slice(0, 2), to: uci.slice(2, 4), promotion: uci[4] || 'q' });
+      rush.board.position(rush.game.fen());
+      rush.board.markMove(uci.slice(0, 2), uci.slice(2, 4));
+      rush.idx++;
+      rush.waiting = false;
+      if (rush.idx >= rush.sol.length) {
+        rushResult(true);
+        rush.waiting = true;
+        setTimeout(nextRushPuzzle, 160);
+      } else {
+        rushStatus('Keep going.', 'good');
+      }
+    }, 200);
+  }
+
+  function endRush() {
+    if (!rush.active) return;
+    clearInterval(rush.timer);
+    rush.timer = null;
+    rush.active = false;
+    $('rush-play-overlay').hidden = true;
+    document.body.style.overflow = '';
+
+    var accuracy = rush.attempted > 0 ? Math.round((rush.correct / rush.attempted) * 100) : 0;
+    $('rush-result-score').textContent = rush.correct;
+    $('rush-result-accuracy').textContent = accuracy + '%';
+    $('rush-result-best').textContent = rush.correct;
+    $('rush-new-best-badge').hidden = true;
+    $('rush-results-overlay').hidden = false;
+    if (rush.correct > 0) Synap.confetti({ particleCount: 120, spread: 90 });
+
+    SynapchessSync.queuedPost('/puzzle-rush/score', { duration: rush.dur, score: rush.correct })
+      .then(function (d) {
+        if (d.queued) return;
+        $('rush-result-best').textContent = d.best;
+        $('rush-new-best-badge').hidden = !d.is_new_best;
+      });
+  }
+
+  $('rush-launch-btn').addEventListener('click', openRushSetup);
+  $('rush-setup-close').addEventListener('click', function () { $('rush-setup-overlay').hidden = true; });
+  Array.prototype.forEach.call(document.querySelectorAll('[data-rush]'), function (b) {
+    b.addEventListener('click', function () { startRush(parseInt(b.getAttribute('data-rush'), 10)); });
+  });
+  $('rush-quit').addEventListener('click', endRush);
+  $('rush-again').addEventListener('click', function () { $('rush-results-overlay').hidden = true; openRushSetup(); });
+  $('rush-back').addEventListener('click', function () {
+    $('rush-results-overlay').hidden = true;
+    if (!currentFen) loadPuzzle();
+  });
+  document.addEventListener('keydown', function (e) {
+    if (e.key !== 'Escape') return;
+    ['rush-setup-overlay', 'budget-overlay'].forEach(function (id) { $(id).hidden = true; });
+  });
+
+  // ── Start ──────────────────────────────────────────────────────────────
+  updateModeButtonsUI();
+  updateImproveLockUI();
+  if (new URLSearchParams(window.location.search).get('rush') === '1') {
+    openRushSetup();
+  } else {
+    loadPuzzle();
+  }
+})();
+</script>
+{% endblock %}

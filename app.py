@@ -63,6 +63,32 @@ def _cross_origin_isolation_headers(response):
     return response
 
 
+# Templates reference static files through asset(), which appends the file's
+# mtime as ?v=. A versioned URL can never serve stale content, so it's safe
+# to let browsers cache it for a year and skip the revalidation round trip
+# on every page view. Unversioned images (piece sprites, photos) never change
+# in place, so they get a week.
+@app.context_processor
+def _asset_helper():
+    def asset(path):
+        try:
+            version = int(os.path.getmtime(os.path.join(app.static_folder, path)))
+        except OSError:
+            version = 0
+        return f'/static/{path}?v={version}'
+    return {'asset': asset}
+
+
+@app.after_request
+def _static_cache_headers(response):
+    if request.path.startswith('/static/'):
+        if 'v' in request.args:
+            response.headers['Cache-Control'] = 'public, max-age=31536000, immutable'
+        elif request.path.startswith('/static/img/'):
+            response.headers['Cache-Control'] = 'public, max-age=604800'
+    return response
+
+
 # Baseline security headers on every response.
 @app.after_request
 def _security_headers(response):
@@ -335,6 +361,37 @@ def _rating_range_filter(min_rating: int, max_rating: int) -> tuple:
     """Return (where_fragment, params) for an explicit rating band, used by
     Assessment Mode's adaptive difficulty."""
     return 'rating BETWEEN ? AND ?', (min_rating, max_rating)
+
+
+def _random_rows(conn, where: str, params: tuple = (), limit: int = 1):
+    """Like _random_row, but returns up to `limit` distinct rows from one
+    sampled scan — Puzzle Rush uses this to fill its queue several puzzles
+    at a time instead of paying a full round trip per puzzle."""
+    rows = conn.execute(
+        f'''SELECT id, fen, engine_best_move, rating, primary_theme FROM personal_blunders
+            TABLESAMPLE SYSTEM (2)
+            WHERE {where}
+            ORDER BY RANDOM() LIMIT {int(limit)}''',
+        params
+    ).fetchall()
+    if not rows:
+        rows = conn.execute(
+            f'''SELECT id, fen, engine_best_move, rating, primary_theme FROM personal_blunders
+                WHERE {where}
+                ORDER BY RANDOM() LIMIT {int(limit)}''',
+            params
+        ).fetchall()
+    return rows
+
+
+def _puzzle_json(row):
+    return {
+        'puzzle_id':        row['id'],
+        'fen':              row['fen'],
+        'engine_best_move': row['engine_best_move'],
+        'rating':           row['rating'],
+        'theme':            row['primary_theme'],
+    }
 
 
 def _random_row(conn, where: str, params: tuple = ()):
@@ -831,6 +888,9 @@ def get_puzzle():
     # the SRS cascade below and degrades gracefully (drop rating band, then
     # theme) instead of 404ing when a narrow combo is sparse.
     if min_rating is not None or max_rating is not None:
+        # ?count=N (max 10) returns {"puzzles": [...]} instead of a single
+        # puzzle, so Puzzle Rush can keep a queue filled ahead of the player.
+        count = request.args.get('count', type=int)
         conn = get_db()
         try:
             lo = min_rating if min_rating is not None else 0
@@ -839,6 +899,11 @@ def get_puzzle():
             if themes_list:
                 theme_where, theme_params = _theme_filter(themes_list)
                 where, params = f'{where} AND {theme_where}', params + theme_params
+
+            if count is not None:
+                count = max(1, min(10, count))
+                rows = _random_rows(conn, where, params, count) or _random_rows(conn, 'TRUE', (), count)
+                return jsonify({'puzzles': [_puzzle_json(r) for r in rows]})
 
             row = _random_row(conn, where, params)
             if row is None and themes_list:
