@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+{% set nav = 'nonprofit' %}
+
+{% block title %}Private chess lessons: Synapchess{% endblock %}
+{% block description %}One-on-one chess lessons for $50 an hour. Every dollar goes straight to Synapchess's mission: chess sets and free training for kids in Title I schools.{% endblock %}
+{% block head %}<link rel="stylesheet" href="{{ asset('css/pages.css') }}" />
+<style>
+  .price-tile { background: var(--accent); color: var(--accent-ink); padding: clamp(24px, 3vw, 40px); display: flex; flex-direction: column; justify-content: space-between; gap: 32px; aspect-ratio: 1 / 1; }
+  .price-tile .tile-fig { font-size: clamp(5rem, 3rem + 7vw, 10rem); }
+  .price-tile .tile-fig small { font-size: 0.32em; letter-spacing: -0.02em; font-weight: 500; }
+  .price-tile p:last-child { font-size: var(--step-lead); line-height: 1.25; max-width: 14ch; }
+  .sq-steps--3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  @media (max-width: 860px) {
+    .sq-steps--3 { grid-template-columns: 1fr; row-gap: 32px; }
+    .price-tile { aspect-ratio: auto; min-height: 220px; }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="page-head">
+  <div class="wrap page-head-grid" style="align-items:center">
+    <div data-reveal>
+      <h1 class="display">Private chess lessons.</h1>
+      <p class="lead">One-on-one lessons for $50 an hour. Every dollar goes straight to the mission: real chess sets and free training for kids in Title I schools.</p>
+      <a class="btn" style="margin-top:32px" href="mailto:synapchess@gmail.com?subject=Booking%20a%20chess%20lesson&amp;body=Hi%20Synapchess%2C%0A%0AI%27d%20like%20to%20book%20a%20lesson.%0A%0AStudent%20name%3A%0AAge%3A%0AChess%20level%3A%0ATimes%20that%20work%3A%0A">Book a lesson <span class="arrow" aria-hidden="true">&rarr;</span></a>
+    </div>
+    <div class="price-tile">
+      <p class="tile-fig">$50<small> / hour</small></p>
+      <p>All of it goes to kids who need a board.</p>
+    </div>
+  </div>
+</section>
+
+<section class="section on-surface" aria-labelledby="goes-title">
+  <div class="wrap split split--media">
+    <figure class="left sq-photo">
+      <img src="/static/img/gallery/madness-2.jpg" width="1320" height="990" loading="lazy"
+           alt="A Synapchess volunteer plays chess with a young boy in costume at a trunk-or-treat" />
+    </figure>
+    <div class="right" data-reveal>
+      <h2 class="h2" id="goes-title">Where your $50 goes.</h2>
+      <ul class="big-list" style="margin-top:28px">
+        <li><h3><span class="sq-bullet"></span>Chess sets for classrooms</h3><p>Real boards for Title I schools, like the seven sets already at Rogers and Christie Elementary.</p></li>
+        <li><h3><span class="sq-bullet"></span>Free training for every student</h3><p>Keeping the puzzle trainer, Puzzle Rush and video lessons free, with no paywall.</p></li>
+        <li><h3><span class="sq-bullet"></span>New chapters</h3><p>Getting Synapchess started at the next school or community center.</p></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section class="section" aria-labelledby="book-title">
+  <div class="wrap">
+    <h2 class="h2" id="book-title" style="max-width:12ch;margin-bottom:clamp(40px,5vw,72px)">How booking works.</h2>
+    <ol class="sq-steps sq-steps--3">
+      <li><div class="pips" aria-hidden="true"><i></i></div><h3>Email us</h3><p>Tell us the student's age, their chess level and what they want to get better at.</p></li>
+      <li><div class="pips" aria-hidden="true"><i></i><i></i></div><h3>Pick a time</h3><p>We will reply to set up a time that works for you.</p></li>
+      <li><div class="pips" aria-hidden="true"><i></i><i></i><i></i></div><h3>Play and learn</h3><p>An hour of one-on-one chess, and $50 toward a classroom that needs a board.</p></li>
+    </ol>
+  </div>
+</section>
+
+<section class="section on-field" aria-labelledby="ready-title">
+  <div class="wrap cta-band">
+    <h2 class="h2" id="ready-title">Learn chess, fund a classroom.</h2>
+    <div class="cta-side">
+      <p class="soft">Email synapchess@gmail.com to book. We will get back to you personally.</p>
+      <a class="btn" href="mailto:synapchess@gmail.com?subject=Booking%20a%20chess%20lesson">Email to book</a>
+    </div>
+  </div>
+</section>
+{% endblock %}

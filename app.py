@@ -457,6 +457,11 @@ def impact():
     return render_template('impact.html')
 
 
+@app.route('/lessons')
+def lessons():
+    return render_template('lessons.html')
+
+
 @app.route('/curriculum')
 def curriculum():
     return render_template('curriculum.html', sections=ordered_sections())
